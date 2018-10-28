@@ -65,7 +65,10 @@
 	}
 
 	nav{
-		padding: 5px 30px;
+		padding: 17px 30px;
+		background-color:#FCFCFD;
+		border-bottom:1px solid #DFDFDF;
+		z-index:100;
 	}
 
 }

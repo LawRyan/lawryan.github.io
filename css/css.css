@@ -36,6 +36,7 @@ nav{
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	transition: 0.5s ease;
 }
 
 nav span{
