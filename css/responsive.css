@@ -45,6 +45,7 @@
 	.mobile-nav .logo{
 		letter-spacing: -4px;
 		font-size:40px;
+		margin: 0;
 	}
 
 	.hero{
@@ -61,6 +62,10 @@
 	}
 	.learned span{
 		 margin: 10px 5px;
+	}
+
+	nav{
+		padding: 5px 30px;
 	}
 
 }
