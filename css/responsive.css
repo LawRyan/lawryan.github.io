@@ -33,16 +33,18 @@
 	}
 
 	.mobile-nav{
-		display: block;
 		font-size:30px;
-	}
-
-	.mobile-nav{
 		justify-content:space-between;
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		width:100vw;
+		width:100%;
+
+	}
+
+	.mobile-nav .logo{
+		letter-spacing: -4px;
+		font-size:40px;
 	}
 
 	.hero{

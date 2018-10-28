@@ -31,7 +31,7 @@ html{line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}bo
 
 nav{
 	padding: 30px;
-    width: 100vw;
+   width: 100vw;
 	position: fixed;
 	display: flex;
 	flex-direction: row;
@@ -153,7 +153,7 @@ nav ul li a{
 }
 
 /*Section*/
-#about, #learned, #projects{
+.section{
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -229,3 +229,7 @@ section h1{
 	font-size:80px;
 	margin:10px 20px;
 }
+
+
+/*projects*/
+
