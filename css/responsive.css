@@ -1,0 +1,73 @@
+@media (max-width: 1200px) {
+
+	.navigation-left span{
+		font-size:30px;
+	}
+	.logo{
+		font-size:50px;
+	}
+
+}
+
+@media (max-width: 940px) {
+	.navigation-left span{
+		font-size:25px;
+	}
+	.logo{
+		font-size:40px;
+	}
+}
+
+/* Landscape phone to portrait tablet */
+@media (max-width: 768px) {
+	.navigation-left span{
+		font-size:15px;
+
+	}
+	.logo{
+		font-size:30px;
+	}
+
+	.navigation-left, nav ul{
+		display: none;
+	}
+
+	nav span{
+		display: block;
+		font-size:30px;
+	}
+
+	nav{
+		justify-content:flex-end;
+	}
+
+	.hero{
+		padding: 80px 0;
+	}
+
+	section {
+    	padding:0;
+    	margin: 60px 27px;
+	}
+
+	section h1 {
+   		font-size: 34px;
+	}
+	.learned span{
+		 margin: 10px 5px;
+	}
+
+}
+
+/* Landscape phones and down */
+@media (max-width: 480px) {
+	section h1 {
+   		font-size: 27px;
+	}
+
+	.learned span{
+		font-size:30px;
+		 margin: 10px 5px;
+	}
+
+}

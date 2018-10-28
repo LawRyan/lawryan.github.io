@@ -30,7 +30,7 @@ html{line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}bo
 }
 
 nav{
-	padding: 15px 100px;
+	padding: 30px;
     width: 100vw;
 	position: fixed;
 	display: flex;
@@ -38,23 +38,28 @@ nav{
 	align-items: center;
 }
 
+nav span{
+	display: none;
+}
+
 .navigation-left{
 	min-height:100vh;
 	background-color:#FCFCFD;
-	max-width: 300px;
+	width: 8vw;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	justify-content: space-around;
 	align-items: center;
 	border-right:1px solid #DFDFDF;
 	position: fixed;
-	padding-top:50px;
-	padding-bottom:20%;
+	padding:50px 0;
+	
 	z-index: 400;
 }
 .navigation-left span{
 	font-size:40px;
 	color:#524f4f;
+
 }
 
 .navigation-left span:hover{
@@ -83,7 +88,8 @@ nav ul{
 
 nav ul li{
 	list-style-type: none;
-	margin:50px 50px;
+	flex:0 1 auto;
+	margin:0 20px;
 }
 
 
@@ -105,7 +111,7 @@ nav ul li a{
 }
 
 .hero{
-	background-image:linear-gradient(to top,rgba(0,0,0,0.1),rgba(0,0,0,0.1)),url('./assets/background5.jpg');
+	background-image:linear-gradient(to top,rgba(0,0,0,0.1),rgba(0,0,0,0.1)),url('../assets/background5.jpg');
 	background-repeat: no-repeat;
 	background-size: cover;
 	height:100vh;
