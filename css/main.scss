@@ -1,0 +1,75 @@
+
+@import './partials/setup.scss';
+@import './partials/header.scss';
+@import './partials/sections.scss';
+@import './partials/fonts.scss';
+@import './partials/learned.scss';
+@import './partials/projects.scss';
+@import './partials/responsive.scss';
+
+
+
+
+
+
+/*About*/
+
+.about-description{
+	text-align: center;
+	line-height: 30px;
+	max-width: 1050px;
+}
+
+/*Story*/
+#story{
+	background-image:linear-gradient(to top,rgba(0,0,0,0.1),rgba(0,0,0,0.1)),url('../assets/background5.jpg');
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+#story h1{
+	color:#524f4f;
+	display: flex;
+	justify-content: center;
+}
+.story-box {
+	border:2px solid black;
+	display: flex;
+	margin:100px 50%;
+	background-color: white;
+}
+.story-container{
+	max-width:700px;
+	min-width: 300px;
+	max-height:200px;
+	padding:10%;
+	text-align: center;
+}
+.story-container p{
+	color:black;
+	font-family: 'Montserrat',sans-serif;
+}
+
+
+
+.left{
+	float:left;
+}
+
+.right{
+	float:right;
+}
+
+.flex-left{
+	align-self : flex-start;
+	max-width:100%;
+}
+
+.flex-right{
+	align-self: flex-end;
+		max-width:100%;
+}
+
+
+
+
+
