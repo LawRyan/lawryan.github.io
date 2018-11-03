@@ -16,6 +16,10 @@
 	.logo{
 		font-size:40px;
 	}
+
+	.project img {
+  		height: 300px;
+  	}
 }
 
 /* Landscape phone to portrait tablet */
@@ -71,6 +75,15 @@
 		z-index:100;
 	}
 
+	#projects {
+ 		background: #EEE;
+ 		margin-left:30px;
+	}
+
+	.project img {
+  		height: 300px;
+  	}
+
 }
 
 /* Landscape phones and down */
@@ -83,5 +96,9 @@
 		font-size:30px;
 		 margin: 10px 5px;
 	}
+
+	.project img {
+  		height: 150px;
+  	}
 
 }
