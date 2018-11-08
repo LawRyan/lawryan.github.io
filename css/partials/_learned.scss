@@ -1,13 +1,22 @@
 /*learned*/
-.learned{
+
+#learned.section{
+	padding:20px 30px;
+
+	.learned{
 	display: flex;
 	flex-direction: row;
-	padding:20px 20px;
 	flex-wrap:wrap;
+
+		span:nth-child(1){
+			margin-left:0;
+		}
+		span{
+			font-size:80px;
+			margin:10px 20px;
+		}
+	}
+
 }
 
 
-.learned span{
-	font-size:80px;
-	margin:10px 20px;
-}

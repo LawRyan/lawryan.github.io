@@ -1,4 +1,14 @@
 
+
+/*variables*/
+$montserrat: 'montserrat',sans-serif;
+$h1-size: 90px;
+$hero-h1:40px;
+$hero-h3:25px;
+$h1-size-2: 50px;
+$background-white:white;
+$background-grey:#ebebeb;
+
 @import './partials/setup.scss';
 @import './partials/header.scss';
 @import './partials/sections.scss';
@@ -9,16 +19,35 @@
 
 
 
+h1{
+		font-family:$montserrat;
+		font-size:$h1-size;
+}
 
+
+.typingAnim{
+	display: flex;
+	flex-direction:row;
+	margin:10px;
+	height:20px;
+}
 
 
 /*About*/
 
-.about-description{
-	text-align: center;
-	line-height: 30px;
-	max-width: 1050px;
+
+
+#about {
+		justify-content: flex-start;
+		align-items: flex-start;
+
+		.about-description{
+			/*text-align: center;*/
+			line-height: 30px;
+			max-width: 550px;
+		}
 }
+
 
 /*Story*/
 #story{
@@ -35,7 +64,7 @@
 	border:2px solid black;
 	display: flex;
 	margin:100px 50%;
-	background-color: white;
+	background-color: $background-white;
 }
 .story-container{
 	max-width:700px;
@@ -46,7 +75,7 @@
 }
 .story-container p{
 	color:black;
-	font-family: 'Montserrat',sans-serif;
+	font-family: $montserrat;
 }
 
 
@@ -59,15 +88,6 @@
 	float:right;
 }
 
-.flex-left{
-	align-self : flex-start;
-	max-width:100%;
-}
-
-.flex-right{
-	align-self: flex-end;
-		max-width:100%;
-}
 
 
 

@@ -16,8 +16,12 @@
         	});
 
 
+
+
   
 		});
+
+
 
    var prevScrollpos = window.pageYOffset;
       window.onscroll = function() {
@@ -36,5 +40,19 @@
         }
       }
 
-        
 
+
+var options = {
+  strings: ["<i>Banking</i> Analyst.","<i>Aspiring</i> Web Developer.", "<i>Passion</i> in Automation.",
+   "<i>Amateur</i> Cook."],
+  typeSpeed: 80,
+  backSpeed: 40,
+  loop: true,
+  loopCount: Infinity,
+  backDelay: 3000,
+
+
+
+}
+
+var typed = new Typed("#test", options);

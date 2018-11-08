@@ -140,15 +140,19 @@ nav ul li a{
 	font-size:20px;
 }
 
-.hero h1, .hero h3{
+.hero h1{
 	font-family: 'Roboto',sans-serif;
+	font-size:$hero-h1;
 }
-.hero span{
+.hero h3{
+	font-family: 'Roboto',sans-serif;
+	font-size:$hero-h3;
+}
+.hero .scroll{
 	position: absolute;
 	left:50%;
 	color:#524f4f;
 	transform: translate(-50%,-50%);
-	top:85%;
 	font-size:30px;
 
 }
