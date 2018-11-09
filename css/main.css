@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat|Roboto|PlayFair+Display");
 /*variables*/
 html {
   line-height: 1.15;
@@ -542,7 +543,8 @@ section h1 {
     justify-content: center;
     -webkit-box-align: center;
     -ms-flex-align: center;
-    align-items: center; }
+    align-items: center;
+    text-align: center; }
   #learned .learned {
     -webkit-box-pack: center;
     -ms-flex-pack: center;
@@ -584,6 +586,15 @@ h1 {
   height: 20px; }
 
 /*About*/
+#about-me {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row; }
+
 #about {
   -webkit-box-pack: start;
   -ms-flex-pack: start;

@@ -1,5 +1,5 @@
 
-
+@import url('https://fonts.googleapis.com/css?family=Montserrat|Roboto|PlayFair+Display');
 /*variables*/
 $montserrat: 'montserrat',sans-serif;
 $h1-size: 90px;
@@ -35,7 +35,10 @@ h1{
 
 /*About*/
 
-
+#about-me{
+	display: flex;
+	flex-direction: row;
+}
 
 #about {
 		justify-content: flex-start;
