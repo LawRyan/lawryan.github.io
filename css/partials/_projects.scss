@@ -16,12 +16,11 @@
 	.project{
 		display: flex;
 		flex-direction: row;
-		  margin:20px;
 		  overflow: hidden;
 		  justify-content: center;
 		  align-items: center;
 		  max-height: 550px;
-		  max-width: 100%;
+		  width:100%;
 	}
 
 	.project img {
@@ -31,5 +30,83 @@
 
 	}
 
+	.project-description{
+		width:calc(100% / 2 - 20px);
+		margin-bottom:20px;
+			
+			h2{
+				font-size:35px;
+			}
+
+			h3, h4{
+				text-transform: uppercase;
+			}
+			
+			h2, h2,h4{
+				margin: 20px 0;
+			}
+
+		
+	}
+
+	.project-des-cont{
+		background-color:$background-grey;
+		width:100%;
+		height:100%;
+		display:flex;
+		flex-direction:column;
+		align-content:center;
+		justify-content: center;
+		align-items:center;
+		text-align:center;
+	}
+
+
+	.project-btns{
+		display:flex;
+		flex-direction:row;
+		margin:20px;
+		align-items: center;
+		justify-content: center;
+	}
 }
 
+.button{
+	background-color:#ffffff;
+	padding:15px 40px;
+	border-radius:3%;
+	font-size:1.1em;
+
+	&:hover{
+		background-color:#eabf18;
+		transition:1s ease-in;
+		color:white;
+	}
+}
+
+
+.project-margin{
+	margin-right:20px;
+	margin-bottom:20px;
+}
+
+.project-header{
+	height:90vh;
+	width:100%;
+	background-color: $background-grey;
+	margin-bottom:80px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-image: linear-gradient(to top, rgba(235,235,235,0.3),rgba(235,235,235,0.3)),url("../assets/projects.jpg");
+	background-position:center;
+	background-repeat:no-repeat;
+	background-size:cover;
+
+	h1{
+		color:$background-grey;
+		font-family: $montserrat;
+		font-size:50px;
+		text-transform:uppercase;
+	}
+}
