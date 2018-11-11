@@ -1,0 +1,26 @@
+/*About*/
+
+#about-me{
+	display: flex;
+	flex-direction: row;
+}
+
+#about {
+		justify-content: flex-start;
+		align-items: flex-start;
+
+		.about-description{
+			/*text-align: center;*/
+			line-height: 40px;
+			max-width: 900px;
+		}
+
+		p{
+			font-family:$questrial;
+
+			span{
+				font-weight: 900;
+				font-family:$montserrat;
+			}
+		}
+}
