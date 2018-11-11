@@ -49,7 +49,7 @@
 
 
 var options = {
-  strings: ["Banking Analyst.","Web Developer.", "Process Automater.",
+  strings: ["Web Developer.", "Banking Data Analyst.", "Process Automater.",
    "Amateur Cook."],
   typeSpeed: 80,
   backSpeed: 40,
