@@ -85,11 +85,13 @@
 	padding:15px 40px;
 	border-radius:3%;
 	font-size:1.1em;
+	border:1px solid $gold;
 
 	&:hover{
 		background-color:#eabf18;
 		transition:1s ease-in;
 		color:white;
+		border:1px solid $white;
 	}
 }
 
