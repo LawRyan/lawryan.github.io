@@ -45,7 +45,7 @@
 
 }
 .contact-form h2{
-	font-family:'Great Vibes', sans-serif;
+	font-family:$m-font;
 	font-size:40px;
 	color:black;
 	font-weight:100;
@@ -79,7 +79,7 @@ input[type="submit"]{
 		padding:10px 15px;
 		font-size:11px;
 		font-weight: 500;
-		font-family: 'Open Sans', sans-serif;
+		font-family: $m-font;
 		background-color:white;
 		border: 1.5px solid black;
 		margin:0 auto;

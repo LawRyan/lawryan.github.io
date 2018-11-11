@@ -177,7 +177,7 @@ template {
 * {
   margin: 0;
   padding: 0;
-  font-family: 'Playfair Display', sans-serif; }
+  font-family: "questrial", sans-serif; }
 
 .hero .scroll:hover, nav ul li a:hover {
   color: #000000;
@@ -190,7 +190,7 @@ nav ul li a:after {
   content: '';
   width: 100%;
   height: 3px;
-  background-color: #eabf18;
+  background-color: #a37b38;
   display: block;
   -webkit-transform: scaleX(0);
   -ms-transform: scaleX(0);
@@ -256,7 +256,7 @@ nav span {
   color: #524f4f; }
 
 .navigation-left span:hover {
-  color: #eabf18;
+  color: #a37b38;
   -webkit-transform: rotate(360deg);
   -ms-transform: rotate(360deg);
   transform: rotate(360deg);
@@ -407,7 +407,7 @@ nav ul li a {
     .menu li a {
       text-decoration: none;
       color: black;
-      font-family: montserrat; }
+      font-family: "montserrat", sans-serif; }
 
 .show {
   top: 80px;
@@ -511,7 +511,7 @@ footer {
       margin: 20px 0; }
     #projects .project-description h4 {
       text-transform: uppercase;
-      color: #EABF18; }
+      color: #a37b38; }
   #projects .project-des-cont {
     background-color: #ebebeb;
     width: 100%;
@@ -703,7 +703,7 @@ footer {
   border: 1px solid #ebebeb; }
 
 .contact-form h2 {
-  font-family: 'Great Vibes', sans-serif;
+  font-family: "montserrat", sans-serif;
   font-size: 40px;
   color: black;
   font-weight: 100;
@@ -711,7 +711,7 @@ footer {
   text-align: center; }
 
 .contact-form h2 span {
-  color: #EABF18; }
+  color: #a37b38; }
 
 .contact-form form {
   max-width: 100%; }
@@ -733,7 +733,7 @@ input[type="submit"] {
   padding: 10px 15px;
   font-size: 11px;
   font-weight: 500;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "montserrat", sans-serif;
   background-color: white;
   border: 1.5px solid black;
   margin: 0 auto; }
@@ -794,7 +794,7 @@ input[type="email"] {
     -o-transition: 1s ease;
     transition: 1s ease; }
     .social-media span:hover {
-      color: #EABF18; }
+      color: #a37b38; }
 
 @media (min-width: 1201px) {
   .flex-project {
@@ -876,7 +876,7 @@ input[type="email"] {
   nav {
     padding: 17px 30px;
     background-color: #FCFCFD;
-    border-bottom: 1px solid #DFDFDF;
+    border-bottom: 1px solid #ebebeb;
     z-index: 100; }
   #projects {
     background: #ebebeb;

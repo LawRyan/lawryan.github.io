@@ -113,13 +113,13 @@
 
 	nav{
 		padding: 17px 30px;
-		background-color:#FCFCFD;
-		border-bottom:1px solid #DFDFDF;
+		background-color:$white;
+		border-bottom:1px solid $lightgrey;
 		z-index:100;
 	}
 
 	#projects {
- 		background:#ebebeb;
+ 		background:$lightgrey;
  		margin:0;
 	}
 

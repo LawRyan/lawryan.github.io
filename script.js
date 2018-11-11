@@ -49,8 +49,8 @@
 
 
 var options = {
-  strings: ["<i>Banking</i> Analyst.","<i>Web</i> Developer.", "<i>Process</i> Automater.",
-   "<i>Amateur</i> Cook."],
+  strings: ["Banking Analyst.","Web Developer.", "Process Automater.",
+   "Amateur Cook."],
   typeSpeed: 80,
   backSpeed: 40,
   loop: true,
@@ -61,4 +61,4 @@ var options = {
 
 }
 
-var typed = new Typed("#test", options);
+var typed = new Typed("#typetext", options);

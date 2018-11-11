@@ -6,7 +6,6 @@
 @import './partials/setup.scss';
 @import './partials/header.scss';
 @import './partials/sections.scss';
-@import './partials/fonts.scss';
 @import './partials/learned.scss';
 @import './partials/projects.scss';
 @import './partials/about.scss';
@@ -16,7 +15,7 @@
 
 
 h1{
-		font-family:$montserrat;
+		font-family:$m-font;
 		font-size:$h1-size;
 }
 
