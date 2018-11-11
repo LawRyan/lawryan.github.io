@@ -36,14 +36,22 @@
 			
 			h2{
 				font-size:35px;
+				font-weight: 700;
 			}
 
-			h3, h4{
-				text-transform: uppercase;
+			h3{
+				// text-transform: uppercase;
+				font-weight: 500;
+
 			}
 			
 			h2, h2,h4{
 				margin: 20px 0;
+			}
+
+			h4{
+				text-transform:uppercase;
+				color:$gold;
 			}
 
 		
@@ -59,6 +67,7 @@
 		justify-content: center;
 		align-items:center;
 		text-align:center;
+		padding:20px;
 	}
 
 
@@ -103,10 +112,40 @@
 	background-repeat:no-repeat;
 	background-size:cover;
 
+
 	h1{
 		color:$background-grey;
 		font-family: $montserrat;
 		font-size:50px;
 		text-transform:uppercase;
 	}
+}
+
+.project-order-1{
+	order:1;
+}
+
+.project-order-2{
+	order:2;
+}
+
+ // Will switch  
+.project-order-3{
+	order:4;
+	margin-right:0;
+	margin-left:20px;
+
+}
+
+// Will switch
+.project-order-4{
+	order:3;
+
+}
+.project-order-5{
+	order:5;
+}
+
+.project-order-6{
+	order:6;
 }

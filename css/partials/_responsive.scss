@@ -6,7 +6,15 @@
 		max-width:calc(100% / 2);
 	}
 
-	
+	#projects {
+		.flex-project.project-description.project-order-4{
+			width:(100% / 2);
+		}
+
+		.flex-project.project-margin.project-order-3{
+			width:calc(100% / 2 - 20px);
+		}
+	}
 }
 @media (max-width: 1200px) {
 
@@ -31,9 +39,17 @@
 		width:100%;
 		margin-bottom:0;
 	}
-
-
 	
+	#projects{
+		.flex-project.project-margin.project-order-3{
+			order:3;
+			margin-left:0;
+		}
+
+		.flex-project.project-margin.project-order-4{
+			order:4;
+		}	
+	}
 }
 
 @media (max-width: 940px) {
@@ -170,4 +186,5 @@
 		flex-direction: column;
 		justify-content: center;
 	}
+
 }

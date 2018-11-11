@@ -12,12 +12,18 @@
 			 $('a').smoothScroll({
             	// direction:'top',
             	speed:1000,
-              offset:-300
+              offset:-50
         	});
 
 
+       $('.fas.fa-bars').on('click', function(){
+          // toggle class show on the menu
+          $('.menu').toggleClass('show');
+        });
 
-
+      $('.menu li').on('click', function(){
+           $('.menu').toggleClass('show');
+      });
   
 		});
 
@@ -43,7 +49,7 @@
 
 
 var options = {
-  strings: ["<i>Banking</i> Analyst.","<i>Aspiring</i> Web Developer.", "<i>Passion</i> in Automation.",
+  strings: ["<i>Banking</i> Analyst.","<i>Web</i> Developer.", "<i>Process</i> Automater.",
    "<i>Amateur</i> Cook."],
   typeSpeed: 80,
   backSpeed: 40,
