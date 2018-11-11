@@ -444,7 +444,8 @@ footer {
 
 /*learned*/
 #learned.section {
-  padding: 20px 30px; }
+  padding: 20px 30px;
+  padding-left: 60px; }
   #learned.section .learned {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -925,6 +926,8 @@ input[type="email"] {
   #learned.section .learned span {
     font-size: 40px;
     margin: 10px 5px; }
+  #learned.section {
+    padding-left: 0; }
   #projects .project img {
     height: 100%; }
   #about, #learned {
