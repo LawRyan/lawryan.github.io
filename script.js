@@ -49,8 +49,8 @@
 
 
 var options = {
-  strings: ["Web Developer.", "Banking Data Analyst.", "Process Automater.",
-   "Amateur Cook."],
+  strings: ["Web Developer.", "Capital Markets Data Analyst.", "Process Automater.",
+   "Amateur Cook.", "Life Long Learner."],
   typeSpeed: 80,
   backSpeed: 40,
   loop: true,
