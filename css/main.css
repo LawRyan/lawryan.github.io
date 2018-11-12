@@ -886,7 +886,6 @@ input[type="email"] {
     border-bottom: 1px solid #ebebeb;
     z-index: 100; }
   #projects {
-    background: #ebebeb;
     margin: 0; }
   #projects .projects {
     -webkit-box-orient: vertical;
@@ -956,7 +955,7 @@ input[type="email"] {
   .copyright {
     padding: 20px;
     font-size: 12px;
-    padding-bottom: 50px; } }
+    padding-bottom: 80px; } }
 
 h1 {
   font-family: "montserrat", sans-serif;
