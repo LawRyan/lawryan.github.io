@@ -3,7 +3,7 @@
 .footer{
 	height:30vh;
 	max-width:100vw;
-	background-color:$black;
+	background-color: $background-grey;
 	// margin: 0px 60px;
 	margin:0;
 	margin-top:100px;
@@ -107,13 +107,13 @@ input[type="email"]{
   	flex-direction: row;
   	justify-content: space-around;
 	align-items: center;
-  	background-color: $black;	
+  	background-color: $background-grey;	
 	// padding:10px;
  //  	padding-right:40px;
  	max-width:100vw;
 	width:100%;
 	padding:5px;
-	color:white;
+	color:$black;
   } 
 
   .social-media{
@@ -124,7 +124,7 @@ input[type="email"]{
 	margin-left:50px;
 
 		a{
-			color:white;
+			color:$black;
 		}
 		span{
 			font-size:30px;
