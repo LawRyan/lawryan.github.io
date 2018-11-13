@@ -955,7 +955,8 @@ input[type="email"] {
   .copyright {
     padding: 20px;
     font-size: 12px;
-    padding-bottom: 80px; } }
+    padding-top: 118px;
+    height: 200px; } }
 
 h1 {
   font-family: "montserrat", sans-serif;
