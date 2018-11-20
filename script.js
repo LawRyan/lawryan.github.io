@@ -62,3 +62,4 @@ var options = {
 }
 
 var typed = new Typed("#typetext", options);
+

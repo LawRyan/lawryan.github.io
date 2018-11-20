@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Line Chart</title>
+	<link href="c3.css" rel="stylesheet">
+</head>
+<body>
+	<div id="chart"></div>
+</body>
+
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="c3.min.js"></script>
+
+<script>
+	var chart = c3.generate({
+    bindto: '#chart',
+    data: {
+      columns: [
+        ['data1', 30, 200, 100, 400, 150, 250],
+        ['data2', 50, 20, 10, 40, 15, 25]
+      ],
+      type: 'spline'
+    }
+})
+</script>
+</html>
