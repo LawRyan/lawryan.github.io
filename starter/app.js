@@ -1,5 +1,5 @@
 var gameInSession, globalScores, currentScore, activePlayer;
-
+alert('First to 10 wins');
 init();
 
 
