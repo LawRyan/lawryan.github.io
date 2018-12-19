@@ -1,5 +1,5 @@
 var gameInSession, globalScores, currentScore, activePlayer;
-alert('First to 10 wins');
+alert('First to 50 wins');
 init();
 
 
@@ -62,7 +62,7 @@ document.querySelector('.btn-hold').addEventListener('click',function(){
 		globalScores[activePlayer] += currentScore;
 		document.getElementById('score-'+ activePlayer).textContent = globalScores[activePlayer];
 
-		if (globalScores[activePlayer]>=10) {
+		if (globalScores[activePlayer]>=50) {
 			winner();
 		}else{
 			nextPlayer();
