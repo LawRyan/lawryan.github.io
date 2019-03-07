@@ -5,6 +5,7 @@ $('form').on("submit",function(event){
 
 	event.preventDefault()
 
+
 	
 		if ($('item').not(null)){
 			const toDoItem = $('#item').val();
@@ -12,6 +13,7 @@ $('form').on("submit",function(event){
 							 <span class="check todo"></span>${toDoItem}	
 							 </li>`;
 			$('ul').append(listItem);
+			$('form')[0].reset();
 		};
 
 	});
