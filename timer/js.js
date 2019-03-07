@@ -10,6 +10,8 @@ const studySession = {
 	totalStudyTIme:0
 };
 
+$(function(){
+
 
 
 const $heroRight = $(".hero-right");
@@ -38,6 +40,11 @@ function manualStudy(){
 
 	if (!studySession.studyStarted){
 		const timeInMins = prompt("How long do you wish to study for(minutes)");
+		if (isNaN(timeInMins)){
+			alert("Please enter a valid Number");
+			reset();
+		}
+
 		studySession.remainingStudyDisplay = timeInMins.minsToHHMMSS();
 		studySession.studyTimeSecs = timeInMins *60;
 		studySession.studyStarted = true;
@@ -64,9 +71,9 @@ function manualStudy(){
 }
 
 function lunchBreak(){
-		$heroLeft.toggleClass("hero-transition");
-		$heroRight.removeClass("hero-transition");
-		$heroLeft.removeClass("hero-transition-restart");
+		$heroRight.toggleClass("hero-transition");
+		$heroLeft.removeClass("hero-transition");
+		$heroLeft.toggleClass("hero-transition-restart");
 		$button.css({"background-color":"black","color":"white"});
 		studySession.remainingBreakDisplay = ("20").minsToHHMMSS();
 		studySession.breakTimeSecs = 20*60;	
@@ -74,9 +81,9 @@ function lunchBreak(){
 }
 
 function morningBreak(){
-		$heroLeft.toggleClass("hero-transition");
-		$heroRight.removeClass("hero-transition");
-		$heroLeft.removeClass("hero-transition-restart");
+		$heroRight.toggleClass("hero-transition");
+		$heroLeft.removeClass("hero-transition");
+		$heroLeft.toggleClass("hero-transition-restart");
 		$button.css({"background-color":"black","color":"white"});
 		studySession.remainingBreakDisplay = ("10").minsToHHMMSS();
 		studySession.breakTimeSecs = 10*60;	
@@ -162,4 +169,6 @@ function oneSecondFunction() {
 
 
 
-//toDO - casche all your selectors
+
+
+})
