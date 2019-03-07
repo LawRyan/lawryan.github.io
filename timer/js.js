@@ -12,8 +12,16 @@ const studySession = {
 
 
 
-
-
+const $heroRight = $(".hero-right");
+const $heroLeft =  $(".hero-left");
+const $button = $("button");
+const $timer = $('#timer');
+const $status = $("#status");
+const $studyBtn = $("#studyBtn");
+const $statsBtn = $("#statsBtn");
+const $resetBtn = $("#resetBtn");
+const $lunchBreak = $("#lunchBreak");
+const $morningBreak = $("#morningBreak");
 
 
 document.getElementById("studyBtn").addEventListener("click",manualStudy); 
@@ -37,17 +45,17 @@ function manualStudy(){
 
 	//Triggers Break Mode
 	if (mode){
-		$(".hero-right").toggleClass("hero-transition");
-		$(".hero-left").removeClass("hero-transition");
-		$(".hero-left").toggleClass("hero-transition-restart");
-		$("button").css({"background-color":"black","color":"white"});
+		$heroRight.toggleClass("hero-transition");
+		$heroLeft.removeClass("hero-transition");
+		$heroLeft.toggleClass("hero-transition-restart");
+		$button.css({"background-color":"black","color":"white"});
 		updateMode();
 	//Triggers study mode
 	}else{
-		$(".hero-left").toggleClass("hero-transition");
-		$(".hero-right").removeClass("hero-transition");
-		$(".hero-left").removeClass("hero-transition-restart");
-		$("button").css({"background-color":"white","color":"black","border":"1px solid black"});
+		$heroLeft.toggleClass("hero-transition");
+		$heroRight.removeClass("hero-transition");
+		$heroLeft.removeClass("hero-transition-restart");
+		$button.css({"background-color":"white","color":"black","border":"1px solid black"});
 		studySession.remainingBreakDisplay = ("5").minsToHHMMSS();
 		studySession.breakTimeSecs = 5*60;	
 		updateMode();
@@ -56,20 +64,20 @@ function manualStudy(){
 }
 
 function lunchBreak(){
-		$(".hero-left").toggleClass("hero-transition");
-		$(".hero-right").removeClass("hero-transition");
-		$(".hero-left").removeClass("hero-transition-restart");
-		$("button").css({"background-color":"black","color":"white"});
+		$heroLeft.toggleClass("hero-transition");
+		$heroRight.removeClass("hero-transition");
+		$heroLeft.removeClass("hero-transition-restart");
+		$button.css({"background-color":"black","color":"white"});
 		studySession.remainingBreakDisplay = ("20").minsToHHMMSS();
 		studySession.breakTimeSecs = 20*60;	
 		updateMode();
 }
 
 function morningBreak(){
-		$(".hero-left").toggleClass("hero-transition");
-		$(".hero-right").removeClass("hero-transition");
-		$(".hero-left").removeClass("hero-transition-restart");
-		$("button").css({"background-color":"black","color":"white"});
+		$heroLeft.toggleClass("hero-transition");
+		$heroRight.removeClass("hero-transition");
+		$heroLeft.removeClass("hero-transition-restart");
+		$button.css({"background-color":"black","color":"white"});
 		studySession.remainingBreakDisplay = ("10").minsToHHMMSS();
 		studySession.breakTimeSecs = 10*60;	
 		updateMode();
@@ -79,30 +87,30 @@ function morningBreak(){
 	function updateMode(){
 	
 		if (studySession.startedStudying){
-			$('#timer').text(studySession.remainingStudyDisplay);
+			$timer.text(studySession.remainingStudyDisplay);
 		}
 
 
 
 		if (studySession.mode){
 			studySession.mode = false;
-			$("#status").text('Break Time');
-			$("#studyBtn").text("Continue Studying");
-			$("#statsBtn").toggleClass("hide");
-			$("#resetBtn").toggleClass("hide");
-			$("#lunchBreak").toggleClass("hide");
-			$("#morningBreak").toggleClass("hide");
-			$('#timer').text(studySession.remainingBreakDisplay);
+			$status.text('Break Time');
+			$studyBtn.text("Continue Studying");
+			$statsBtn.toggleClass("hide");
+			$resetBtn.toggleClass("hide");
+			$lunchBreak.toggleClass("hide");
+			$morningBreak.toggleClass("hide");
+			$timer.text(studySession.remainingBreakDisplay);
 		}else{
 			studySession.mode = true;
 
-			$("#status").text('Study Time');
-			$("#studyBtn").text("Break 5 Mins");
-			$("#statsBtn").toggleClass("hide");
-			$("#resetBtn").toggleClass("hide");
-			$("#lunchBreak").toggleClass("hide");
-			$("#morningBreak").toggleClass("hide");
-			$('#timer').text(studySession.remainingStudyDisplay);
+			$status.text('Study Time');
+			$studyBtn.text("Break 5 Mins");
+			$statsBtn.toggleClass("hide");
+			$resetBtn.toggleClass("hide");
+			$lunchBreak.toggleClass("hide");
+			$morningBreak.toggleClass("hide");
+			$timer.text(studySession.remainingStudyDisplay);
 		}
 	};
 
@@ -122,14 +130,14 @@ function oneSecondFunction() {
 			studySession.studyTimeSecs -= 1;
 			const timeRemaining = (studySession.studyTimeSecs/60);
 			studySession.remainingStudyDisplay= ("" + timeRemaining +"").minsToHHMMSS();
-			$('#timer').text(studySession.remainingStudyDisplay);	
+			$timer.text(studySession.remainingStudyDisplay);	
 		}
 	}else if(!studySession.mode){
 		if(studySession.breakTimeSecs>0){
 			studySession.breakTimeSecs -= 1;
 			const timeRemaining = (studySession.breakTimeSecs/60);
 			studySession.remainingBreakDisplay= ("" + timeRemaining +"").minsToHHMMSS();
-			$('#timer').text(studySession.remainingBreakDisplay);	
+			$timer.text(studySession.remainingBreakDisplay);	
 		}
 	}
 };
