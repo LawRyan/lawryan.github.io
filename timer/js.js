@@ -138,13 +138,20 @@ function oneSecondFunction() {
 			const timeRemaining = (studySession.studyTimeSecs/60);
 			studySession.remainingStudyDisplay= ("" + timeRemaining +"").minsToHHMMSS();
 			$timer.text(studySession.remainingStudyDisplay);	
+		}else{
+			alert("Study Session Done")
+			reset();
 		}
-	}else if(!studySession.mode){
+
+	}else if(!studySession.mode && studySession.studyStarted){
 		if(studySession.breakTimeSecs>0){
 			studySession.breakTimeSecs -= 1;
 			const timeRemaining = (studySession.breakTimeSecs/60);
 			studySession.remainingBreakDisplay= ("" + timeRemaining +"").minsToHHMMSS();
 			$timer.text(studySession.remainingBreakDisplay);	
+		}else{
+			alert("Break Session Done, ready to study - Press ok?")
+			manualStudy();
 		}
 	}
 };
