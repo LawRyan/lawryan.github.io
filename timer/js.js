@@ -55,14 +55,14 @@ function manualStudy(){
 		$heroRight.toggleClass("hero-transition");
 		$heroLeft.removeClass("hero-transition");
 		$heroLeft.toggleClass("hero-transition-restart");
-		$button.css({"background-color":"black","color":"white"});
+		$button.css("color","white");
 		updateMode();
 	//Triggers study mode
 	}else{
 		$heroLeft.toggleClass("hero-transition");
 		$heroRight.removeClass("hero-transition");
 		$heroLeft.removeClass("hero-transition-restart");
-		$button.css({"background-color":"white","color":"black","border":"1px solid black"});
+		
 		studySession.remainingBreakDisplay = ("5").minsToHHMMSS();
 		studySession.breakTimeSecs = 5*60;	
 		updateMode();
@@ -74,7 +74,7 @@ function lunchBreak(){
 		$heroRight.toggleClass("hero-transition");
 		$heroLeft.removeClass("hero-transition");
 		$heroLeft.toggleClass("hero-transition-restart");
-		$button.css({"background-color":"black","color":"white"});
+		
 		studySession.remainingBreakDisplay = ("20").minsToHHMMSS();
 		studySession.breakTimeSecs = 20*60;	
 		updateMode();
@@ -84,7 +84,7 @@ function morningBreak(){
 		$heroRight.toggleClass("hero-transition");
 		$heroLeft.removeClass("hero-transition");
 		$heroLeft.toggleClass("hero-transition-restart");
-		$button.css({"background-color":"black","color":"white"});
+	
 		studySession.remainingBreakDisplay = ("10").minsToHHMMSS();
 		studySession.breakTimeSecs = 10*60;	
 		updateMode();
@@ -127,7 +127,7 @@ function morningBreak(){
 
 
 	
-		setInterval(oneSecondFunction, 1000);
+setInterval(oneSecondFunction, 1000);
 	
 
 

@@ -5,6 +5,7 @@ $('form').on("submit",function(event){
 
 	event.preventDefault()
 
+	
 
 	
 		if ($('item').not(null)){
