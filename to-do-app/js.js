@@ -1,5 +1,10 @@
 $(function(){
 
+
+const name = prompt("What is your name")
+
+$('.container h1').html(`${name}'s to do list`)
+
 //Watch form submit
 $('form').on("submit",function(event){
 

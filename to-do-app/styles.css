@@ -9,7 +9,7 @@ html {
 body {
     font-family: 'Open Sans', sans-serif;
     min-height: 100vh;
-    background: #f6f7f9;
+    background: url('https://fsmedia.imgix.net/43/e9/9e/ac/0c64/4d0e/a2bc/dda1d61a31db/on-fire.jpeg?rect=0%2C56%2C1280%2C640&fm=png&w=1200');
     padding-top: 50px;
     font-size: 1.6rem;
 }
