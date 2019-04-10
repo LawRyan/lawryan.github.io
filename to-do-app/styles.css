@@ -9,9 +9,10 @@ html {
 body {
     font-family: 'Open Sans', sans-serif;
     min-height: 100vh;
-    background: url('https://fsmedia.imgix.net/43/e9/9e/ac/0c64/4d0e/a2bc/dda1d61a31db/on-fire.jpeg?rect=0%2C56%2C1280%2C640&fm=png&w=1200');
+    background: url('https://media3.giphy.com/media/kspVl6FzbdblOMKRmM/giphy.gif?cid=790b76115cad66356965784e36c7ac61');
     padding-top: 50px;
     font-size: 1.6rem;
+
 }
 
 .container {

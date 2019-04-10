@@ -1,9 +1,12 @@
 $(function(){
 
+setTimeout(function(){
 
-const name = prompt("What is your name")
+		const name = prompt("What is your name")
 
-$('.container h1').html(`${name}'s to do list`)
+		$('.container h1').html(`${name}'s to do list`)
+},500); 
+
 
 //Watch form submit
 $('form').on("submit",function(event){
@@ -22,10 +25,16 @@ $('form').on("submit",function(event){
 			$('form')[0].reset();
 		};
 
-	});
+});
 
 		$('ul').on("click","li",function(){
-			$(this).toggleClass("completed");
-			$(this).find('span.check').toggleClass('todo done');
+			if ($(this).hasClass('completed')){
+				$(this).remove();
+			}else{
+				$(this).toggleClass("completed");
+				$(this).find('span.check').toggleClass('todo done');
+			}
 		});
+
+
 });
