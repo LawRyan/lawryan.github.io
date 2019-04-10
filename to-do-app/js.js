@@ -2,19 +2,25 @@ $(function(){
 
 setTimeout(function(){
 
-		const name = prompt("What is your name")
-
-		$('.container h1').html(`${name}'s to do list`)
+		if (localStorage.name){
+				$('.container h1').html(`${localStorage.name}'s to do list`)
+		}else{
+			const name = prompt("What is your name");
+			$('.container h1').html(`${name}'s to do list`);
+			 localStorage.setItem("name",`${name}`);
+		}
 },500); 
 
+var savedList = JSON.parse(localStorage.savedListItems || null) || {};
+			$('ul').append(savedList);
+			console.log(savedList);
 
 //Watch form submit
 $('form').on("submit",function(event){
 
 	event.preventDefault()
 
-	
-
+		
 	
 		if ($('item').not(null)){
 			const toDoItem = $('#item').val();
@@ -37,4 +43,12 @@ $('form').on("submit",function(event){
 		});
 
 
+
+
+
 });
+
+window.addEventListener("unload", function(event) { //when the window is closed
+	var list = document.getElementById('list').innerHTML;
+	localStorage.setItem("savedListItems",  JSON.stringify(list)); // save selected color to localStorage
+	});
