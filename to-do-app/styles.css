@@ -12,15 +12,19 @@ body {
     background: url('https://media3.giphy.com/media/kspVl6FzbdblOMKRmM/giphy.gif?cid=790b76115cad66356965784e36c7ac61');
     padding-top: 50px;
     font-size: 1.6rem;
+    background-size:cover;
 
 }
 
 .container {
     max-width: 700px;
     margin: 0 auto;
-    background: white;
+    background: #ffffffa3;
     padding: 50px;
     position: relative;
+}
+.container:hover{
+    background:white;
 }
 
 .container::after {
