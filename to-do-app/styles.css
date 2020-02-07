@@ -11,7 +11,11 @@ body {
     min-height: 100vh;
   /*   background: url('https://media3.giphy.com/media/kspVl6FzbdblOMKRmM/giphy.gif?cid=790b76115cad66356965784e36c7ac61'); */
  /*  background:url('https://media.giphy.com/media/GR81UZYyhN3Ww/giphy.gif'); */
-    background:url('https://media.giphy.com/media/GK2zBA4xXqIPS/giphy.gif');
+  /* background:url('https://media.giphy.com/media/5tvOtygPxPu40RPGc2/giphy.gif');*/
+  /* background:url('https://media.giphy.com/media/k5zu35npVsYfgZQwwl/giphy.gif');*/
+   background:url('https://media.giphy.com/media/nwCz29GZlx0HfZZIwF/giphy.gif');
+  /* background:url('');*/ 
+   /* background:url('https://media.giphy.com/media/GK2zBA4xXqIPS/giphy.gif');*/
     padding-top: 50px;
     font-size: 1.6rem;
     background-size:cover;
