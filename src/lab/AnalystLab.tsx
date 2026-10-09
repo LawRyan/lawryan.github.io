@@ -270,7 +270,7 @@ function AskStep({ answer, onAsk, onRecords }: { answer: Answer | null; onAsk: (
           <div className="answer xp-anim" key={answer.q}>
             <div className="ans-q"><span className="mono">L//IOS</span>{answer.q}</div>
             <dl>
-              {answer.lines.map((l, i) => <Fragment key={i}><dt className={`tag tag-${l.tag.replace(' ', '-').toLowerCase()}`}>{l.tag}</dt><dd>{l.text}</dd></Fragment>)}
+              {answer.lines.map((l, i) => <Fragment key={i}><dt className={`atag atag-${l.tag.replace(' ', '-').toLowerCase()}`}>{l.tag}</dt><dd>{l.text}</dd></Fragment>)}
             </dl>
             {answer.tree && <Tree node={answer.tree} />}
             <div className="ans-foot">

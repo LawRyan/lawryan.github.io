@@ -27,7 +27,7 @@ See **`CONTENT_REVIEW.md`** for everything that needs sign-off.
 ```bash
 npm install
 npm run dev        # watch + local server at http://localhost:5173
-npm test           # Intelligence Lab math checks (474 assertions)
+npm test           # Intelligence Lab engine checks (independent recomputation)
 npm run build      # → dist/
 npm run preview    # serve dist/ at http://127.0.0.1:4173
 npm run typecheck
@@ -36,8 +36,8 @@ npm run typecheck
 Visual checks (need Playwright + Chromium installed locally):
 
 ```bash
-node scripts/shots.mjs review      # desktop + mobile screenshots → shots/
-node scripts/interact.mjs          # clicks through the Lab, tabs, menu, links
+node scripts/matrix.mjs <tag>      # screenshots at 1920/1440/768/390/360 → shots/<tag>/, overflow + touch-target report
+node scripts/interact.mjs          # clicks through the whole site, including the Lab flow
 node scripts/og.mjs                # regenerate social share images
 ```
 
@@ -60,8 +60,10 @@ src/
   components/previews.tsx  labelled conceptual previews for L//IOS
   home/Home.tsx         homepage sections
   lios/LiosPage.tsx     /lios/ page
-  lab/engine.ts         synthetic data + rule-based insights (pure, tested)
-  lab/Lab.tsx           Intelligence Lab UI
+  lab/analyst.ts        Lab engine: synthetic files, profiling, relationships, quality, findings, Q&A (pure, tested)
+  lab/AnalystLab.tsx    Intelligence Lab UI (lazy-loaded)
+  components/Shot.tsx   real-screenshot frames and gallery
+public/lios-shots/      real L//IOS screenshots (WebP), see CONTENT_REVIEW.md
 public/                 fonts, favicon, share images, legacy apps
 scripts/                build, local server, tests, screenshots
 ```

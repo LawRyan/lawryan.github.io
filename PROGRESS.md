@@ -27,17 +27,29 @@ Touch targets under 32px on mobile: 12 on the homepage, 1 on /lios/.
 9. **SEO/a11y gaps.** There's no sitemap.xml or robots.txt, the L//IOS wordmark serves as the h2, and the charts have no text alternative beyond a label.
 10. **No fast navigation** for a long single page (command palette / quick jump).
 
-## Plan (priority order)
-- [ ] P1 Hero: add a live "signal panel" visualization (synthetic, labelled) on the right; restate the role line per brief; tighten the mobile hero.
-- [ ] P2 L//IOS: rename the pillar to Markets; build an interactive architecture diagram, a philosophy section, a stronger brand motif and per-pillar product cards; previews stay labelled as conceptual until real screenshots exist.
-- [ ] P3 Lab: add guided questions (What changed most? Which segment is outperforming? Unusual movements? What should I investigate? Which factors explain the variance?), a variance driver breakdown (waterfall), and tests.
-- [ ] P4 Impact: four case studies in Problem / Contribution / Approach / Impact format, with metrics flagged for approval.
-- [ ] P5 Narrative: a "Why L//IOS" bridge section; evolution arc per brief.
-- [ ] P6 Section rhythm: vary the layouts (full-bleed band, split editorial, asymmetric).
-- [ ] P7 Mobile: 44px touch targets, 360px pass.
-- [ ] P8 SEO/a11y: sitemap.xml, robots.txt, heading audit, chart summaries.
-- [ ] P9 Command palette (⌘K / "/" and a nav button).
-- [ ] P10 Final matrix, before/after, CONTENT_REVIEW update, PR.
+## Plan (priority order): status
+- [x] P1 Hero: live signal panel, role line per brief, proof strip, tighter mobile hero
+- [x] P2 L//IOS: real screenshots of all three apps, pillars rewritten from READMEs, loop diagram, product principles, tech matrix, roadmap, gallery
+- [x] P3 Lab: rebuilt as "L//IOS Analyst in miniature" (Files → Understand → Dashboard → Ask → Investigate), 6 guided questions, driver trees, data checks, records with source row numbers
+- [x] P4 Impact: four case studies in Problem / Contribution / Approach / Impact form
+- [x] P5 Narrative: career arc per the brief, plus a "Why L//IOS" bridge
+- [x] P6 Section rhythm: split editorial, band timeline, tabbed case studies, feature card, gallery
+- [x] P7 Mobile: no small touch targets at 390/360/768, no overflow, 44px controls
+- [x] P8 SEO/a11y: sitemap.xml, robots.txt, refreshed meta and share images, heading audit, AA contrast (muted text raised to ≥4.96:1), visible focus
+- [x] P9 Command palette (Ctrl/⌘ K or "/", plus a nav button)
+- [x] P10 Final matrix, before/after, CONTENT_REVIEW, PR
+
+## Test results (last run)
+- `npm test`: analyst 73 checks, 0 failures (independent recomputation; planted stories found on 4 seeds)
+- `node scripts/interact.mjs`: all 50 interaction checks passed (intro, palette, timeline, case studies, full Lab flow, mobile menu, L//IOS deep links, gallery, broken images, URLs incl. legacy apps and 404)
+- `node scripts/matrix.mjs after`: 0 console errors, 0 horizontal overflow, 0 small touch targets on every page at all 5 widths
+- Type-check: passes apart from errors caused by the missing React types (they couldn't be installed offline here). GitHub Actions runs the full check on merge.
+- Bundle: home 21.5 kB + React 184 kB + shared 38 kB; the Lab (43 kB) loads only when its section comes near. Screenshots are WebP (1.1 MB total, lazy-loaded with fixed dimensions).
+
+## Remaining issues
+- The full TypeScript check with React types runs only in CI (no npm registry in this workspace).
+- No Lighthouse score yet (no Lighthouse available offline). Run it after deploy.
+- Nutrition status in L//IOS Health: the screens exist but the README says "not yet". Marked In development; Ryan to confirm.
 
 ## Decisions
 - **Real L//IOS screenshots (done).** Ryan granted read access to `Desktop\Claude\lios`, `lios-analyst` and `lios-mobile`. Read only the docs and built bundles (no `.env*`, no project data). Copied the prebuilt apps into the cloud workspace and ran each app's own QA script:
@@ -53,3 +65,5 @@ Touch targets under 32px on mobile: 12 on the homepage, 1 on /lios/.
 - 00:10 Audit + baseline screenshots done.
 - 00:15 Homepage: new hero with a live signal panel, proof strip, story/arc/"why L//IOS", timeline, case studies, command palette (⌘K or /).
 - 00:25 L//IOS: got access, captured real screenshots of all three apps, rewrote the pillars, built the screenshot gallery.
+- 00:45 Intelligence Lab rebuilt around the Analyst concept (per Ryan); engine + 73 tests.
+- 00:55 SEO files, palette fix, contrast fix, class-collision fix, new interaction tests, final matrix and before/after.

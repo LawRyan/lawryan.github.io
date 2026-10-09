@@ -16,7 +16,7 @@
   --line-2: rgba(186, 204, 228, 0.17);
   --ink: #e9eef5;
   --ink-2: #a4afbf;
-  --ink-3: #6c7789;
+  --ink-3: #808b9d;
   --silver: #c8d1dc;
   --signal: #6fd3f2;
   --signal-dim: rgba(111, 211, 242, 0.14);
@@ -889,8 +889,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 .answer dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0; }
 .answer dt, .answer dd { padding: 11px 16px; border-bottom: 1px solid var(--line); }
 .answer dd { margin: 0; line-height: 1.5; font-size: 0.93rem; padding-left: 4px; }
-.tag { font-family: var(--f-mono); font-size: 0.6rem; letter-spacing: 0.08em; align-self: start; margin-top: 2px; }
-.tag-fact { color: var(--ink-2); } .tag-interpretation { color: var(--signal); } .tag-data-check { color: var(--watch); }
+.atag { font-family: var(--f-mono); font-size: 0.6rem; letter-spacing: 0.08em; align-self: start; margin-top: 2px; }
+.atag-fact { color: var(--ink-2); } .atag-interpretation { color: var(--signal); } .atag-data-check { color: var(--watch); }
 .ans-foot { display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 12px 16px; }
 @media (max-width: 860px) { .st-ask { grid-template-columns: 1fr; } }
 
