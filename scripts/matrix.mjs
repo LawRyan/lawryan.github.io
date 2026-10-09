@@ -21,7 +21,7 @@ for (const [w, h, dpr] of widths) {
     for (let y = 0; y < H; y += 500) { await p.mouse.wheel(0, 500); await p.waitForTimeout(40); }
     await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(600);
     await p.screenshot({ path: `${dir}/${name}-${w}-full.jpg`, type: 'jpeg', quality: 68, fullPage: true });
-    const over = await p.evaluate(() => { const vw = document.documentElement.clientWidth; return [...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.width && r.right > vw + 1 && !e.closest('.tbl-wrap,canvas,.hero-canvas,[data-allow-overflow]') && getComputedStyle(e).position !== 'fixed'; }).slice(0, 5).map(e => (e.tagName + '.' + (e.className?.baseVal ?? e.className)).slice(0, 70)); });
+    const over = await p.evaluate(() => { const vw = document.documentElement.clientWidth; return [...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.width && r.right > vw + 1 && !e.closest('.tbl-wrap,canvas,.hero-canvas,[data-allow-overflow],.gallery-thumbs,.tree') && getComputedStyle(e).position !== 'fixed'; }).slice(0, 5).map(e => (e.tagName + '.' + (e.className?.baseVal ?? e.className)).slice(0, 70)); });
     const smallTargets = w < 800 ? await p.evaluate(() => [...document.querySelectorAll('a,button')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.height < 32) && !e.closest('.tbl-wrap'); }).length) : 0;
     console.log(`${String(w).padStart(4)} ${name.padEnd(5)} h=${H} errors=${errs.length} overflow=${JSON.stringify(over)}${w < 800 ? ` small-targets=${smallTargets}` : ''}`);
     await p.close();

@@ -131,7 +131,7 @@ function Palette() {
     window.addEventListener('open-palette', show);
     return () => { window.removeEventListener('keydown', key); window.removeEventListener('open-palette', show); };
   }, []);
-  useEffect(() => { if (open) setTimeout(() => input.current?.focus(), 0); else last.current?.focus?.(); }, [open]);
+  useEffect(() => { if (!open) last.current?.focus?.(); }, [open]);
   if (!open) return null;
   const list = DESTS().filter(d => (d.label + ' ' + d.hint).toLowerCase().includes(q.trim().toLowerCase()));
   const go = (d: Dest) => {
@@ -142,7 +142,7 @@ function Palette() {
   return (
     <div className="pal-back" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
       <div className="pal" role="dialog" aria-modal="true" aria-label="Jump to a section">
-        <input ref={input} id="pal-q" value={q} placeholder="Jump to… (Experience, L//IOS, Lab)" aria-label="Search sections" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-activedescendant={list[i] ? `pal-${i}` : undefined}
+        <input ref={input} autoFocus id="pal-q" value={q} placeholder="Jump to… (Experience, L//IOS, Lab)" aria-label="Search sections" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-activedescendant={list[i] ? `pal-${i}` : undefined}
           onChange={e => { setQ(e.target.value); setI(0); }}
           onKeyDown={e => {
             if (e.key === 'Escape') setOpen(false);

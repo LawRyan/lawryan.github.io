@@ -930,3 +930,4 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 .tbl tr.muted td { color: var(--ink-3); }
 @media (max-width: 1000px) { .inv-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .inv-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } .alab-steps { justify-content: flex-start; } .alab-steps button { padding: 8px 9px; } .alab-badge { display: none; } }
+.brand { min-height: 44px; align-items: center; }
