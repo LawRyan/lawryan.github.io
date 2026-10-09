@@ -329,6 +329,7 @@ function LazyLab() {
 }
 
 function Philosophy() {
+  const [morePr, setMorePr] = useState(false);
   return (
     <section className="section philo" id="philosophy" aria-labelledby="philo-h">
       <div className="wrap">
@@ -336,7 +337,7 @@ function Philosophy() {
           <Eyebrow>How I work</Eyebrow>
           <h2 id="philo-h" className="h-section">Five principles.</h2>
         </div>
-        <ul className="principles">
+        <ul className={`principles${morePr ? '' : ' fold fold-3'}`}>
           {principles.map(p => (
             <li key={p.t} className="rv">
               <span className="t"><span className="s" aria-hidden="true">//</span>{p.t}</span>
@@ -344,6 +345,7 @@ function Philosophy() {
             </li>
           ))}
         </ul>
+        <button className="more-btn" aria-expanded={morePr} onClick={() => setMorePr(m => !m)}>{morePr ? 'Show less' : `Show all ${principles.length} principles`}</button>
       </div>
     </section>
   );
@@ -353,6 +355,7 @@ function Projects() {
   const cats = ['All', 'Flagship', 'Data Analytics', 'Web Development', 'Experimental', 'Earlier'] as const;
   const [cat, setCat] = useState<(typeof cats)[number]>('All');
   const list = projects.filter(p => cat === 'All' || p.cat === cat);
+  const [more, setMore] = useState(false);
   const Row = ({ p }: { p: Project }) => {
     const inner = (
       <>
@@ -379,7 +382,8 @@ function Projects() {
         <div className="filters" role="group" aria-label="Filter projects">
           {cats.map(c => <button key={c} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</button>)}
         </div>
-        <ul className="proj-list" aria-live="polite">{list.map(p => <Row key={p.name} p={p} />)}</ul>
+        <ul className={`proj-list${more ? '' : ' fold fold-4'}`} aria-live="polite">{list.map(p => <Row key={p.name} p={p} />)}</ul>
+        {list.length > 4 && <button className="more-btn" aria-expanded={more} onClick={() => setMore(m => !m)}>{more ? 'Show less' : `Show earlier work (${list.length - 4})`}</button>}
       </div>
     </section>
   );

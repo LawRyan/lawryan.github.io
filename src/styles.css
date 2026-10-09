@@ -151,7 +151,7 @@ p { margin: 0; text-wrap: pretty; }
 @media (max-width: 720px) { .hero-foot { grid-template-columns: 1fr; } .hero h1 { max-width: none; } }
 
 /* ───────── Section frame ───────── */
-.section { padding-block: clamp(80px, 12vw, 148px); border-top: 1px solid var(--line); position: relative; }
+.section { padding-block: clamp(64px, 9vw, 116px); border-top: 1px solid var(--line); position: relative; }
 .section-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px 48px; align-items: end; margin-bottom: clamp(40px, 6vw, 72px); }
 .section-head .lede { color: var(--ink-2); font-size: var(--step-1); max-width: 34rem; justify-self: end; }
 .section-head .h-section { margin-top: 18px; }
@@ -479,7 +479,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 /* ═════════ Sprint additions (Oct 2026) ═════════ */
 .eyebrow-lios b { color: var(--lios); }
 .h-display { font-size: clamp(2.6rem, 5.6vw, 5rem); line-height: 0.98; letter-spacing: -0.035em; font-stretch: 88%; font-weight: 600; margin-top: 18px; text-wrap: balance; }
-.sec-head { display: grid; gap: 16px; margin-bottom: clamp(36px, 5vw, 64px); max-width: 52rem; }
+.sec-head { display: grid; gap: 16px; margin-bottom: clamp(32px, 4vw, 52px); max-width: 52rem; }
 .sec-head .h-section { margin-top: 2px; }
 .sec-head .lede { color: var(--ink-2); font-size: var(--step-1); max-width: 40rem; line-height: 1.55; }
 
@@ -1003,3 +1003,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
   .kit-col { padding: 20px 18px 22px; gap: 12px; }
 }
 .cs > * { min-width: 0; }
+
+/* Fold long lists on phones; desktop always shows everything */
+.more-btn { display: none; }
+@media (max-width: 760px) {
+  .fold-4 > li:nth-child(n+5), .fold-3 > li:nth-child(n+4) { display: none; }
+  .more-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-2); background: none; color: var(--ink); font: inherit; font-size: 0.92rem; cursor: pointer; }
+  .more-btn::after { content: '↓'; color: var(--signal); }
+  .more-btn[aria-expanded='true']::after { content: '↑'; }
+}
