@@ -248,7 +248,7 @@ function YoY({ cur, prev, startWeek = 52, highlight, labels = ['This year', 'Las
         {hover !== null && <><line x1={x(hover)} x2={x(hover)} y1={T} y2={H - B} stroke="rgba(186,204,228,0.3)" /><circle cx={x(hover)} cy={y(cur[hover])} r="3.5" fill="var(--signal)" /></>}
         {Array.from({ length: n }, (_, i) => <rect key={i} x={x(i) - (W - Lp - R) / (n - 1) / 2} y={T} width={(W - Lp - R) / (n - 1)} height={H - T - B} fill="transparent" onMouseEnter={() => setHover(i)} />)}
       </svg>
-      <p className="lab-note">{hover !== null ? <>Week of {weekLabel(startWeek + hover)} · {labels[0]} {money(cur[hover])} · {labels[1]} {money(prev[hover])} · {signed(pctChg(prev[hover], cur[hover]))}</> : 'Hover a week to compare.'}</p>
+      <p className="lab-note">{hover !== null ? <>Week of {weekLabel(startWeek + hover)} · {labels[0]} {money(cur[hover])} · {labels[1]} {money(prev[hover])} · {signed(pctChg(prev[hover], cur[hover]))}</> : (typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches ? 'Tap a week to compare.' : 'Hover a week to compare.')}</p>
     </div>
   );
 }
