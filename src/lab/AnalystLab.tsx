@@ -339,20 +339,25 @@ function InvestigateStep({ files, finding, records, findings: F, onPick }: { fil
               </select>
             </label>
           </div>
-          <dl className="inv-nums">{f.numbers.map(n => <div key={n.label}><dt>{n.label}</dt><dd>{n.value}</dd></div>)}</dl>
-          {f.checks && (
-            <section className="inv-checks" aria-label="Data quality checks">
-              <div className="inv-checks-head"><span className="eyebrow">Is it real? · data checks</span><div className={`verdict ${f.verdict!.startsWith('BUSINESS') ? 'ok' : 'bad'}`}>{f.verdict}</div></div>
-              <ul>{f.checks.map(c => <li key={c.name} className={c.pass ? 'pass' : 'fail'}><b>{c.pass ? '✓' : '!'} {c.name}</b><span>{c.detail}</span></li>)}</ul>
-            </section>
-          )}
-          {series && f.window && (
-            <div className="chart-card">
-              <div className="chart-head"><span className="eyebrow">{segName(f.seg)} · weekly {f.measure === 'cv' ? 'revenue' : 'notional'}</span><span className="mono muted small">When did it start?</span></div>
-              <YoY cur={series.cur} prev={series.prev} startWeek={series.from} highlight={[f.window.b[0] - series.from, f.window.b[1] - series.from]} labels={['Recent', 'Year earlier']} />
+          <div className="inv-grid">
+            <div className="inv-main">
+              <dl className="inv-nums">{f.numbers.map(n => <div key={n.label}><dt>{n.label}</dt><dd>{n.value}</dd></div>)}</dl>
+              {series && f.window && (
+                <div className="chart-card">
+                  <div className="chart-head"><span className="eyebrow">{segName(f.seg)} · weekly {f.measure === 'cv' ? 'revenue' : 'notional'}</span><span className="mono muted small">When did it start?</span></div>
+                  <YoY cur={series.cur} prev={series.prev} startWeek={series.from} highlight={[f.window.b[0] - series.from, f.window.b[1] - series.from]} labels={['Recent', 'Year earlier']} />
+                </div>
+              )}
+              {tree && <div className="tree-card"><span className="eyebrow">Why · driver tree</span><Tree node={tree} /></div>}
             </div>
-          )}
-          {tree && <div className="tree-card"><span className="eyebrow">Why · driver tree</span><Tree node={tree} /></div>}
+            {f.checks && (
+              <aside className="inv-checks" aria-label="Data quality checks">
+                <span className="eyebrow">Is it real? · data checks</span>
+                <div className={`verdict ${f.verdict!.startsWith('BUSINESS') ? 'ok' : 'bad'}`}>{f.verdict}</div>
+                <ul>{f.checks.map(c => <li key={c.name} className={c.pass ? 'pass' : 'fail'}><b>{c.pass ? '✓' : '!'} {c.name}</b><span>{c.detail}</span></li>)}</ul>
+              </aside>
+            )}
+          </div>
         </>
       )}
       {records && <Records files={files} label={records.label} filter={records.rows} />}

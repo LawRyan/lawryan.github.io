@@ -1028,13 +1028,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
   .tree-r em { display: block; margin: 2px 0 0; }
 }
 
-/* Investigate, stacked: checks strip → chart → driver tree → records */
-.inv-checks { padding: 14px 16px 16px; gap: 12px; }
-.inv-checks-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
-.inv-checks-head .verdict { padding: 6px 12px; }
-.inv-checks ul { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
-.inv-checks li { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: rgba(255,255,255,0.015); align-content: start; }
-.tree-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px 6px 6px; background: #0d1118; min-width: 0; }
-.tree-card > .eyebrow { display: block; padding: 0 10px 8px; }
+/* Investigate: main column (numbers, chart, driver tree) + data-checks sidebar, like the app */
+.inv-main { display: grid; gap: 14px; align-content: start; }
+.inv-checks { position: sticky; top: 84px; }
+.inv-checks li { padding: 9px 0; }
+.tree-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px 4px 4px; min-width: 0; }
+.tree-card > .eyebrow { display: block; padding: 0 12px 8px; }
 .tree-card .tree-r:last-child { border-bottom: 0; }
-@media (max-width: 560px) { .inv-checks ul { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .inv-checks { position: static; } }
