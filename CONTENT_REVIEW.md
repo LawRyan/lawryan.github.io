@@ -25,7 +25,7 @@ site. To change any of it, edit `src/content.ts`, or ask Claude to.
 ### Narrative and experience copy (my wording)
 | # | Item |
 |---|------|
-| 1.10 | Career arc: Technology foundations (Early) → Capital Markets (2015 →) → Data & analytics (2018 →) → Automation (2021 →) → AI innovation (Now). The dates are anchors from your degree, HackerYou and RBC roles; adjust if they don't match how you'd tell it. |
+| 1.10 | Career arc (rebuilt from your LinkedIn history): Capital Markets (2015 →) → Data & onboarding (2017 →) → Automation (2017 →) → Leading analytics (2019 →) → Client intelligence (2021 →) → AI innovation (Now). |
 | 1.11 | "Why L//IOS" bridge: "After years of building reporting, dashboards and validation frameworks, I kept coming back to one question: What if software could do more than display information?" |
 | 1.12 | Case studies are now in Problem / My contribution / Approach / Impact form. The problem statements are my generalized framing; please check they're accurate and not too specific. |
 
@@ -37,7 +37,7 @@ site. To change any of it, edit `src/content.ts`, or ask Claude to.
 | 2.2 | Metrics: 300+ rules · 100–150K trade records · ~40 reports · ~30 hrs/month | You approved at go-live. They now also appear in the hero "proof" strip. |
 | 2.3 | Public email | Still empty: add to `contact.email` if wanted |
 | 2.4 | Résumé PDF | Optional |
-| 2.5 | Roles before Dec 2021 | Still shown as "Banking & Capital Markets · Earlier roles" |
+| 2.5 | Full RBC history | Done: all seven RBC roles from your LinkedIn (Tax Operations Analyst, Nov 2015 → VP, Client Intelligence, Dec 2025). Title is now "Vice President, Client Intelligence" and the VP start date is Dec 2025. Metrics in earlier roles (20,000+ clients, 4,000 PDFs, ~300 hrs, 100+ hrs) are from your public LinkedIn. There's also a new KYC data-quality case study and an "LEI validator" project. |
 
 ## 3. Synthetic and demo data on the site
 - **Hero signal panel**: a 64-point synthetic series. The trend and outlier figures are computed live from it.

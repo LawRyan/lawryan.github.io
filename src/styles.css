@@ -530,7 +530,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 .story-copy { display: grid; gap: 18px; color: var(--ink-2); font-size: 1.05rem; line-height: 1.65; max-width: 34rem; }
 .story-copy .lead { color: var(--ink); font-size: var(--step-1); line-height: 1.55; }
 @media (max-width: 900px) { .story-grid { grid-template-columns: 1fr; } }
-.arc { list-style: none; margin: clamp(56px, 7vw, 96px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); position: relative; }
+.arc { list-style: none; margin: clamp(56px, 7vw, 96px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: relative; }
 .arc::before { content: ''; position: absolute; left: 0; right: 0; top: 7px; height: 1px; background: linear-gradient(90deg, var(--line-2), var(--signal) 70%, var(--lios)); }
 .arc li { position: relative; padding: 34px 20px 0 0; display: grid; gap: 8px; align-content: start; }
 .arc-node { position: absolute; top: 0; left: 0; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); border: 1px solid var(--silver); }

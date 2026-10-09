@@ -28,8 +28,8 @@ await p.keyboard.type('lab'); await p.keyboard.press('Enter'); await p.waitForTi
 ok(await p.evaluate(() => Math.abs(document.getElementById('lab').getBoundingClientRect().top) < 120), 'palette jumps to the Lab');
 await p.keyboard.press('/'); ok(await p.locator('.pal').isVisible(), 'palette opens with /');
 await p.keyboard.press('Escape'); ok(!(await p.locator('.pal').count()), 'palette closes with Escape');
-await p.locator('#tl-assoc').click(); ok((await p.locator('#tl-panel h3').innerText()) === 'Associate', 'timeline selects Associate');
-await p.locator('#tl-assoc').press('ArrowUp'); ok((await p.locator('#tl-panel h3').innerText()) === 'Vice President', 'timeline arrow keys');
+await p.locator('#tl-assoc').click(); ok((await p.locator('#tl-panel h3').innerText()) === 'Client Intelligence Associate', 'timeline selects Associate');
+await p.locator('#tl-assoc').press('ArrowUp'); ok((await p.locator('#tl-panel h3').innerText()) === 'Vice President, Client Intelligence', 'timeline arrow keys');
 await p.locator('#cs-modernization').click(); ok((await p.locator('#cs-panel h3').innerText()).includes('Reporting rebuilt'), 'case study tabs');
 await p.getByRole('button', { name: 'Earlier' }).click(); ok(await p.locator('.proj').count() === 3, 'project filter');
 

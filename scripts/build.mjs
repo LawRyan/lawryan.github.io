@@ -22,7 +22,7 @@ const pages = [
 
 const ld = JSON.stringify({
   '@context': 'https://schema.org', '@type': 'Person', name: 'Ryan Law', url: 'https://lawryan.github.io/',
-  jobTitle: 'Vice President', worksFor: { '@type': 'Organization', name: 'RBC Capital Markets' },
+  jobTitle: 'Vice President, Client Intelligence', worksFor: { '@type': 'Organization', name: 'RBC Capital Markets' },
   alumniOf: 'Wilfrid Laurier University',
   sameAs: ['https://www.linkedin.com/in/ryan-law-92a629104/', 'https://github.com/lawryan'],
 });

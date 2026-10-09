@@ -8,11 +8,11 @@ export const REVIEW_MODE = false;
 
 export const site = {
   name: 'Ryan Law',
-  title: 'Vice President, RBC Capital Markets', // needs approval: employer named publicly
+  title: 'Vice President, Client Intelligence · RBC Capital Markets',
   roles: ['Capital Markets', 'Data & Analytics', 'AI Innovation'],
   headline: { lead: 'Turning complex data into', em: 'intelligent', tail: 'decisions.' },
   intro:
-    "I'm Ryan Law, a Capital Markets professional working at the intersection of financial markets, data intelligence, and emerging technology. I build analytical systems, automate complex workflows, and explore how artificial intelligence can change the way we understand information and make decisions.",
+    "I'm Ryan Law, Vice President of Client Intelligence at RBC Capital Markets, where I've spent eleven years across tax operations, client onboarding, KYC data and client analytics. I build analytical systems, automate complex workflows, and explore how artificial intelligence can change the way we understand information and make decisions.",
   url: 'https://lawryan.github.io/',
 };
 
@@ -38,10 +38,11 @@ export const focus = [
 
 /** The career arc, in the order it happened. Years are only shown where they're verified. */
 export const arc = [
-  { stage: 'Technology foundations', when: 'Early', text: 'Curiosity about how software and the web are built.' },
-  { stage: 'Capital Markets', when: '2015 →', text: 'BBA from Wilfrid Laurier, then into banking and markets: how the business runs and which numbers matter.' },
-  { stage: 'Data & analytics', when: '2018 →', text: 'Learned to build at HackerYou, then turned that toward reporting and business intelligence.' },
-  { stage: 'Automation', when: '2021 →', text: 'Python and Excel automation, validation frameworks and modernized Tableau reporting.' },
+  { stage: 'Capital Markets', when: '2015 →', text: 'BBA from Wilfrid Laurier, then Tax Operations at RBC Capital Markets: FATCA, CRS and a new regulatory compliance system.' },
+  { stage: 'Data & onboarding', when: '2017 →', text: 'Client implementation and onboarding data: margin rules, KYC, credit and trading documentation.' },
+  { stage: 'Automation', when: '2017 →', text: 'Learned to code at HackerYou and used it at work: VBA, JavaScript, bots and an API-driven LEI validator.' },
+  { stage: 'Leading analytics', when: '2019 →', text: 'Team lead for KYC data and reporting, then client management and analytics.' },
+  { stage: 'Client intelligence', when: '2021 →', text: 'Client intelligence for Capital Markets; Vice President since December 2025.' },
   { stage: 'AI innovation', when: 'Now', text: 'Exploring software that understands data and explains it, through L//IOS.' },
 ];
 
@@ -49,7 +50,7 @@ export const story = {
   statement: 'I’ve spent my career where markets meet data.',
   paragraphs: [
     'Banking taught me how markets businesses actually run: the questions leaders ask, the pressure on the numbers, and how much depends on data being right.',
-    'Alongside it I learned to build. Today I design reporting and analytical systems for Capital Markets, automate the repetitive parts of the workflow, and build the validation that makes the output trustworthy.',
+    'From my first role I looked for the repetitive work that could be automated. Today I design reporting and analytical systems for Capital Markets, automate the repetitive parts of the workflow, and build the validation that makes the output trustworthy.',
   ],
   why: {
     lead: 'After years of building reporting, dashboards and validation frameworks, I kept coming back to one question:',
@@ -72,69 +73,78 @@ export interface Role {
   flag?: string;
 }
 
+const RBC = 'RBC Capital Markets';
+/** Career history as published on Ryan's LinkedIn profile (Oct 2026). */
 export const experience: Role[] = [
   {
-    id: 'vp',
-    when: 'Jan 2026 – Present',
-    from: 2026.0, to: null, kind: 'role',
-    title: 'Vice President',
-    org: 'RBC Capital Markets',
-    summary: 'Bridging business requirements and technical execution across reporting, data quality and analytics.',
+    id: 'vp', when: 'Dec 2025 – Present', from: 2025.92, to: null, kind: 'role',
+    title: 'Vice President, Client Intelligence', org: RBC,
+    summary: 'Leads client intelligence work across reporting, data quality and analytics, bridging business requirements and technical execution.',
+    points: ['Reporting and data quality', 'Business intelligence and Capital Markets analytics', 'Automation and operational efficiency', 'Analytical solution development', 'Data governance and controls', 'Reporting modernization'],
+  },
+  {
+    id: 'assoc', when: 'Dec 2021 – Dec 2025', from: 2021.92, to: 2025.92, kind: 'role',
+    title: 'Client Intelligence Associate', org: RBC,
+    summary: 'Built and modernized client intelligence and business reporting, with automation and validation at the core.',
+    points: ['Tableau reporting development and modernization', 'Python and Excel automation', 'Data quality validation frameworks', 'Trade and client intelligence reporting', 'Executive reports'],
+  },
+  {
+    id: 'cmlead', when: 'Aug 2020 – Dec 2021', from: 2020.58, to: 2021.92, kind: 'role',
+    title: 'Client Management & Analytics Team Lead', org: RBC,
+    summary: 'Led client management and analytics, with responsibility for data quality and executive reporting.',
+    points: ['Team leadership', 'Client analytics', 'Data quality', 'Executive reports'],
+  },
+  {
+    id: 'kyclead', when: 'Dec 2019 – Aug 2020', from: 2019.92, to: 2020.58, kind: 'role',
+    title: 'KYC Data & Reporting Team Lead', org: RBC,
+    summary: 'Led KYC data and reporting, owning data quality and the reports senior management relied on.',
+    points: ['Team leadership', 'KYC data', 'Data quality', 'Executive reports'],
+  },
+  {
+    id: 'onboarding', when: 'Nov 2018 – Dec 2019', from: 2018.83, to: 2019.92, kind: 'role',
+    title: 'Global Client Onboarding Data Analyst', org: RBC,
+    summary: 'The link between front and back office for the data quality of 20,000+ clients going through KYC refresh.',
     points: [
-      'Reporting and data quality',
-      'Business intelligence and Capital Markets analytics',
-      'Automation and operational efficiency',
-      'Analytical solution development',
-      'Data governance and controls',
-      'Reporting modernization',
-      'Cross-functional collaboration with business and technology partners',
+      'Daily reports for business managers, regional reports for APAC, Canada, US and Europe, and weekly reports for senior management',
+      'Prepared key metrics and risk-based recommendations for the Director and Global Head of Data Management',
+      'Rebuilt legacy reporting to feed automatically from source data',
+      'Built a bot that determined KYC requirements and handled client outreach',
+      'A macro that remediated 4,000 PDF files, saving an estimated 300 hours',
     ],
-    flag: 'Employer and title shown publicly',
   },
   {
-    id: 'assoc',
-    when: 'Dec 2021 – Dec 2025',
-    from: 2021.92, to: 2025.99, kind: 'role',
-    title: 'Associate',
-    org: 'RBC Capital Markets',
-    summary: 'Built and modernized business intelligence for markets businesses, with automation and validation at the core.',
+    id: 'implementation', when: 'Nov 2017 – Nov 2018', from: 2017.83, to: 2018.83, kind: 'role',
+    title: 'Client Implementation Analyst', org: RBC,
+    summary: 'Worked with internal and external stakeholders on compliance with regulatory margin requirements.',
     points: [
-      'Development and modernization of Tableau reporting',
-      'Python and Excel-based automation',
-      'Data quality validation frameworks',
-      'Trade and client intelligence reporting',
-      'Capital Markets analytics',
-      'Operational process improvements',
+      'A framework to track onboarding metrics across KYC, credit and trading documentation',
+      'Client-enablement statistics with e-Comm teams, used for planning',
+      'Automated reports, outreach, Dodd-Frank disclosures and data work, saving 100+ hours',
+      'A Legal Entity Identifier validator using the GLEIF API',
+      'Applied web development (HTML5, JavaScript) and advanced VBA to regulatory data validity',
     ],
-    flag: 'Employer and title shown publicly',
   },
   {
-    id: 'early',
-    when: 'Before 2021',
-    from: 2015.5, to: 2021.9, kind: 'earlier',
-    title: 'Banking & Capital Markets',
-    org: 'Earlier roles',
-    summary: 'Early career in banking and Capital Markets; my 2018 site described three-plus years of experience at the time.',
-    points: ['Foundation in markets businesses and financial services', 'Self-taught and bootcamp-trained web development alongside work'],
-    flag: 'Add titles, employers and dates, or keep general',
+    id: 'tax', when: 'Nov 2015 – Nov 2017', from: 2015.83, to: 2017.83, kind: 'role',
+    title: 'Tax Operations Analyst', org: RBC,
+    summary: 'Tax compliance for transactional and operational taxes: FATCA, OECD CRS, Chapter 3/61 and HIRE Act (871m).',
+    points: [
+      'Classification and certification of high-priority clients and entities',
+      'Helped build RBC’s new Tax Operations Regulatory Compliance System and improved it as rules changed',
+      'User acceptance testing and post-implementation validation',
+      'A production defect log to track defects and assess business risk',
+    ],
   },
   {
-    id: 'hy',
-    when: '2018',
-    from: 2018.3, kind: 'education',
-    title: 'Web Development',
-    org: 'HackerYou',
+    id: 'hy', when: '2018', from: 2018.3, kind: 'education',
+    title: 'Web Development', org: 'HackerYou',
     summary: 'Immersive front-end development program.',
     points: ['HTML, CSS, Sass, JavaScript', 'Responsive builds from design files', 'Small JavaScript applications'],
   },
   {
-    id: 'wlu',
-    when: '2015',
-    from: 2015.3, kind: 'education',
-    title: 'Bachelor of Business Administration',
-    org: 'Wilfrid Laurier University',
-    summary: 'BBA, 2015.',
-    points: [],
+    id: 'wlu', when: '2015', from: 2015.3, kind: 'education',
+    title: 'Bachelor of Business Administration', org: 'Wilfrid Laurier University',
+    summary: 'BBA, 2015.', points: [],
   },
 ];
 
@@ -195,6 +205,16 @@ export const cases = [
     approach: 'A check at every stage before the next one starts, with lineage back to the source.',
     impact: 'Reporting that can be traced and defended.',
     tags: ['Ingestion', 'Reconciliation', 'Lineage'],
+  },
+  {
+    id: 'kyc',
+    k: 'Earlier · KYC at scale',
+    title: 'Data quality for 20,000+ clients in KYC refresh',
+    problem: 'A global KYC refresh depended on accurate client data across front and back office, with reporting that was built by hand.',
+    contribution: 'Acted as the link between every line of business on data quality, and rebuilt the reporting.',
+    approach: 'Legacy reports rebuilt to feed from source data; a bot to determine KYC requirements and handle outreach; a macro to remediate missed documents.',
+    impact: '20,000+ clients covered, 4,000 PDF files remediated, and an estimated 300 hours saved.',
+    tags: ['KYC', 'Automation', 'VBA'],
   },
 ];
 
@@ -412,6 +432,7 @@ export interface Project {
   internal?: boolean;
 }
 export const projects: Project[] = [
+  { name: 'LEI validator', cat: 'Data Analytics', year: '2018', body: 'At work: a Legal Entity Identifier validator that checks entities against the GLEIF API and flags invalid ones.', tags: ['JavaScript', 'API', 'Data quality'] },
   { name: 'L//IOS', cat: 'Flagship', year: 'Ongoing', body: 'Three applications: L//IOS Analyst for data intelligence, L//IOS Markets for research, and L//IOS Health on Android.', tags: ['TypeScript', 'React', 'Kotlin', 'SQLite'], href: '/lios/', internal: true },
   { name: 'Intelligence Lab', cat: 'Experimental', year: '2026', body: 'A browser-sized version of L//IOS Analyst: it reads a set of synthetic files, checks them, and investigates what changed.', tags: ['TypeScript', 'Analytics', 'Synthetic data'], href: '#lab', internal: true },
   { name: 'JavaScript chart studies', cat: 'Data Analytics', year: 'Earlier', body: 'Early experiments visualizing data in the browser with D3 and C3.', tags: ['D3', 'C3', 'JavaScript'], href: '/line.html' },
