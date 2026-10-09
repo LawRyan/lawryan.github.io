@@ -317,8 +317,22 @@ function InvestigateStep({ files, finding, records, findings: F, onPick }: { fil
   const tree = useMemo(() => (f?.window ? driverTree(files, f.seg, f.window.a, f.window.b, f.measure, 3, 3) : null), [f, files]);
   if (!f && !records) {
     return (
-      <div className="st"><p className="muted">Pick a finding to investigate.</p>
-        <ol className="flist compact">{F.map(x => <li key={x.id}><button onClick={() => onPick(x)}><b>{x.title}</b></button></li>)}</ol>
+      <div className="st st-pick">
+        <div className="pick-head"><span className="eyebrow">Investigate</span><h3>Pick a finding to look into.</h3><p className="muted">Each one opens with its numbers, the chart, the driver tree, the data checks and the rows behind it.</p></div>
+        <ol className="flist pick-list">
+          {F.map((x, i) => (
+            <li key={x.id}>
+              <button onClick={() => onPick(x)}>
+                <span className="fn mono">{String(i + 1).padStart(2, '0')}</span>
+                <span>
+                  <b>{x.title}</b>
+                  <span className="ft">{x.text}</span>
+                  <span className="fmeta"><i className={`kd kd-${x.kind.replace(' ', '-').toLowerCase()}`} />{x.kind}{x.verdict && <em className={x.verdict.startsWith('BUSINESS') ? 'ok' : 'bad'}>{x.verdict.startsWith('BUSINESS') ? 'DATA CHECKED' : 'DATA ISSUE?'}</em>}<span className="inv">Investigate →</span></span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
       </div>
     );
   }

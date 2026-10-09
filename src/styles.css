@@ -1036,3 +1036,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 .tree-card > .eyebrow { display: block; padding: 0 12px 8px; }
 .tree-card .tree-r:last-child { border-bottom: 0; }
 @media (max-width: 1000px) { .inv-checks { position: static; } }
+
+/* Investigate: finding picker (step 5 before a finding is chosen) */
+.st-pick { display: grid; gap: 18px; }
+.pick-head { display: grid; gap: 6px; max-width: 40rem; }
+.pick-head h3 { font-size: var(--step-2); letter-spacing: -0.02em; }
+.pick-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 10px; }
+.pick-list button { border: 1px solid var(--line); border-radius: 10px; padding: 14px 14px; height: 100%; align-items: start; }
+.pick-list button:hover { border-color: var(--line-2); }
