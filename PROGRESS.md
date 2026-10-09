@@ -41,7 +41,7 @@ Touch targets under 32px on mobile: 12 on the homepage, 1 on /lios/.
 
 ## Test results (last run)
 - `npm test`: analyst 73 checks, 0 failures (independent recomputation; planted stories found on 4 seeds)
-- `node scripts/interact.mjs`: all 50 interaction checks passed (intro, palette, timeline, case studies, full Lab flow, mobile menu, L//IOS deep links, gallery, broken images, URLs incl. legacy apps and 404)
+- `node scripts/interact.mjs`: all 48 interaction checks passed (intro, palette, timeline, case studies, full Lab flow, mobile menu, L//IOS deep links, gallery, broken images, URLs incl. legacy apps and 404)
 - `node scripts/matrix.mjs after`: 0 console errors, 0 horizontal overflow, 0 small touch targets on every page at all 5 widths
 - Type-check: passes apart from errors caused by the missing React types (they couldn't be installed offline here). GitHub Actions runs the full check on merge.
 - Bundle: home 21.5 kB + React 184 kB + shared 38 kB; the Lab (43 kB) loads only when its section comes near. Screenshots are WebP (1.1 MB total, lazy-loaded with fixed dimensions).
