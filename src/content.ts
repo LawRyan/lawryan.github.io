@@ -79,8 +79,12 @@ export const experience: Role[] = [
   {
     id: 'vp', when: 'Dec 2025 – Present', from: 2025.92, to: null, kind: 'role',
     title: 'Vice President, Client Intelligence', org: RBC,
-    summary: 'Leads client intelligence work across reporting, data quality and analytics, bridging business requirements and technical execution.',
-    points: ['Reporting and data quality', 'Business intelligence and Capital Markets analytics', 'Automation and operational efficiency', 'Analytical solution development', 'Data governance and controls', 'Reporting modernization'],
+    summary: 'Leads reporting, data quality and business intelligence for Capital Markets, turning complex business requirements into practical solutions.',
+    points: [
+      'Manage an offshore analytics and reporting team: work allocation, deliverables and capability building',
+      'Oversee validation frameworks, data integrity controls and reconciliations',
+      'Drive automation, and align priorities with business leaders, technology partners and teams across regions',
+    ],
   },
   {
     id: 'assoc', when: 'Dec 2021 – Dec 2025', from: 2021.92, to: 2025.92, kind: 'role',
