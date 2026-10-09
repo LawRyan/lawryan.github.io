@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
-  REVIEW_MODE, site, contact, arc, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
+  REVIEW_MODE, site, contact, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
 import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, type NavItem } from '../components/common';
 import SignalPanel from '../components/SignalPanel';
@@ -101,16 +101,6 @@ function Story() {
             {story.paragraphs.map(p => <p key={p.slice(0, 18)}>{p}</p>)}
           </div>
         </div>
-        <ol className="arc rv" aria-label="Career arc">
-          {arc.map((a, i) => (
-            <li key={a.stage} style={{ ['--i' as string]: i }} className={i === arc.length - 1 ? 'now' : undefined}>
-              <span className="arc-node" aria-hidden="true" />
-              <span className="arc-when">{a.when}</span>
-              <h3>{a.stage}</h3>
-              <p>{a.text}</p>
-            </li>
-          ))}
-        </ol>
         <figure className="why rv">
           <p className="why-lead">{story.why.lead}</p>
           <blockquote>{story.why.q}</blockquote>
@@ -121,7 +111,7 @@ function Story() {
   );
 }
 
-const T0 = 2015, T1 = 2026.9;
+const T0 = 2013, T1 = 2026.9;
 const pos = (t: number) => ((t - T0) / (T1 - T0)) * 100;
 
 function Experience() {
@@ -134,7 +124,7 @@ function Experience() {
     setSel(n.id);
     document.getElementById(`tl-${n.id}`)?.focus();
   };
-  const years = Array.from({ length: 12 }, (_, i) => T0 + i);
+  const years = Array.from({ length: 14 }, (_, i) => T0 + i);
   return (
     <section className="section" id="experience" aria-labelledby="xp-h">
       <div className="wrap">
@@ -143,7 +133,7 @@ function Experience() {
           <h2 id="xp-h" className="h-section">Where the business meets the build.</h2>
           <p className="lede">I bridge business requirements and technical execution: understanding what a markets team needs, then building and validating the systems that deliver it.</p>
         </div>
-        <div className="tl2 rv" role="tablist" aria-label="Career timeline, 2015 to today" aria-orientation="vertical" onKeyDown={e => {
+        <div className="tl2 rv" role="tablist" aria-label="Career timeline, 2013 to today" aria-orientation="vertical" onKeyDown={e => {
           if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); move(-1); }
           if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); move(1); }
         }}>

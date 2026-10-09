@@ -12,7 +12,7 @@ export const site = {
   roles: ['Capital Markets', 'Data & Analytics', 'AI Innovation'],
   headline: { lead: 'Turning complex data into', em: 'intelligent', tail: 'decisions.' },
   intro:
-    "I'm Ryan Law, Vice President of Client Intelligence at RBC Capital Markets, where I've spent eleven years across tax operations, client onboarding, KYC data and client analytics. I build analytical systems, automate complex workflows, and explore how artificial intelligence can change the way we understand information and make decisions.",
+    "I'm Ryan Law, Vice President of Client Intelligence at RBC Capital Markets, where I've spent eleven years turning markets data into decisions. I build analytical systems, automate complex workflows, and explore how artificial intelligence can change the way we understand information and make decisions.",
   url: 'https://lawryan.github.io/',
 };
 
@@ -149,9 +149,14 @@ export const experience: Role[] = [
     points: ['HTML, CSS, Sass, JavaScript', 'Responsive builds from design files', 'Small JavaScript applications'],
   },
   {
-    id: 'wlu', when: '2015', from: 2015.3, kind: 'education',
-    title: 'Bachelor of Business Administration', org: 'Wilfrid Laurier University',
-    summary: 'BBA, 2015.', points: [],
+    id: 'wlu-dip', when: '2015', from: 2015.3, kind: 'education',
+    title: 'Diploma in Accounting', org: 'Wilfrid Laurier University',
+    summary: 'Went back to Laurier for accounting after the BBA.', points: [],
+  },
+  {
+    id: 'wlu', when: '2013', from: 2013.3, kind: 'education',
+    title: 'Bachelor of Business Administration, Finance', org: 'Wilfrid Laurier University',
+    summary: 'BBA with a focus on finance.', points: [],
   },
 ];
 
