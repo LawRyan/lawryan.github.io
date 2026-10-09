@@ -80,7 +80,7 @@ export function Nav({ items, home }: { items: NavItem[]; home: string }) {
             {items.map(i => (
               <li key={i.href}>
                 <a href={i.href} className={i.lios ? 'is-lios' : undefined} aria-current={i.id && active === i.id ? 'true' : undefined} onClick={() => setOpen(false)}>
-                  {i.label}
+                  <Brand text={i.label} />
                 </a>
               </li>
             ))}
@@ -286,4 +286,10 @@ export function Intro({ word = 'RYAN LAW' }: { word?: string }) {
       <button className="intro-skip" onClick={() => setState('out')}>Skip intro</button>
     </div>
   );
+}
+
+/** Renders text with every "L//IOS" set in the app wordmark style (Geist Mono bold, cyan slashes). */
+export function Brand({ text }: { text: string }) {
+  const parts = text.split('L//IOS');
+  return <>{parts.map((p, n) => <span key={n}>{n > 0 && <span className="lmark">L<span className="sl">//</span>IOS</span>}{p}</span>)}</>;
 }

@@ -977,3 +977,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 .loop-core { font-family: var(--f-brand); font-weight: 700; letter-spacing: 0.01em; font-size: 22px; }
 .loop-sl { fill: var(--signal); }
 .alab-brand b { font-family: var(--f-brand); font-weight: 700; }
+
+/* L//IOS name inside headings, tabs and nav: same treatment as the app wordmark */
+.lmark { font-family: var(--f-brand); font-weight: 700; letter-spacing: 0; font-size: 0.92em; white-space: nowrap; }
+.lmark .sl { color: var(--signal); }

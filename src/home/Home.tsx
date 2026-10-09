@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   REVIEW_MODE, site, contact, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
-import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, type NavItem } from '../components/common';
+import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
 import SignalPanel from '../components/SignalPanel';
 import LoopDiagram from '../components/LoopDiagram';
 import { Shot } from '../components/Shot';
@@ -265,7 +265,7 @@ function Lios() {
         <div className="feature rv">
           <div className="feature-copy">
             <div className="pillar-top"><span className="eyebrow eyebrow-lios"><b aria-hidden="true">//</b>01 · {lios.pillars[0].line}</span><Status s={lios.pillars[0].status} /></div>
-            <h3>{lios.pillars[0].name}</h3>
+            <h3><Brand text={lios.pillars[0].name} /></h3>
             <p>{lios.pillars[0].body}</p>
             <p className="app-flow mono">{lios.pillars[0].flow}</p>
             <ul className="proof-list">{lios.pillars[0].proof.slice(0, 3).map(x => <li key={x}>{x}</li>)}</ul>
@@ -280,7 +280,7 @@ function Lios() {
           {lios.pillars.slice(1).map((p, n) => (
             <a key={p.id} href={`/lios/#${p.id}`} className={`pillar rv pillar-${p.id}`}>
               <div className="pillar-top"><span className="eyebrow">0{n + 2} · {p.short}</span><Status s={p.status} /></div>
-              <h3>{p.name}<small>{p.line}</small></h3>
+              <h3><Brand text={p.name} /><small>{p.line}</small></h3>
               <div className="pillar-prev"><Shot shot={p.shots[0]} sizes="(max-width: 960px) 100vw, 40vw" /></div>
               <p>{p.body}</p>
               <span className="link-arrow">Explore {p.short} <span className="arr" aria-hidden="true">→</span></span>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { lios } from '../content';
-import { Nav, Footer, SignalField, Review, Status, useReveal, Eyebrow, type NavItem } from '../components/common';
+import { Nav, Footer, SignalField, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
 import { Shot, ShotGallery } from '../components/Shot';
 import LoopDiagram from '../components/LoopDiagram';
 
@@ -101,7 +101,7 @@ export default function LiosPage() {
                 <button key={x.id} role="tab" id={`eco-${x.id}`} aria-selected={sel === x.id} aria-controls="eco-panel" tabIndex={sel === x.id ? 0 : -1}
                   onClick={() => pick(x.id)}
                   onKeyDown={e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const m = ids[(n + (e.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length]; pick(m); document.getElementById(`eco-${m}`)?.focus(); } }}>
-                  <span className="mono">0{n + 1}</span> {x.name}
+                  <span className="mono">0{n + 1}</span> <Brand text={x.name} />
                 </button>
               ))}
             </div>
@@ -109,7 +109,7 @@ export default function LiosPage() {
               <div className="app-head" key={`h-${p.id}`}>
                 <div>
                   <div className="eco-top"><span className="line">{p.line}</span><Status s={p.status} /></div>
-                  <h3>{p.name}</h3>
+                  <h3><Brand text={p.name} /></h3>
                   <p className="app-flow mono">{p.flow}</p>
                 </div>
                 <p className="app-body">{p.body}</p>
