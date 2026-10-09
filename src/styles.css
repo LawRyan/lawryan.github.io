@@ -3,6 +3,8 @@
 @font-face { font-family: 'Instrument Sans'; src: url('/fonts/InstrumentSans-var.woff2') format('woff2'); font-weight: 400 700; font-stretch: 75% 100%; font-display: swap; }
 @font-face { font-family: 'Instrument Serif'; src: url('/fonts/InstrumentSerif-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Instrument Serif'; src: url('/fonts/InstrumentSerif-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Geist Mono'; src: url('/fonts/GeistMono-700.woff') format('woff'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Geist Mono'; src: url('/fonts/GeistMono-400.woff') format('woff'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'JetBrains Mono'; src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'JetBrains Mono'; src: url('/fonts/JetBrainsMono-Medium.woff2') format('woff2'); font-weight: 500; font-display: swap; }
 
@@ -27,6 +29,7 @@
 
   --f-display: 'Instrument Sans', 'Helvetica Neue', Arial, system-ui, sans-serif;
   --f-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --f-brand: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
   --f-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   --step--1: 0.8125rem;
@@ -931,3 +934,46 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 @media (max-width: 1000px) { .inv-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .inv-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } .alab-steps { justify-content: flex-start; } .alab-steps button { padding: 8px 9px; } .alab-badge { display: none; } }
 .brand { min-height: 44px; align-items: center; }
+
+/* career timeline: one row per role on a shared axis */
+.tl2 { display: grid; border-top: 1px solid var(--line-2); }
+.tl2-row, .tl2-axis { display: grid; grid-template-columns: minmax(0, 15rem) 9.5rem minmax(0, 1fr); gap: 16px; align-items: center; }
+.tl2-row { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 14px 10px 14px 12px; cursor: pointer; min-height: 60px; transition: background 0.25s; position: relative; }
+.tl2-row::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 2px; border-radius: 2px; background: transparent; transition: background 0.25s; }
+.tl2-row:hover { background: rgba(255,255,255,0.025); }
+.tl2-row[aria-selected='true'] { background: linear-gradient(90deg, var(--signal-dim), transparent 55%); }
+.tl2-row[aria-selected='true']::before { background: var(--signal); }
+.tl2-lbl { display: grid; gap: 2px; min-width: 0; }
+.tl2-lbl b { font-weight: 500; font-size: 1rem; line-height: 1.25; }
+.tl2-lbl span { color: var(--ink-3); font-size: 0.84rem; }
+.tl2-row[aria-selected='true'] .tl2-lbl b { color: var(--signal); }
+.tl2-when { font-size: 0.72rem; color: var(--ink-2); letter-spacing: 0.02em; white-space: nowrap; }
+.tl2-track { position: relative; height: 26px; background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 11.9 - 1px), rgba(186,204,228,0.07) calc(100% / 11.9 - 1px) calc(100% / 11.9)); border-radius: 4px; }
+.tl2-bar { position: absolute; top: 7px; height: 12px; border-radius: 6px; background: linear-gradient(90deg, rgba(111,211,242,0.35), rgba(111,211,242,0.6)); transition: height 0.3s var(--ease), top 0.3s var(--ease), background 0.3s; }
+.tl2-earlier .tl2-bar { background: repeating-linear-gradient(135deg, rgba(186,204,228,0.28) 0 5px, rgba(186,204,228,0.1) 5px 10px); }
+.tl2-row[aria-selected='true'] .tl2-bar { top: 4px; height: 18px; background: linear-gradient(90deg, rgba(111,211,242,0.55), var(--signal)); box-shadow: 0 0 18px rgba(111,211,242,0.35); }
+.tl2-row.tl2-earlier[aria-selected='true'] .tl2-bar { background: repeating-linear-gradient(135deg, rgba(111,211,242,0.6) 0 5px, rgba(111,211,242,0.25) 5px 10px); }
+.tl2-dot { position: absolute; top: 7px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; border: 1px solid var(--silver); background: var(--bg); }
+.tl2-row[aria-selected='true'] .tl2-dot { background: var(--signal); border-color: var(--signal); box-shadow: 0 0 0 5px var(--signal-dim); }
+.tl2-axis { padding: 8px 10px 0 12px; }
+.tl2-years { position: relative; height: 16px; }
+.tl2-years i { position: absolute; transform: translateX(-50%); font-style: normal; font-family: var(--f-mono); font-size: 0.68rem; color: var(--ink-3); }
+.tl2-years i:first-child { transform: none; }
+.tl-panel { margin-top: 28px; }
+@media (max-width: 900px) { .tl2-row, .tl2-axis { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); } .tl2-when { grid-column: 1; grid-row: 2; margin-top: -6px; } .tl2-track { grid-column: 2; grid-row: 1 / span 2; } .tl2-axis > span:nth-child(2) { display: none; } }
+@media (max-width: 560px) {
+  .tl2-row { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 14px 8px 14px 14px; }
+  .tl2-when { grid-row: auto; margin-top: 0; }
+  .tl2-track { grid-column: 1; grid-row: auto; height: 18px; }
+  .tl2-bar, .tl2-dot { top: 4px; height: 10px; } .tl2-dot { width: 10px; margin-left: -5px; }
+  .tl2-row[aria-selected='true'] .tl2-bar { top: 2px; height: 14px; }
+  .tl2-axis { grid-template-columns: minmax(0, 1fr); } .tl2-axis > span:not(.tl2-years) { display: none; }
+}
+
+/* L//IOS wordmark — matches the apps: Geist Mono bold, white letters, cyan slashes */
+.wordmark { font-family: var(--f-brand); font-weight: 700; font-stretch: 100%; letter-spacing: 0.01em; line-height: 0.9; background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--ink); font-size: clamp(4rem, 13vw, 10rem); animation: none; }
+.wordmark .sl { color: var(--signal); letter-spacing: 0; margin: 0; font-weight: 700; font-stretch: 100%; }
+.lp-word .wordmark { font-size: clamp(4.4rem, 17vw, 13.5rem); animation: wordIn 1s var(--ease) both; }
+.loop-core { font-family: var(--f-brand); font-weight: 700; letter-spacing: 0.01em; font-size: 22px; }
+.loop-sl { fill: var(--signal); }
+.alab-brand b { font-family: var(--f-brand); font-weight: 700; }

@@ -143,26 +143,30 @@ function Experience() {
           <h2 id="xp-h" className="h-section">Where the business meets the build.</h2>
           <p className="lede">I bridge business requirements and technical execution: understanding what a markets team needs, then building and validating the systems that deliver it.</p>
         </div>
-        <div className="tl rv" role="tablist" aria-label="Career timeline, 2015 to today" onKeyDown={e => {
-          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); move(1); }
-          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+        <div className="tl2 rv" role="tablist" aria-label="Career timeline, 2015 to today" aria-orientation="vertical" onKeyDown={e => {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); move(-1); }
+          if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); move(1); }
         }}>
-          <div className="tl-axis" aria-hidden="true">
-            {years.map(yv => <span key={yv} style={{ left: `${pos(yv)}%` }}>{yv}</span>)}
-          </div>
-          {order.map(x => {
+          {[...order].reverse().map(x => {
             const to = x.to === null ? T1 : x.to;
-            const isBand = to !== undefined;
+            const band = to !== undefined;
             return (
               <button key={x.id} id={`tl-${x.id}`} role="tab" aria-selected={sel === x.id} aria-controls="tl-panel" tabIndex={sel === x.id ? 0 : -1}
-                className={`tl-item tl-${x.kind}${isBand ? ' band' : ' point'}`}
-                style={{ left: `${pos(x.from)}%`, ...(isBand ? { width: `${pos(to!) - pos(x.from)}%` } : {}) }}
-                onClick={() => setSel(x.id)}>
-                <span className="tl-mark" aria-hidden="true" />
-                <span className="tl-label"><b>{x.title}</b><span>{x.org} · {x.when}</span></span>
+                className={`tl2-row tl2-${x.kind}`} onClick={() => setSel(x.id)}>
+                <span className="tl2-lbl"><b>{x.title}</b><span>{x.org}</span></span>
+                <span className="tl2-when mono">{x.when}</span>
+                <span className="tl2-track" aria-hidden="true">
+                  {band
+                    ? <span className="tl2-bar" style={{ left: `${pos(x.from)}%`, width: `${pos(to!) - pos(x.from)}%` }} />
+                    : <span className="tl2-dot" style={{ left: `${pos(x.from)}%` }} />}
+                </span>
               </button>
             );
           })}
+          <div className="tl2-axis" aria-hidden="true">
+            <span /><span />
+            <span className="tl2-years">{years.filter(y => y % 2 === 1 || y === T0).map(yv => <i key={yv} style={{ left: `${pos(yv)}%` }}>{yv}</i>)}</span>
+          </div>
         </div>
         <div className="tl-panel" id="tl-panel" role="tabpanel" aria-labelledby={`tl-${r.id}`}>
           <div key={r.id} className="xp-anim tl-panel-in">

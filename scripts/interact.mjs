@@ -29,7 +29,7 @@ ok(await p.evaluate(() => Math.abs(document.getElementById('lab').getBoundingCli
 await p.keyboard.press('/'); ok(await p.locator('.pal').isVisible(), 'palette opens with /');
 await p.keyboard.press('Escape'); ok(!(await p.locator('.pal').count()), 'palette closes with Escape');
 await p.locator('#tl-assoc').click(); ok((await p.locator('#tl-panel h3').innerText()) === 'Associate', 'timeline selects Associate');
-await p.locator('#tl-assoc').press('ArrowRight'); ok((await p.locator('#tl-panel h3').innerText()) === 'Vice President', 'timeline arrow keys');
+await p.locator('#tl-assoc').press('ArrowUp'); ok((await p.locator('#tl-panel h3').innerText()) === 'Vice President', 'timeline arrow keys');
 await p.locator('#cs-modernization').click(); ok((await p.locator('#cs-panel h3').innerText()).includes('Reporting rebuilt'), 'case study tabs');
 await p.getByRole('button', { name: 'Earlier' }).click(); ok(await p.locator('.proj').count() === 3, 'project filter');
 

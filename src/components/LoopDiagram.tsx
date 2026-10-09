@@ -26,7 +26,7 @@ export default function LoopDiagram({ large = false }: { large?: boolean }) {
           </defs>
           <circle cx={C} cy={C} r={R} fill="none" stroke="rgba(186,204,228,0.12)" strokeWidth="1" />
           <circle className="loop-run" cx={C} cy={C} r={R} fill="none" stroke="url(#loopG)" strokeWidth="1.6" strokeDasharray="60 644" strokeLinecap="round" />
-          <text x={C} y={C - 4} textAnchor="middle" className="loop-core">L//IOS</text>
+          <text x={C} y={C - 4} textAnchor="middle" className="loop-core">L<tspan className="loop-sl">//</tspan>IOS</text>
           <text x={C} y={C + 16} textAnchor="middle" className="loop-sub">{names[domain]}</text>
           {L.map((s, i) => {
             const [x, y] = pt(i);

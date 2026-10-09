@@ -8,6 +8,7 @@ const s = await serve(4177); const b = await pw.chromium.launch();
 const css = `@font-face{font-family:IS;src:url(/fonts/InstrumentSans-var.woff2);font-weight:400 700;font-stretch:75% 100%}
 @font-face{font-family:ISe;src:url(/fonts/InstrumentSerif-Italic.woff2);font-style:italic}
 @font-face{font-family:JB;src:url(/fonts/JetBrainsMono-Regular.woff2)}
+@font-face{font-family:GM;src:url(/fonts/GeistMono-700.woff);font-weight:700}
 body{margin:0;width:1200px;height:630px;background:#090c11;color:#e9eef5;font-family:IS;overflow:hidden;position:relative}
 .p{position:absolute;inset:72px 80px;display:flex;flex-direction:column;justify-content:space-between}
 .m{font-family:JB;font-size:20px;letter-spacing:.2em;color:#a4afbf}
@@ -18,7 +19,7 @@ svg{position:absolute;inset:0}`;
 const lines = Array.from({ length: 22 }, (_, i) => { const y0 = 200 + i * 20, a = 6 + i * 1.6; let d = ''; for (let k = 0; k <= 60; k++) { const x = k * 20; const y = y0 - Math.sin(k / 6 + i * 0.7) * a * 0.6 - Math.exp(-((((k / 60) - 0.7) * 5) ** 2)) * a; d += (k ? 'L' : 'M') + x + ',' + y.toFixed(1); } return `<path d="${d}" fill="none" stroke="rgba(200,212,228,${0.04 + i * 0.012})"/>`; }).join('');
 const pages = {
   home: `<svg width="1200" height="630">${lines}</svg><div class="p"><div class="m">RYAN LAW</div><h1>Turning complex data<br>into <i>intelligent</i> decisions.</h1><div class="f"><span>Capital Markets · Data &amp; Analytics · AI Innovation</span><span>lawryan.github.io</span></div></div>`,
-  lios: `<svg width="1200" height="630">${lines}</svg><div class="p"><div class="m">ANALYST · MARKETS · HEALTH — AN INDEPENDENT PROJECT BY RYAN LAW</div><h1 style="font-size:190px;font-stretch:78%;letter-spacing:-.06em;background:linear-gradient(100deg,#e9eef5 20%,#b7a8ff 55%,#6fd3f2 90%);-webkit-background-clip:text;color:transparent">L//IOS</h1><div class="f"><span style="color:#e9eef5;font-family:IS;font-size:34px">An Operating System for Insight.</span><span>lawryan.github.io/lios</span></div></div>`,
+  lios: `<svg width="1200" height="630">${lines}</svg><div class="p"><div class="m">ANALYST · MARKETS · HEALTH — AN INDEPENDENT PROJECT BY RYAN LAW</div><h1 style="font-family:GM;font-weight:700;font-size:170px;letter-spacing:.01em;color:#e9eef5">L<span style="color:#6fd3f2">//</span>IOS</h1><div class="f"><span style="color:#e9eef5;font-family:IS;font-size:34px">An Operating System for Insight.</span><span>lawryan.github.io/lios</span></div></div>`,
 };
 for (const [k, html] of Object.entries(pages)) {
   const p = await b.newPage({ viewport: { width: 1200, height: 630 } });
