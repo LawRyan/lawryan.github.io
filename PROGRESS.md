@@ -1,0 +1,47 @@
+# Enhancement sprint — progress log
+
+Branch: `sprint-oct-2026` (from `master` @ 8609648). Nothing deploys until merged to `master` with Ryan's approval.
+Started: 2026-10-09 00:10 ET.
+
+## How to resume
+1. `git checkout sprint-oct-2026`
+2. `npm install` (or link node_modules), `npm run build`, `npm test`
+3. `node scripts/matrix.mjs <tag>` → screenshots at 1920/1440/768/390/360 in `shots/<tag>/`
+4. `node scripts/interact.mjs` → browser interaction checks
+5. Continue from "Next steps" below.
+
+## Baseline audit (shots/before)
+
+Build, unit tests (474 checks) and interaction tests all passed. No console errors or horizontal overflow at any of the five widths.
+Touch targets under 32px on mobile: 12 on the homepage, 1 on /lios/.
+
+### Ten most important weaknesses, in priority order
+1. **Hero composition.** On desktop the right half is empty; the background lines are too faint to read as intentional. Nothing in the first screen shows the work itself.
+2. **L//IOS lacks product weight.** There's no architecture diagram, no philosophy and no shared brand system across the pillars. The previews look generic. The pillar name ("Intelligence") also doesn't match the brief ("Markets").
+3. **Intelligence Lab has no guided path.** Visitors must work out what to click. There are no suggested questions, no variance/driver analysis and only one chart type.
+4. **Impact reads like a résumé.** The case studies are identical cards with no problem → contribution → approach → impact structure.
+5. **Narrative is disconnected.** Nothing explains *why* L//IOS exists, and the evolution list doesn't match the brief's arc (Technology → Capital Markets → Data & Analytics → Automation → AI).
+6. **Monotonous section rhythm.** Every section uses the same header (eyebrow + h2 left, lede right), followed by a card grid.
+7. **Mobile.** There are 12 small touch targets, the hero is long before the first proof point, and chips wrap awkwardly at 360px.
+8. **Experience** is a tablist of bullet points rather than an executive summary of scope.
+9. **SEO/a11y gaps.** There's no sitemap.xml or robots.txt, the L//IOS wordmark serves as the h2, and the charts have no text alternative beyond a label.
+10. **No fast navigation** for a long single page (command palette / quick jump).
+
+## Plan (priority order)
+- [ ] P1 Hero: add a live "signal panel" visualization (synthetic, labelled) on the right; restate the role line per brief; tighten the mobile hero.
+- [ ] P2 L//IOS: rename the pillar to Markets; build an interactive architecture diagram, a philosophy section, a stronger brand motif and per-pillar product cards; previews stay labelled as conceptual until real screenshots exist.
+- [ ] P3 Lab: add guided questions (What changed most? Which segment is outperforming? Unusual movements? What should I investigate? Which factors explain the variance?), a variance driver breakdown (waterfall), and tests.
+- [ ] P4 Impact: four case studies in Problem / Contribution / Approach / Impact format, with metrics flagged for approval.
+- [ ] P5 Narrative: a "Why L//IOS" bridge section; evolution arc per brief.
+- [ ] P6 Section rhythm: vary the layouts (full-bleed band, split editorial, asymmetric).
+- [ ] P7 Mobile: 44px touch targets, 360px pass.
+- [ ] P8 SEO/a11y: sitemap.xml, robots.txt, heading audit, chart summaries.
+- [ ] P9 Command palette (⌘K / "/" and a nav button).
+- [ ] P10 Final matrix, before/after, CONTENT_REVIEW update, PR.
+
+## Decisions
+- Real L//IOS screenshots: the apps live on Ryan's Windows machine and can't be reached from this cloud session. Asked Ryan to open the chat in the desktop app to unlock it. Until then, previews stay as clearly labelled concept illustrations.
+- No new runtime dependencies. Charts and diagrams are hand-built SVG.
+
+## Log
+- 00:10 Audit + baseline screenshots done.
