@@ -4,7 +4,7 @@
  * REVIEW_MODE shows small "Needs approval" markers on anything listed in
  * CONTENT_REVIEW.md. Set it to false before publishing.
  */
-export const REVIEW_MODE = true;
+export const REVIEW_MODE = false;
 
 export const site = {
   name: 'Ryan Law',
