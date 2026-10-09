@@ -37,7 +37,7 @@ site. To change any of it, edit `src/content.ts`, or ask Claude to.
 | 2.2 | Metrics: 300+ rules · 100–150K trade records · ~40 reports · ~30 hrs/month | You approved at go-live. They now also appear in the hero "proof" strip. |
 | 2.3 | Public email | Still empty: add to `contact.email` if wanted |
 | 2.4 | Résumé PDF | Optional |
-| 2.5 | Full RBC history | Done: all seven RBC roles from your LinkedIn (Tax Operations Analyst, Nov 2015 → VP, Client Intelligence, Dec 2025). Title is now "Vice President, Client Intelligence" and the VP start date is Dec 2025. Metrics in earlier roles (20,000+ clients, 4,000 PDFs, ~300 hrs, 100+ hrs) are from your public LinkedIn. There's also a new KYC data-quality case study and an "LEI validator" project. |
+| 2.5 | Full RBC history | Done: all seven RBC roles from your LinkedIn (Tax Operations Analyst, Nov 2015 → VP, Client Intelligence, Dec 2025). Title is now "Vice President, Client Intelligence" and the VP start date is Dec 2025. Metrics in earlier roles (20,000+ clients, 4,000 PDFs, ~300 hrs, 100+ hrs) are from your public LinkedIn. Role details were filled in from your résumé (kept short; LinkedIn dates used where they differ; dollar figures left out). There's also a new KYC data-quality case study and an "LEI validator" project. |
 
 ## 3. Synthetic and demo data on the site
 - **Hero signal panel**: a 64-point synthetic series. The trend and outlier figures are computed live from it.
