@@ -19,7 +19,7 @@ export const site = {
 export const contact = {
   linkedin: 'https://www.linkedin.com/in/ryan-law-92a629104/', // from existing site
   github: 'https://github.com/lawryan', // owner of this repository
-  email: '', // not in the existing repo — add the address you want public
+  email: 'ryanlaw@live.com',
   resume: '', // optional — add a PDF to /public and put its path here, e.g. '/ryan-law-resume.pdf'
 };
 
@@ -92,7 +92,7 @@ export const experience: Role[] = [
     summary: 'Built the Tableau reporting for Global Markets business heads and Global Business Management across all regions.',
     points: [
       'Cut manual reporting effort by 95% by automating and moving Excel reports into Tableau',
-      'Designed a client value methodology for the Energy sector',
+      'Designed a revenue methodology for the Energy sector',
       'Added new performance metrics, including hit rates and capital analysis',
     ],
   },
@@ -171,10 +171,10 @@ export interface Metric {
 }
 /** Every metric below is employer-specific and needs approval before publishing. */
 export const metrics: Metric[] = [
+  { value: '95%', label: 'less manual reporting', note: 'by automating and moving Excel reports into Tableau' },
+  { value: '97%', label: 'fewer KYC errors', note: 'with bots for client outreach and document uploads' },
+  { value: '20,000+', label: 'clients', note: 'kept accurate through a global KYC refresh' },
   { value: '300+', label: 'validation rules', note: 'in a data quality framework supporting control processes' },
-  { value: '100–150K', label: 'trade records', note: 'covered by validation processes' },
-  { value: '~40', label: 'BI reports', note: 'migrated and modernized' },
-  { value: '~30 hrs', label: 'saved each month', note: 'through reporting modernization' },
 ];
 
 /**
@@ -329,10 +329,9 @@ export const lios = {
         'Raw data never leaves the computer; AI is off by default',
       ],
       shots: [
-        { src: '/lios-shots/analyst-dashboard', alt: 'L//IOS Analyst dashboard showing KPIs, CV by month, and a ranked list of findings', caption: ANALYST_NOTE, device: 'desktop' },
+        { src: '/lios-shots/analyst-dashboard', alt: 'L//IOS Analyst dashboard showing KPIs, revenue by month, and a ranked list of findings', caption: ANALYST_NOTE, device: 'desktop' },
         { src: '/lios-shots/analyst-init', alt: 'L//IOS Analyst initialization: seven engines online, files, data regions, relationships and quality issues found', caption: ANALYST_NOTE, device: 'desktop' },
         { src: '/lios-shots/analyst-investigation', alt: 'An investigation into a finding, with data checks, a weekly chart and a driver tree', caption: ANALYST_NOTE, device: 'desktop' },
-        { src: '/lios-shots/analyst-model', alt: 'The discovered data model with relationships, match rates and cardinality', caption: ANALYST_NOTE, device: 'desktop' },
         { src: '/lios-shots/analyst-quality', alt: 'Data quality page with five scores and seven checks, each with its method', caption: ANALYST_NOTE, device: 'desktop' },
         { src: '/lios-shots/analyst-ask', alt: 'Ask L//IOS answering with FACT and INTERPRETATION labels and a driver tree', caption: ANALYST_NOTE, device: 'desktop' },
       ],

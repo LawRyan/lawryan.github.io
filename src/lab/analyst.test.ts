@@ -26,8 +26,8 @@ const sum = (xs: Trade[], k: 'cv' | 'notional') => xs.reduce((a, t) => a + t[k],
 const prof = profile(f);
 const role = (file: string, name: string) => prof.find(p => p.file === file && p.name === name)!;
 ok(role('Trades.csv', 'Trade Date').role === 'date', 'date detected');
-ok(role('Trades.csv', 'Notional (USD mm)').role === 'measure' && role('Trades.csv', 'CV (USD k)').role === 'measure', 'measures detected');
-ok(role('Targets.csv', 'CV Target (USD k)').role === 'measure', 'target is a measure');
+ok(role('Trades.csv', 'Notional (USD mm)').role === 'measure' && role('Trades.csv', 'Revenue (USD k)').role === 'measure', 'measures detected');
+ok(role('Targets.csv', 'Revenue Target (USD k)').role === 'measure', 'target is a measure');
 ok(role('Trades.csv', 'Region').meaning === 'geography' && role('Trades.csv', 'Desk').meaning === 'organisation', 'meanings detected');
 ok(role('Clients.csv', 'Client ID').meaning === 'record key' && role('Trades.csv', 'Client ID').meaning === 'foreign key', 'keys detected');
 
@@ -56,8 +56,8 @@ near(q.overall, (1 + (1 - PLANTED.duplicates / N) + (1 - conflicts.length / N) +
 
 // ── KPIs
 const k = kpis(f);
-near(k.cv.cur, sum(live.filter(t => t.week >= 52), 'cv'), 1e-6, 'CV this year');
-near(k.cv.pri, sum(live.filter(t => t.week < 52), 'cv'), 1e-6, 'CV last year');
+near(k.cv.cur, sum(live.filter(t => t.week >= 52), 'cv'), 1e-6, 'Revenue this year');
+near(k.cv.pri, sum(live.filter(t => t.week < 52), 'cv'), 1e-6, 'Revenue last year');
 ok(k.trades.cur === live.filter(t => t.week >= 52).length, 'trade count');
 
 // ── driver trees are additive at every level

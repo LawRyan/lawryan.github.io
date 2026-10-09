@@ -62,7 +62,7 @@ function FilesStep({ files, onRun }: { files: Files; onRun: () => void }) {
   const cards = [
     { name: 'Trades.csv', rows: files.trades.length, cols: 9, kb: Math.round(files.trades.length * 0.092), note: 'one row per trade, two years' },
     { name: 'Clients.csv', rows: files.clients.length, cols: 4, kb: 3, note: 'client master' },
-    { name: 'Targets.csv', rows: files.targets.length, cols: 3, kb: 1, note: 'CV target by quarter and desk' },
+    { name: 'Targets.csv', rows: files.targets.length, cols: 3, kb: 1, note: 'Revenue target by quarter and desk' },
   ];
   return (
     <div className="st st-files">
@@ -153,7 +153,7 @@ function DashboardStep({ files, a, onInvestigate, onAsk }: { files: Files; a: A;
   const wk = useMemo(() => weekly(L, 'cv'), [L]);
   const k = a.k;
   const tiles = [
-    { l: 'CV', v: money(k.cv.cur), d: pctChg(k.cv.pri, k.cv.cur), sub: `${money(k.cv.cur - k.cv.pri)} vs last year` },
+    { l: 'Revenue', v: money(k.cv.cur), d: pctChg(k.cv.pri, k.cv.cur), sub: `${money(k.cv.cur - k.cv.pri)} vs last year` },
     { l: 'Notional', v: moneyMM(k.notional.cur), d: pctChg(k.notional.pri, k.notional.cur), sub: 'USD' },
     { l: 'Active clients', v: String(k.clients.cur), d: pctChg(k.clients.pri, k.clients.cur), sub: `${k.clients.cur - k.clients.pri} vs last year` },
     { l: 'Trades', v: k.trades.cur.toLocaleString('en-US'), d: pctChg(k.trades.pri, k.trades.cur), sub: 'excl. cancelled' },
@@ -174,11 +174,11 @@ function DashboardStep({ files, a, onInvestigate, onAsk }: { files: Files; a: A;
           ))}
         </div>
         <div className="chart-card">
-          <div className="chart-head"><span className="eyebrow">Weekly CV · this year vs last</span><span className="mono muted small">Is it growing, and is this year different?</span></div>
+          <div className="chart-head"><span className="eyebrow">Weekly revenue · this year vs last</span><span className="mono muted small">Is it growing, and is this year different?</span></div>
           <YoY cur={wk.slice(52)} prev={wk.slice(0, 52)} />
         </div>
         <div className="chart-card">
-          <div className="chart-head"><span className="eyebrow">CV by desk · last 52 weeks</span></div>
+          <div className="chart-head"><span className="eyebrow">Revenue by desk · last 52 weeks</span></div>
           <div className="dbars">
             {desk.map(x => (
               <div key={x.d} className="dbar">
@@ -237,7 +237,7 @@ function YoY({ cur, prev, startWeek = 52, highlight, labels = ['This year', 'Las
   return (
     <div ref={ref}>
       <div className="legend static"><span><i style={{ background: 'var(--signal)' }} />{labels[0]}</span><span><i style={{ background: 'var(--ink-3)' }} />{labels[1]}</span></div>
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label={`${labels[0]} vs ${labels[1]}, weekly CV. ${labels[0]} total ${money(cur.reduce((a, b) => a + b, 0))}, ${labels[1]} ${money(prev.reduce((a, b) => a + b, 0))}.`} onMouseLeave={() => setHover(null)}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label={`${labels[0]} vs ${labels[1]}, weekly revenue. ${labels[0]} total ${money(cur.reduce((a, b) => a + b, 0))}, ${labels[1]} ${money(prev.reduce((a, b) => a + b, 0))}.`} onMouseLeave={() => setHover(null)}>
         {highlight && <rect x={x(highlight[0])} y={T} width={x(highlight[1]) - x(highlight[0])} height={H - T - B} fill="rgba(183,168,255,0.08)" />}
         {[0, 0.5, 1].map(t => <g key={t}><line x1={Lp} x2={W - R} y1={y(t * mx)} y2={y(t * mx)} stroke="rgba(186,204,228,0.08)" /><text x={Lp - 6} y={y(t * mx) + 3} textAnchor="end">{money(t * mx)}</text></g>)}
         {Array.from({ length: n }, (_, i) => i).filter(i => i % every === 0 && n - 1 - i >= every / 2).map(i => <text key={i} x={x(i)} y={H - 6} textAnchor={i === 0 ? 'start' : 'middle'}>{weekLabel(startWeek + i)}</text>)}
@@ -344,7 +344,7 @@ function InvestigateStep({ files, finding, records, findings: F, onPick }: { fil
             <div className="inv-main">
               {series && f.window && (
                 <div className="chart-card">
-                  <div className="chart-head"><span className="eyebrow">{segName(f.seg)} · weekly {f.measure === 'cv' ? 'CV' : 'notional'}</span><span className="mono muted small">When did it start?</span></div>
+                  <div className="chart-head"><span className="eyebrow">{segName(f.seg)} · weekly {f.measure === 'cv' ? 'revenue' : 'notional'}</span><span className="mono muted small">When did it start?</span></div>
                   <YoY cur={series.cur} prev={series.prev} startWeek={series.from} highlight={[f.window.b[0] - series.from, f.window.b[1] - series.from]} labels={['Recent', 'Year earlier']} />
                 </div>
               )}
@@ -377,11 +377,11 @@ function Records({ files, label, filter }: { files: Files; label: string; filter
     <div className="records">
       <div className="records-head">
         <div className="crumbs"><span className="eyebrow">Underlying records</span><span className="crumb">{label}</span></div>
-        <span className="mono muted">{rows.length.toLocaleString('en-US')} rows · {money(total)} CV</span>
+        <span className="mono muted">{rows.length.toLocaleString('en-US')} rows · {money(total)} revenue</span>
       </div>
       <div className="tbl-wrap">
         <table className="tbl">
-          <thead><tr><th className="n">Row</th><th>Trade</th><th>Date</th><th>Client</th><th>Class</th><th>Desk</th><th>Region</th><th className="n">Notional $mm</th><th className="n"><button onClick={() => setDesc(d => !d)} aria-label="Sort by CV">CV $k {desc ? '↓' : '↑'}</button></th><th>Status</th></tr></thead>
+          <thead><tr><th className="n">Row</th><th>Trade</th><th>Date</th><th>Client</th><th>Class</th><th>Desk</th><th>Region</th><th className="n">Notional $mm</th><th className="n"><button onClick={() => setDesc(d => !d)} aria-label="Sort by revenue">Revenue $k {desc ? '↓' : '↑'}</button></th><th>Status</th></tr></thead>
           <tbody>
             {rows.slice(page * PAGE, page * PAGE + PAGE).map(t => (
               <tr key={t.rid} className={t.status === 'Cancelled' ? 'muted' : undefined}>

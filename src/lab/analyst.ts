@@ -26,7 +26,7 @@ export interface Trade {
   desk: Desk;
   region: Region;
   notional: number;     // USD mm
-  cv: number;           // client value, USD k
+  cv: number;           // revenue, USD k
   status: 'Done' | 'Cancelled';
   notionalAsText: boolean;
 }
@@ -180,7 +180,7 @@ export function profile(f: Files): ColumnProfile[] {
     profileColumn('Trades.csv', 'Desk', T.map(t => t.desk)),
     profileColumn('Trades.csv', 'Region', T.map(t => t.region)),
     profileColumn('Trades.csv', 'Notional (USD mm)', T.map(t => t.notional)),
-    profileColumn('Trades.csv', 'CV (USD k)', T.map(t => t.cv)),
+    profileColumn('Trades.csv', 'Revenue (USD k)', T.map(t => t.cv)),
     profileColumn('Trades.csv', 'Status', T.map(t => t.status)),
     profileColumn('Clients.csv', 'Client ID', C.map(c => c.clientId)),
     profileColumn('Clients.csv', 'Client Name', C.map(c => c.name)),
@@ -188,7 +188,7 @@ export function profile(f: Files): ColumnProfile[] {
     profileColumn('Clients.csv', 'Region', C.map(c => c.region)),
     profileColumn('Targets.csv', 'Quarter', G.map(g => g.quarter)),
     profileColumn('Targets.csv', 'Desk', G.map(g => g.desk)),
-    profileColumn('Targets.csv', 'CV Target (USD k)', G.map(g => g.cvTarget)),
+    profileColumn('Targets.csv', 'Revenue Target (USD k)', G.map(g => g.cvTarget)),
   ];
 }
 
@@ -272,7 +272,7 @@ export function quality(f: Files) {
   }
   checks.push({ id: 'orphans', severity: 'MEDIUM', dimension: 'Integrity', title: `${orphan.length} trades have no match in Clients`, detail: `${orphanIds.size} Client ID values (${[...orphanIds].sort().join(', ')}) are missing from the client master, so their client attributes are blank.`, affected: orphan.length, method: 'Trades.Client ID NOT IN Clients.Client ID', rows: t => orphanIds.has(t.clientId) });
   if (topPair) checks.push({ id: 'mapping', severity: 'MEDIUM', dimension: 'Consistency', title: `${conflict.length} Client Class values disagree with Clients`, detail: `${topPair[0].split(' → ')[0]} in Trades but ${topPair[0].split(' → ')[1]} in the client master (${topPair[1]} rows). One-click mapping available.`, affected: conflict.length, method: 'join on Client ID; compare Trades.Client Class with Clients.Client Class', rows: t => ids.has(t.clientId) && masterClass.get(t.clientId) !== t.clientClass });
-  checks.push({ id: 'dups', severity: 'MEDIUM', dimension: 'Uniqueness', title: `${dup.extra} duplicate Trades rows`, detail: `${dup.extra} records appear twice with identical values in every column, adding ${money(dupCv)} of CV twice. Likely a double-loaded extract.`, affected: dup.extra, method: 'GROUP BY every column HAVING COUNT(*) > 1', rows: t => dup.rids.has(t.rid) });
+  checks.push({ id: 'dups', severity: 'MEDIUM', dimension: 'Uniqueness', title: `${dup.extra} duplicate Trades rows`, detail: `${dup.extra} records appear twice with identical values in every column, adding ${money(dupCv)} of revenue twice. Likely a double-loaded extract.`, affected: dup.extra, method: 'GROUP BY every column HAVING COUNT(*) > 1', rows: t => dup.rids.has(t.rid) });
   checks.push({ id: 'text', severity: 'LOW', dimension: 'Validity', title: `${asText} Notional values stored as text`, detail: 'Converted to numbers on import. Nothing was lost, but the source should store numbers as numbers.', affected: asText, method: 'parsed text → number during import', rows: t => t.notionalAsText });
   checks.push({ id: 'cancelled', severity: 'OK', dimension: 'Assumption', title: `Excluding ${cancelled} Cancelled trades`, detail: 'Status = Cancelled rows are kept in the file but left out of every total.', affected: cancelled, method: 'Status ≠ Cancelled', rows: t => t.status === 'Cancelled' });
 
@@ -412,8 +412,8 @@ export function trendFindings(f: Files): Finding[] {
     const name = segName(s), up = now.s >= 0;
     out.push({
       id: `trend-${name}-${m}`, kind: 'TREND',
-      title: `${name} ${m === 'cv' ? 'CV' : 'activity'} ${up ? 'accelerating' : 'declining'}`,
-      text: `${m === 'cv' ? 'CV' : 'Notional'} ${signed(now.s)} over six weeks (rest of business ${signed(now.rest)}).`,
+      title: `${name} ${m === 'cv' ? 'revenue' : 'activity'} ${up ? 'accelerating' : 'declining'}`,
+      text: `${m === 'cv' ? 'Revenue' : 'Notional'} ${signed(now.s)} over six weeks (rest of business ${signed(now.rest)}).`,
       score: Math.min(1, Math.abs(z) / 8) * 0.55 + (ok ? 0.3 : 0.1) + 0.15,
       seg: s, measure: m, window: { a, b }, checks, verdict: ok ? 'BUSINESS CHANGE · DATA CHECKS PASS' : 'POSSIBLE DATA ISSUE',
       numbers: [
@@ -452,7 +452,7 @@ export function findings(f: Files): Finding[] {
     const verb = deep.delta >= 0 ? 'rose' : 'fell';
     out.push({
       id: 'driver', kind: 'DRIVER', title: `${deep.label} ${lead.label} ${verb} ${money(Math.abs(deep.delta))}${bigger ? ', more than the whole change' : ''}`,
-      text: `CV ${signed(total.pct)} overall (${money(total.delta)}); ${deep.label} ${lead.label} ${signed(deep.pct)}${bigger ? ', partly offset elsewhere' : ''}.`,
+      text: `Revenue ${signed(total.pct)} overall (${money(total.delta)}); ${deep.label} ${lead.label} ${signed(deep.pct)}${bigger ? ', partly offset elsewhere' : ''}.`,
       score: 0.62, seg: { ...lead.seg, ...deep.seg }, measure: 'cv',
       numbers: [{ label: 'This year', value: money(total.b) }, { label: 'Last year', value: money(total.a) }, { label: 'Change', value: money(total.delta) }, { label: `${deep.label} ${lead.label}`, value: money(deep.delta) }],
       rows: t => t.status !== 'Cancelled' && t.week >= 52 && inSeg(t, deep.seg, cls),
@@ -466,7 +466,7 @@ export function findings(f: Files): Finding[] {
   }).sort((a, b) => a.pct - b.pct);
   const tgtAll = att.reduce((s, x) => s + x.tgt, 0), actAll = att.reduce((s, x) => s + x.act, 0);
   out.push({
-    id: 'target', kind: 'TARGET', title: `CV at ${((actAll / tgtAll) * 100).toFixed(1)}% of target, ${att[0].d} furthest behind (${att[0].pct.toFixed(1)}%)`,
+    id: 'target', kind: 'TARGET', title: `Revenue at ${((actAll / tgtAll) * 100).toFixed(1)}% of target, ${att[0].d} furthest behind (${att[0].pct.toFixed(1)}%)`,
     text: `${money(actAll)} vs ${money(tgtAll)} across four quarters.`, score: 0.5, seg: { desk: att[0].d }, measure: 'cv',
     numbers: att.map(x => ({ label: x.d, value: `${x.pct.toFixed(1)}%` })),
     rows: t => t.status !== 'Cancelled' && t.week >= 52 && t.desk === att[0].d,
@@ -481,8 +481,8 @@ export function findings(f: Files): Finding[] {
     const lostCv = sumOf(L.filter(t => goneSet.has(t.clientId) && t.week < 52), 'cv');
     out.push({
       id: 'churn', kind: 'CHURN', title: `${gone.length} clients stopped trading, mostly ${topSeg[0]}`,
-      text: `Active last year, none this year; worth ${money(lostCv)} of CV last year.`, score: 0.48, seg: {}, measure: 'cv',
-      numbers: [{ label: 'Clients', value: String(gone.length) }, { label: 'CV last year', value: money(lostCv) }, { label: 'Largest group', value: `${topSeg[0]} (${topSeg[1]})` }],
+      text: `Active last year, none this year; worth ${money(lostCv)} of revenue last year.`, score: 0.48, seg: {}, measure: 'cv',
+      numbers: [{ label: 'Clients', value: String(gone.length) }, { label: 'Revenue last year', value: money(lostCv) }, { label: 'Largest group', value: `${topSeg[0]} (${topSeg[1]})` }],
       rows: t => goneSet.has(t.clientId),
     });
   }
@@ -518,8 +518,8 @@ export function ask(f: Files, q: (typeof QUESTIONS)[number]): Answer {
     const bySize = [...rows].sort((a, b) => (b.b - b.a) - (a.b - a.a))[0];
     return { q, rows: t => t.status !== 'Cancelled' && t.week >= 52 && inSeg(t, t1.s, cls), rowsLabel: segName(t1.s), tools: ['group_by(desk, client class)', 'compare_periods(last 52w, prior 52w)'], lines: [
       { tag: 'FACT', text: `${segName(t1.s)} grew ${signed(t1.p)} year on year (${money(t1.a)} → ${money(t1.b)}), outperforming ${segName(t2.s)} by ${(t1.p - t2.p).toFixed(1)} percentage points.` },
-      { tag: 'FACT', text: `The business overall ${pctChg(all.a, all.b) >= 0 ? 'grew' : 'changed'} ${signed(pctChg(all.a, all.b))}. Segments under $2.0M of CV last year are left out.` },
-      { tag: 'INTERPRETATION', text: bySize.s === t1.s ? `${segName(t1.s)} leads on both pace and size of gain.` : `${segName(t1.s)} leads on pace; ${segName(bySize.s)} added the most CV (${money(bySize.b - bySize.a)}).` },
+      { tag: 'FACT', text: `The business overall ${pctChg(all.a, all.b) >= 0 ? 'grew' : 'changed'} ${signed(pctChg(all.a, all.b))}. Segments under $2.0M of revenue last year are left out.` },
+      { tag: 'INTERPRETATION', text: bySize.s === t1.s ? `${segName(t1.s)} leads on both pace and size of gain.` : `${segName(t1.s)} leads on pace; ${segName(bySize.s)} added the most revenue (${money(bySize.b - bySize.a)}).` },
     ] };
   }
   if (q === 'Are there unusual movements?') {
@@ -538,7 +538,7 @@ export function ask(f: Files, q: (typeof QUESTIONS)[number]): Answer {
     const tree = driverTree(f, {}, [0, 51], [52, 103], 'cv', 3, 3);
     const k = tree.children[0], kk = k.children[0];
     return { q, tree, rows: t => t.status !== 'Cancelled' && t.week >= 52 && inSeg(t, kk && !kk.other ? kk.seg : k.seg, cls), rowsLabel: kk && !kk.other ? `${kk.label} ${k.label}` : k.label, tools: ['compare_periods()', 'find_top_contributors()', 'driver_tree()'], lines: [
-      { tag: 'FACT', text: `CV ${signed(tree.pct)} year on year (${money(tree.a)} → ${money(tree.b)}, ${money(tree.delta)}).` },
+      { tag: 'FACT', text: `Revenue ${signed(tree.pct)} year on year (${money(tree.a)} → ${money(tree.b)}, ${money(tree.delta)}).` },
       { tag: 'FACT', text: `${k.label} contributed ${money(k.delta)} (${(k.share * 100).toFixed(0)}% of the change)${kk && !kk.other ? `; inside it, ${kk.label} ${money(kk.delta)}` : ''}.` },
       { tag: 'INTERPRETATION', text: 'Contributions add up exactly to the total. Causes such as pricing or coverage are not in the data and are not asserted.' },
     ] };

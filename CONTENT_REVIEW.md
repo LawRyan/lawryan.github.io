@@ -8,7 +8,7 @@ site. To change any of it, edit `src/content.ts`, or ask Claude to.
 ### L//IOS real screenshots (`public/lios-shots/`)
 | # | Item | Notes |
 |---|------|-------|
-| 1.1 | **L//IOS Analyst**: 6 screenshots of your app running on its own synthetic "Global Markets" sample (`samples/generate.py`, fictional firms, AI off) | The sample is modelled on a markets business: client value (CV), notional, desks, regions, a dataset called **"Coalition"** and wallet share. No real data, but please confirm you're comfortable showing a dataset shaped like this publicly. The "Coalition" name appears in the Model screenshot. |
+| 1.1 | **L//IOS Analyst**: 5 screenshots of your app on its own synthetic sample (fictional firms, AI off) | Model screenshot removed per Ryan; site text says revenue, not CV. |
 | 1.2 | **L//IOS Markets**: 3 screenshots of desktop L//IOS in `--demo` mode | Every value is badged DEMO DATA by the app itself. Tickers shown: TSM, QCOM, ASML, NVDA, AVGO, AMD, MU, SOXX, S&P 500 (demo prices). |
 | 1.3 | **L//IOS Health**: 6 phone screens from the app's own automated UI tests (sample data, most badged DEMO) | They show sample body weight, lifts and runs (e.g. bench 205 lb, 181.9 → 175 lb goal). **If any of these numbers are actually yours, say so and I'll swap the screens.** |
 
