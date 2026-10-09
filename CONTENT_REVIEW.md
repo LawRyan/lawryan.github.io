@@ -15,7 +15,7 @@ site. To change any of it, edit `src/content.ts`, or ask Claude to.
 ### L//IOS facts, taken from your READMEs (please confirm)
 | # | Claim on the site | Source |
 |---|------|--------|
-| 1.4 | Analyst: "166,286 synthetic trades, 5 files, 9 data regions understood in about 17 seconds" | My run of your build in this session |
+| 1.4 | Analyst: "166,286 synthetic trades, 5 files, 9 data regions understood in under 25 seconds" (17 s and 23 s across two runs) | My run of your build in this session |
 | 1.5 | Analyst: "Measured on a 72 MB workbook: 831,430 rows ready to explore in about 87 s" | lios-analyst README |
 | 1.6 | Markets: "87 automated tests" | lios README |
 | 1.7 | Statuses: Analyst and Markets **Working**; Health **In development** | READMEs + QA runs. Database connectors, SEC/FRED and AI marked Prototype; nutrition marked In development (screens exist; the README still lists it as "not yet"). |

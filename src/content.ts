@@ -323,7 +323,7 @@ export const lios = {
       ],
       stack: ['TypeScript', 'React 19', 'Node.js', 'SQLite (node:sqlite)', 'esbuild', 'Custom SVG charts', 'Playwright QA'],
       proof: [
-        '166,286 synthetic trades, 5 files, 9 data regions understood in about 17 seconds',
+        '166,286 synthetic trades, 5 files, 9 data regions understood in under 25 seconds',
         'Engine totals checked against an independent recomputation from the raw workbook',
         'Measured on a 72 MB workbook: 831,430 rows ready to explore in about 87 s',
         'Raw data never leaves the computer; AI is off by default',
