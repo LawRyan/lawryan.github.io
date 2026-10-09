@@ -175,7 +175,7 @@ export function SignalField({ tint = 'signal', density = 30 }: { tint?: 'signal'
 export function Intro({ word = 'RYAN LAW' }: { word?: string }) {
   const [state, setState] = useState<'on' | 'out' | 'gone'>(() => {
     try {
-      if (reducedMotion() || sessionStorage.getItem('rl-intro') || /[?&]nointro/.test(location.search)) return 'gone';
+      if (reducedMotion() || location.hash || sessionStorage.getItem('rl-intro') || /[?&]nointro/.test(location.search)) return 'gone';
     } catch { return 'gone'; }
     return 'on';
   });

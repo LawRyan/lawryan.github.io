@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   REVIEW_MODE, site, contact, focus, evolution, about, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
@@ -18,6 +18,7 @@ const NAV: NavItem[] = [
 
 export default function Home() {
   useReveal();
+  useHashOnLoad();
   return (
     <>
       <Intro />
@@ -38,6 +39,21 @@ export default function Home() {
       <Footer />
     </>
   );
+}
+
+/**
+ * The page is rendered by script, so when someone arrives with a #section link
+ * (e.g. /#lab from the L//IOS page) the browser looks for it before it exists.
+ * Jump there once it's rendered, and again after fonts settle the layout.
+ */
+function useHashOnLoad() {
+  useEffect(() => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const go = () => document.getElementById(id)?.scrollIntoView({ block: 'start' });
+    requestAnimationFrame(go);
+    document.fonts?.ready.then(go);
+  }, []);
 }
 
 function Hero() {
