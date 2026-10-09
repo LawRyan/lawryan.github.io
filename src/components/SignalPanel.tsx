@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { rng } from '../lab/engine';
+import { rng } from '../lab/rng';
 import { reducedMotion } from './common';
 
 /**

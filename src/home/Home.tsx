@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   REVIEW_MODE, site, contact, arc, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
@@ -6,7 +6,7 @@ import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, ty
 import SignalPanel from '../components/SignalPanel';
 import LoopDiagram from '../components/LoopDiagram';
 import { Shot } from '../components/Shot';
-import Lab from '../lab/Lab';
+const AnalystLab = lazy(() => import('../lab/AnalystLab'));
 
 export const HOME_NAV: NavItem[] = [
   { href: '#home', label: 'Home', id: 'home' },
@@ -311,12 +311,27 @@ function LabSection() {
         <div className="sec-head rv">
           <Eyebrow>Intelligence Lab</Eyebrow>
           <h2 id="lab-h" className="h-section">Beyond the dashboard, <span className="serif">in miniature</span>.</h2>
-          <p className="lede">A working demo of the idea behind L//IOS Data Intelligence. Pick a dataset, ask a question, and follow the answer down to the records that prove it.</p>
+          <p className="lede">A hands-on version of L//IOS Analyst. Give it three files and watch it work out the data, check it, build the dashboard and investigate what changed. Every number goes back to a row.</p>
         </div>
-        <Lab />
+        <LazyLab />
       </div>
     </section>
   );
+}
+
+/** Load the Lab's code only when its section comes near, or when someone arrives at #lab. */
+function LazyLab() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [show, setShow] = useState(() => location.hash === '#lab');
+  useEffect(() => {
+    if (show || !ref.current) return;
+    if (!('IntersectionObserver' in window)) { setShow(true); return; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShow(true); io.disconnect(); } }, { rootMargin: '800px 0px' });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [show]);
+  const ph = <div className="alab alab-ph" aria-busy="true"><span className="mono muted">Loading the Intelligence Lab…</span></div>;
+  return <div ref={ref}>{show ? <Suspense fallback={ph}><AnalystLab /></Suspense> : ph}</div>;
 }
 
 function Philosophy() {
