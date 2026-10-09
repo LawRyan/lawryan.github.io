@@ -15,7 +15,7 @@ for (const [w, h, dpr] of widths) {
   for (const [name, path] of pages) {
     const p = await ctx.newPage(); const errs = [];
     p.on('pageerror', e => errs.push(String(e))); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
-    await p.goto('http://127.0.0.1:4190' + path, { waitUntil: 'networkidle' }); await p.waitForTimeout(700);
+    await p.goto('http://127.0.0.1:4190' + path, { waitUntil: 'networkidle' }); await p.addStyleTag({ content: 'html{scroll-behavior:auto!important}' }); await p.waitForTimeout(700);
     await p.screenshot({ path: `${dir}/${name}-${w}-top.jpg`, type: 'jpeg', quality: 80 });
     const H = await p.evaluate(() => document.body.scrollHeight);
     for (let y = 0; y < H; y += 500) { await p.mouse.wheel(0, 500); await p.waitForTimeout(40); }

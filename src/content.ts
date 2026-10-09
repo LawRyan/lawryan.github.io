@@ -9,7 +9,7 @@ export const REVIEW_MODE = false;
 export const site = {
   name: 'Ryan Law',
   title: 'Vice President, RBC Capital Markets', // needs approval: employer named publicly
-  roles: ['Capital Markets', 'Analytics', 'Automation', 'AI'],
+  roles: ['Capital Markets', 'Data & Analytics', 'AI Innovation'],
   headline: { lead: 'Turning complex data into', em: 'intelligent', tail: 'decisions.' },
   intro:
     "I'm Ryan Law, a Capital Markets professional working at the intersection of financial markets, data intelligence, and emerging technology. I build analytical systems, automate complex workflows, and explore how artificial intelligence can change the way we understand information and make decisions.",
@@ -36,22 +36,35 @@ export const focus = [
   },
 ];
 
-export const evolution = [
-  { stage: 'Foundations', years: '2015', text: 'Business degree at Wilfrid Laurier University, then into banking and Capital Markets.' },
-  { stage: 'Builder', years: '2018', text: 'Learned web development at HackerYou because I wanted to build tools, not only use them.' },
-  { stage: 'Intelligence', years: '2021 →', text: 'Business intelligence, reporting, automation and data governance for Capital Markets.' },
-  { stage: 'Systems', years: 'Now', text: 'Scalable analytical systems, and the shift from dashboards toward software that surfaces insight on its own.' },
+/** The career arc, in the order it happened. Years are only shown where they're verified. */
+export const arc = [
+  { stage: 'Technology foundations', when: 'Early', text: 'Curiosity about how software and the web are built.' },
+  { stage: 'Capital Markets', when: '2015 →', text: 'BBA from Wilfrid Laurier, then into banking and markets: how the business runs and which numbers matter.' },
+  { stage: 'Data & analytics', when: '2018 →', text: 'Learned to build at HackerYou, then turned that toward reporting and business intelligence.' },
+  { stage: 'Automation', when: '2021 →', text: 'Python and Excel automation, validation frameworks and modernized Tableau reporting.' },
+  { stage: 'AI innovation', when: 'Now', text: 'Exploring software that understands data and explains it, through L//IOS.' },
 ];
 
-export const about = [
-  'My career started with curiosity about technology and how the web is built. Banking taught me how markets businesses actually run: the questions leaders ask, the pressure on the numbers, and how much depends on data being right.',
-  'Since then my work has moved steadily toward the point where those two meet. I build reporting and analytical systems for Capital Markets, automate the repetitive parts of the workflow, and design the validation that makes the output trustworthy.',
-  'What interests me most now is the next step for business intelligence: systems that don’t wait to be queried, but notice what changed and explain why it matters.',
-];
+export const story = {
+  statement: 'I’ve spent my career where markets meet data.',
+  paragraphs: [
+    'Banking taught me how markets businesses actually run: the questions leaders ask, the pressure on the numbers, and how much depends on data being right.',
+    'Alongside it I learned to build. Today I design reporting and analytical systems for Capital Markets, automate the repetitive parts of the workflow, and build the validation that makes the output trustworthy.',
+  ],
+  why: {
+    lead: 'After years of building reporting, dashboards and validation frameworks, I kept coming back to one question:',
+    q: 'What if software could do more than display information?',
+    tail: 'What if it could understand the data, surface what matters, and help people decide? L//IOS is my exploration of that.',
+  },
+};
 
 export interface Role {
   id: string;
   when: string;
+  /** timeline position in fractional years; end omitted = point, null = present */
+  from: number;
+  to?: number | null;
+  kind: 'role' | 'education' | 'earlier';
   title: string;
   org: string;
   summary: string;
@@ -63,6 +76,7 @@ export const experience: Role[] = [
   {
     id: 'vp',
     when: 'Jan 2026 – Present',
+    from: 2026.0, to: null, kind: 'role',
     title: 'Vice President',
     org: 'RBC Capital Markets',
     summary: 'Bridging business requirements and technical execution across reporting, data quality and analytics.',
@@ -80,6 +94,7 @@ export const experience: Role[] = [
   {
     id: 'assoc',
     when: 'Dec 2021 – Dec 2025',
+    from: 2021.92, to: 2025.99, kind: 'role',
     title: 'Associate',
     org: 'RBC Capital Markets',
     summary: 'Built and modernized business intelligence for markets businesses, with automation and validation at the core.',
@@ -96,6 +111,7 @@ export const experience: Role[] = [
   {
     id: 'early',
     when: 'Before 2021',
+    from: 2015.5, to: 2021.9, kind: 'earlier',
     title: 'Banking & Capital Markets',
     org: 'Earlier roles',
     summary: 'Early career in banking and Capital Markets; my 2018 site described three-plus years of experience at the time.',
@@ -105,6 +121,7 @@ export const experience: Role[] = [
   {
     id: 'hy',
     when: '2018',
+    from: 2018.3, kind: 'education',
     title: 'Web Development',
     org: 'HackerYou',
     summary: 'Immersive front-end development program.',
@@ -113,6 +130,7 @@ export const experience: Role[] = [
   {
     id: 'wlu',
     when: '2015',
+    from: 2015.3, kind: 'education',
     title: 'Bachelor of Business Administration',
     org: 'Wilfrid Laurier University',
     summary: 'BBA, 2015.',
@@ -133,29 +151,49 @@ export const metrics: Metric[] = [
   { value: '~30 hrs', label: 'saved each month', note: 'through reporting modernization' },
 ];
 
+/**
+ * Case studies in executive form. Wording is generalized: no system names, clients,
+ * data or architecture. Metrics referenced here are the approved figures above.
+ */
 export const cases = [
   {
+    id: 'validation',
     k: 'Data quality',
     title: 'A validation framework people can trust',
-    body: 'Designed a rules-based validation framework that checks large trade datasets before they reach reporting, with clear exception handling and controls.',
+    problem: 'Large trade datasets fed downstream reporting, and errors were found late, by the people reading the reports.',
+    contribution: 'Designed and built a rules-based validation framework that checks the data before it reaches reporting.',
+    approach: 'Python-driven rules with clear exception handling, so each break is visible, owned and resolved.',
+    impact: '300+ rules applied across roughly 100–150K trade records, supporting the control process.',
     tags: ['Python', 'Validation', 'Controls'],
   },
   {
+    id: 'modernization',
     k: 'Modernization',
     title: 'Reporting rebuilt for speed and clarity',
-    body: 'Helped migrate and modernize a suite of business intelligence reports, removing manual steps and making the outputs easier to read and maintain.',
+    problem: 'A large suite of BI reports relied on manual steps that took time every month and were hard to maintain.',
+    contribution: 'Helped migrate and modernize the reports, removing manual work along the way.',
+    approach: 'Rebuilt in Tableau with automated preparation in Python and Excel, designed to be easier to read and maintain.',
+    impact: 'About 40 reports modernized and roughly 30 hours a month saved.',
     tags: ['Tableau', 'Automation', 'BI'],
   },
   {
+    id: 'fixed-income',
     k: 'Markets analytics',
     title: 'Fixed income client intelligence',
-    body: 'Built analytical reporting on fixed income client activity and RFQ flow, giving teams a clearer view of client engagement.',
+    problem: 'Teams needed a clearer view of how clients engage across fixed income activity and RFQ flow.',
+    contribution: 'Built the analytical reporting that brings that activity together.',
+    approach: 'Client and RFQ activity modelled into views that answer the questions coverage teams ask.',
+    impact: 'A clearer, shared picture of client engagement for the business.',
     tags: ['Fixed income', 'RFQ', 'Client intelligence'],
   },
   {
+    id: 'integration',
     k: 'Integration',
     title: 'From ingestion to certified output',
-    body: 'Worked across data ingestion, reconciliation, validation and reporting controls, so each stage has a check before the next one starts.',
+    problem: 'Data passes through many hands between source and report, and each hand-off is a place for errors.',
+    contribution: 'Worked across ingestion, reconciliation, validation and reporting controls.',
+    approach: 'A check at every stage before the next one starts, with lineage back to the source.',
+    impact: 'Reporting that can be traced and defended.',
     tags: ['Ingestion', 'Reconciliation', 'Lineage'],
   },
 ];
@@ -188,99 +226,179 @@ export const principles = [
   { t: 'Continuous evolution.', d: 'New technology is a chance to rethink how the work gets done.' },
 ];
 
-export type Status = 'In development' | 'Prototype' | 'Planned' | 'Concept';
+export type Status = 'Working' | 'In development' | 'Prototype' | 'Planned' | 'Concept';
+
+export interface Shot { src: string; alt: string; caption: string; device: 'desktop' | 'phone' }
 export interface Pillar {
   id: string;
   name: string;
   short: string;
+  product: string;            // the real app name
   line: string;
   body: string;
+  flow: string;               // the app's own pipeline, from its README
   status: Status;
   capabilities: { name: string; status: Status }[];
   stack: string[];
+  proof: string[];            // verifiable facts from the repo
+  shots: Shot[];
   extra?: string;
 }
 
 /**
- * L//IOS statuses and stacks are placeholders until Ryan confirms them.
- * Every capability is marked conservatively; nothing is presented as released.
+ * L//IOS content is taken from each app's README, ARCHITECTURE notes and test suites
+ * (Desktop\Claude\lios, lios-analyst, lios-mobile, read Oct 2026). Screenshots are real:
+ * produced by running each app's own QA scripts on demo or synthetic sample data.
+ * "Working" = present in the current build and covered by the app's tests or QA run.
  */
+const ANALYST_NOTE = 'Real screenshot · L//IOS Analyst on its synthetic “Global Markets” sample (fictional firms)';
+const MARKETS_NOTE = 'Real screenshot · L//IOS in demo mode (the app labels every value DEMO DATA)';
+const MOBILE_NOTE = 'Real screen · rendered by the app’s own UI tests with sample data';
+
 export const lios = {
   tagline: 'An Operating System for Insight.',
-  statement: 'A growing ecosystem of intelligent applications designed to turn information into understanding, action, and better decisions.',
+  statement: 'Three applications built on one idea: software that understands the data, says what matters, and shows its working.',
   thesis: "The future of analytics isn't more dashboards. It's systems that understand the data and tell us what matters.",
   vision: [
     'Modern software asks people to move between fragmented systems, interpret information by hand, and repeat the same analytical steps again and again.',
-    'L//IOS explores a different approach: applications that do more of the interpreting, keep context across tasks, and help people act with less friction.',
+    'L//IOS explores a different approach: applications that do more of the interpreting, keep context across questions, and help people act with less friction, without ever inventing a number.',
   ],
   disclaimer: 'L//IOS is an independent personal technology project and is not affiliated with or endorsed by RBC Capital Markets.',
   pillars: [
     {
-      id: 'intelligence',
-      name: 'L//IOS Intelligence',
-      short: 'Intelligence',
-      line: 'Markets and research intelligence',
-      body: 'One interface for understanding market developments, sectors, companies and emerging themes, with AI-assisted research you can question and follow up.',
-      status: 'In development',
+      id: 'data',
+      name: 'L//IOS Analyst',
+      short: 'Analyst',
+      product: 'L//IOS Analyst',
+      line: 'Data intelligence · autonomous analysis',
+      body: 'Give it files it has never seen. It works out the structure, connects the datasets safely, checks quality, builds the dashboard and investigates what changed. Every number traces back to source rows.',
+      flow: 'Drop data → Initialize → Understand → Dashboard → Insights → Investigate',
+      status: 'Working',
       capabilities: [
-        { name: 'Sector intelligence', status: 'In development' },
-        { name: 'Company comparisons', status: 'In development' },
-        { name: 'Performance analysis', status: 'In development' },
-        { name: 'Market visualization', status: 'In development' },
-        { name: 'News and narrative analysis', status: 'Planned' },
-        { name: 'Natural-language queries with follow-ups', status: 'In development' },
-        { name: 'Insight generation', status: 'Planned' },
+        { name: 'Excel, CSV, JSON, Parquet and SQLite ingestion, including messy sheets', status: 'Working' },
+        { name: 'Schema and meaning detection: measures, dimensions, dates, hierarchies', status: 'Working' },
+        { name: 'Relationship discovery with match rates; joins can never multiply rows', status: 'Working' },
+        { name: 'Data quality checks with stated methods and affected rows', status: 'Working' },
+        { name: 'Generated dashboard, driver trees and ranked findings', status: 'Working' },
+        { name: 'Plain-language questions answered by deterministic tools', status: 'Working' },
+        { name: 'Version refresh: what changed between data drops', status: 'Working' },
+        { name: 'PostgreSQL / SQL Server snapshots', status: 'Prototype' },
+        { name: 'Optional AI rephrasing and summaries, numerically guarded', status: 'Prototype' },
       ],
-      stack: ['React', 'TypeScript', 'Node.js', 'LLM integration', 'Data visualization'],
-      extra: 'Themes: AI infrastructure · Semiconductors · Nuclear energy · Robotics · Cybersecurity · Large-cap technology',
+      stack: ['TypeScript', 'React 19', 'Node.js', 'SQLite (node:sqlite)', 'esbuild', 'Custom SVG charts', 'Playwright QA'],
+      proof: [
+        '166,286 synthetic trades, 5 files, 9 data regions understood in about 17 seconds',
+        'Engine totals checked against an independent recomputation from the raw workbook',
+        'Measured on a 72 MB workbook: 831,430 rows ready to explore in about 87 s',
+        'Raw data never leaves the computer; AI is off by default',
+      ],
+      shots: [
+        { src: '/lios-shots/analyst-dashboard', alt: 'L//IOS Analyst dashboard showing KPIs, CV by month, and a ranked list of findings', caption: ANALYST_NOTE, device: 'desktop' },
+        { src: '/lios-shots/analyst-init', alt: 'L//IOS Analyst initialization: seven engines online, files, data regions, relationships and quality issues found', caption: ANALYST_NOTE, device: 'desktop' },
+        { src: '/lios-shots/analyst-investigation', alt: 'An investigation into a finding, with data checks, a weekly chart and a driver tree', caption: ANALYST_NOTE, device: 'desktop' },
+        { src: '/lios-shots/analyst-model', alt: 'The discovered data model with relationships, match rates and cardinality', caption: ANALYST_NOTE, device: 'desktop' },
+        { src: '/lios-shots/analyst-quality', alt: 'Data quality page with five scores and seven checks, each with its method', caption: ANALYST_NOTE, device: 'desktop' },
+        { src: '/lios-shots/analyst-ask', alt: 'Ask L//IOS answering with FACT and INTERPRETATION labels and a driver tree', caption: ANALYST_NOTE, device: 'desktop' },
+      ],
+    },
+    {
+      id: 'markets',
+      name: 'L//IOS Markets',
+      short: 'Markets',
+      product: 'L//IOS (desktop)',
+      line: 'Markets and research intelligence',
+      body: 'Ask a question and the question builds the workspace: market data, deterministic analytics, coverage, internet-attention signals, evidence with labels, and research that remembers what changed.',
+      flow: 'Ask → Research → Connect → Visualize → Investigate → Remember',
+      status: 'Working',
+      capabilities: [
+        { name: 'Sector and company analysis with follow-ups (“Change this to YTD”, “Remove Intel”)', status: 'Working' },
+        { name: 'Relative performance, drawdown, volatility and correlation, recomputed in Verify', status: 'Working' },
+        { name: 'News coverage and Hacker News attention signals', status: 'Working' },
+        { name: 'Saved research with “What changed?” and // TODAY', status: 'Working' },
+        { name: 'Private datasets alongside public data', status: 'Working' },
+        { name: 'SEC filings and FRED macro adapters', status: 'Prototype' },
+        { name: 'AI research agent (off by default, evidence-guarded)', status: 'Prototype' },
+        { name: 'More attention sources and a knowledge graph', status: 'Planned' },
+      ],
+      stack: ['TypeScript', 'React', 'Node.js', 'SQLite (node:sqlite)', 'esbuild', 'Anthropic API (optional)', 'Playwright QA'],
+      proof: [
+        '87 automated tests across analytics, providers, schemas and AI contracts',
+        'Market data is never labelled real-time; demo data is always badged',
+        'Every chart has Verify: returns and drawdowns recomputed from the closes',
+        'Runs locally on 127.0.0.1; secrets stay on the server',
+      ],
+      shots: [
+        { src: '/lios-shots/markets-semis', alt: 'L//IOS semiconductors workspace: year-to-date performance, leaders and laggards, with DEMO DATA badges', caption: MARKETS_NOTE, device: 'desktop' },
+        { src: '/lios-shots/markets-home', alt: 'L//IOS home: “What do you want to understand?” with a command bar and suggested investigations', caption: MARKETS_NOTE, device: 'desktop' },
+        { src: '/lios-shots/markets-evidence', alt: 'Evidence panel recomputing every return and drawdown, all matching', caption: MARKETS_NOTE, device: 'desktop' },
+      ],
+      extra: 'Themes it follows: AI infrastructure · Semiconductors · Nuclear energy · Robotics · Cybersecurity · Large-cap technology',
     },
     {
       id: 'health',
       name: 'L//IOS Health',
       short: 'Health',
-      line: 'Personal health and performance',
-      body: 'A mobile-first app for tracking, understanding and improving personal performance, from strength and running to nutrition and body composition.',
+      product: 'L//IOS Mobile (Android)',
+      line: 'Personal health and training intelligence',
+      body: 'A native Android app that reads Health Connect, interprets messy workout notes, tracks strength, running and body composition, and tells you what changed and what to do next, labelling every value as measured, calculated or interpreted.',
+      flow: 'Open → // Today → Understand → Investigate → Verify',
       status: 'In development',
       capabilities: [
-        { name: 'Workout logging and strength progression', status: 'In development' },
-        { name: 'Running performance and activity', status: 'In development' },
-        { name: 'Nutrition logging', status: 'In development' },
-        { name: 'Food-photo calorie and macro estimates', status: 'Prototype' },
-        { name: 'Weight and body-composition trends', status: 'In development' },
-        { name: 'Conversational assistant', status: 'Planned' },
-        { name: 'Health Connect / Samsung Health integration', status: 'Planned' },
+        { name: 'Workout capture by paste, voice or photo, interpreted on-device', status: 'Working' },
+        { name: 'Strength progression, estimated 1RM and personal records', status: 'Working' },
+        { name: 'Running, pickleball and training load', status: 'Working' },
+        { name: 'Health Connect: Samsung Health and RENPHO body data (read-only)', status: 'Working' },
+        { name: 'Next-session planning that adapts to time, fatigue and equipment', status: 'Working' },
+        { name: 'Nutrition logging and food-photo estimates', status: 'In development' },
+        { name: 'AI assistant (off by default; key stays on the phone or a paired backend)', status: 'Prototype' },
+        { name: 'Link to desktop L//IOS', status: 'Planned' },
       ],
-      stack: ['Android', 'TypeScript', 'SQLite', 'LLM integration', 'Health Connect (planned)'],
-    },
-    {
-      id: 'data',
-      name: 'L//IOS Data Intelligence',
-      short: 'Data Intelligence',
-      line: 'Analytics that explains itself',
-      body: 'Load spreadsheets and files, and the platform profiles them, finds relationships, checks quality, builds the views and explains what matters, with every calculation traceable to its records.',
-      status: 'In development',
-      capabilities: [
-        { name: 'Excel and CSV ingestion', status: 'In development' },
-        { name: 'Automated profiling and quality checks', status: 'In development' },
-        { name: 'Relationship discovery and suggested joins', status: 'Prototype' },
-        { name: 'Generated dashboards', status: 'Prototype' },
-        { name: 'Natural-language analysis', status: 'Planned' },
-        { name: 'Anomaly detection and insight generation', status: 'Prototype' },
-        { name: 'Drill-down, lineage and transparent calculations', status: 'In development' },
+      stack: ['Kotlin 2.1', 'Jetpack Compose', 'SQLite', 'Health Connect', 'ML Kit (on-device OCR)', 'Robolectric + Roborazzi'],
+      proof: [
+        'Pure Kotlin analytics module, unit-tested on the JVM',
+        'Golden journeys run on the real UI in automated tests',
+        'A single privacy gate for any outbound data',
+        'Health data stays on the phone',
       ],
-      stack: ['React', 'TypeScript', 'Node.js', 'SQLite', 'Python', 'Data visualization'],
+      shots: [
+        { src: '/lios-shots/mobile-today', alt: 'L//IOS Mobile Today screen with readiness rings and the next session, labelled demo data', caption: MOBILE_NOTE, device: 'phone' },
+        { src: '/lios-shots/mobile-brief', alt: 'Brief: three things deserve your attention today', caption: MOBILE_NOTE, device: 'phone' },
+        { src: '/lios-shots/mobile-interpreted', alt: 'An interpreted workout read from pasted text, before saving', caption: MOBILE_NOTE, device: 'phone' },
+        { src: '/lios-shots/mobile-health', alt: 'Health readiness score with what moved it', caption: MOBILE_NOTE, device: 'phone' },
+        { src: '/lios-shots/mobile-next', alt: 'Next session: a suggested lower-body strength workout and why', caption: MOBILE_NOTE, device: 'phone' },
+        { src: '/lios-shots/mobile-food', alt: 'A meal-photo estimate broken into foods with calorie ranges', caption: MOBILE_NOTE, device: 'phone' },
+      ],
     },
   ] as Pillar[],
   roadmap: [
-    { t: 'Natural-language interaction', d: 'Ask questions in plain language and keep the context across follow-ups.' },
-    { t: 'Automated insight discovery', d: 'Surface changes and outliers before anyone goes looking for them.' },
-    { t: 'Better data integration', d: 'Connect more sources with less manual preparation.' },
-    { t: 'Agentic workflows', d: 'Let the software carry multi-step analysis through to a result.' },
-    { t: 'Cross-device experience', d: 'One context shared across desktop and mobile.' },
-    { t: 'Context-aware assistance', d: 'Help that understands what you are working on right now.' },
+    { t: 'Desktop and phone, one context', d: 'Link L//IOS Mobile to desktop L//IOS so the brief follows you.' },
+    { t: 'More data sources', d: 'Fundamentals, more attention sources, and live database connections for Analyst.' },
+    { t: 'Research that stays current', d: 'Scheduled revisits of saved research: “What changed today?”' },
+    { t: 'Guarded AI, everywhere', d: 'Models that plan and explain, never calculate, with every number checked against evidence.' },
+    { t: 'Knowledge graph', d: 'Questions across entities, relationships and themes the research has already found.' },
+    { t: 'Nutrition, complete', d: 'Finish nutrition in L//IOS Health and connect it to training and recovery.' },
   ],
-  techNote: 'Technologies used across the ecosystem. Not every application uses every one.',
-  tech: ['React', 'TypeScript', 'Node.js', 'SQLite', 'Python', 'LLM integrations', 'Data visualization', 'Android', 'API integration'],
+  techNote: 'Technologies in the current builds. Not every application uses every one.',
+  tech: ['TypeScript', 'React', 'Node.js', 'SQLite', 'esbuild', 'Kotlin', 'Jetpack Compose', 'Health Connect', 'Anthropic API', 'Playwright'],
+  /** The shared principles, drawn from the apps' architecture notes. */
+  philosophy: [
+    { t: 'Code calculates. Models interpret.', d: 'Arithmetic is deterministic and tested. A model may explain, but every number it writes must already be in the evidence.' },
+    { t: 'Show the working.', d: 'Every KPI, bar and finding opens Explain, Drill down and View data, back to the source row.' },
+    { t: 'Check the data first.', d: 'Before a change is called a business event, the data explanations are tested: missing loads, duplicates, mapping changes.' },
+    { t: 'Private by default.', d: 'Raw data stays on the device. AI is off until you turn it on, and you can see exactly what it would be sent.' },
+  ],
+  loop: [
+    { k: 'Collect', d: 'Bring the data in, from files, feeds or devices.' },
+    { k: 'Validate', d: 'Check it before trusting it.' },
+    { k: 'Understand', d: 'Find what changed and why.' },
+    { k: 'Explain', d: 'Say it plainly, with the evidence attached.' },
+    { k: 'Act', d: 'Help decide what to do next.' },
+  ],
+  domains: {
+    data: { Collect: 'Excel, CSV, Parquet, SQLite', Validate: 'Quality checks with stated methods', Understand: 'Meanings, relationships, driver trees', Explain: 'FACT / INTERPRETATION labels', Act: 'Watches, saved views, exported reports' },
+    markets: { Collect: 'Market data, news, attention signals', Validate: 'Freshness labels, schema checks', Understand: 'Relative performance and what changed', Explain: 'Evidence with citations', Act: 'Watches, theses, saved research' },
+    health: { Collect: 'Health Connect, workout notes, meals', Validate: 'Measured vs calculated vs interpreted', Understand: 'Progression, recovery, trends', Explain: 'What moved today and why', Act: 'The next session, adapted' },
+  } as Record<string, Record<string, string>>,
 };
 
 export interface Project {
@@ -294,8 +412,8 @@ export interface Project {
   internal?: boolean;
 }
 export const projects: Project[] = [
-  { name: 'L//IOS', cat: 'Flagship', year: 'Ongoing', body: 'An ecosystem of intelligent applications for markets research, personal performance and self-explaining analytics.', tags: ['AI', 'React', 'TypeScript'], href: '/lios/', internal: true },
-  { name: 'Intelligence Lab', cat: 'Experimental', year: '2026', body: 'A working, in-browser analytics demo with rule-based insights and drill-down to the records behind every number.', tags: ['TypeScript', 'Analytics', 'Synthetic data'], href: '#lab', internal: true },
+  { name: 'L//IOS', cat: 'Flagship', year: 'Ongoing', body: 'Three applications: L//IOS Analyst for data intelligence, L//IOS Markets for research, and L//IOS Health on Android.', tags: ['TypeScript', 'React', 'Kotlin', 'SQLite'], href: '/lios/', internal: true },
+  { name: 'Intelligence Lab', cat: 'Experimental', year: '2026', body: 'A browser-sized version of L//IOS Analyst: it reads a set of synthetic files, checks them, and investigates what changed.', tags: ['TypeScript', 'Analytics', 'Synthetic data'], href: '#lab', internal: true },
   { name: 'JavaScript chart studies', cat: 'Data Analytics', year: 'Earlier', body: 'Early experiments visualizing data in the browser with D3 and C3.', tags: ['D3', 'C3', 'JavaScript'], href: '/line.html' },
   { name: 'ShipSimple', cat: 'Web Development', year: 'Earlier', body: 'Front end for an e-commerce shipping startup.', tags: ['HTML', 'Sass', 'JavaScript', 'Bootstrap'], href: 'http://www.shipsimple.io/', img: '/legacy-assets/shipsimple-white.JPG' },
   { name: 'Responsive travel site', cat: 'Web Development', year: '2018', body: 'A single-page site built from a PSD design, fully responsive across screen sizes.', tags: ['HTML', 'CSS', 'JavaScript'], img: '/legacy-assets/p2-white.JPG' },

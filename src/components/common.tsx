@@ -6,7 +6,11 @@ export function Review({ children = 'Needs approval' }: { children?: ReactNode }
   return <span className="review" title="Listed in CONTENT_REVIEW.md">{children}</span>;
 }
 
-const statusClass: Record<StatusT, string> = { 'In development': 'dev', Prototype: 'proto', Planned: 'plan', Concept: 'concept' };
+export function Eyebrow({ children, review, tone }: { children: ReactNode; review?: ReactNode; tone?: 'lios' }) {
+  return <div className={`eyebrow${tone ? ' eyebrow-' + tone : ''}`}><b aria-hidden="true">//</b>{children}{review}</div>;
+}
+
+const statusClass: Record<StatusT, string> = { Working: 'ok', 'In development': 'dev', Prototype: 'proto', Planned: 'plan', Concept: 'concept' };
 export function Status({ s }: { s: StatusT }) {
   return <span className={`status status-${statusClass[s]}`}>{s}</span>;
 }
@@ -68,6 +72,10 @@ export function Nav({ items, home }: { items: NavItem[]; home: string }) {
           <button className="nav-toggle" aria-expanded={open} aria-controls="nav-links" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen(o => !o)}>
             <span />
           </button>
+          <button className="nav-k" onClick={() => window.dispatchEvent(new Event('open-palette'))} aria-label="Search the site" title="Search (Ctrl K or /)">
+            <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="M10.4 10.4 14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            <kbd>⌘K</kbd>
+          </button>
           <ul className="nav-links" id="nav-links">
             {items.map(i => (
               <li key={i.href}>
@@ -79,7 +87,81 @@ export function Nav({ items, home }: { items: NavItem[]; home: string }) {
           </ul>
         </nav>
       </div>
+      <Palette />
     </header>
+  );
+}
+
+interface Dest { label: string; hint: string; href: string; ext?: boolean }
+const onHome = () => location.pathname === '/' || location.pathname === '/index.html';
+const DESTS = (): Dest[] => {
+  const h = (id: string) => (onHome() ? `#${id}` : `/#${id}`);
+  return [
+    { label: 'About', hint: 'Story and career arc', href: h('about') },
+    { label: 'Experience', hint: 'Career timeline', href: h('experience') },
+    { label: 'Impact', hint: 'Case studies and outcomes', href: h('impact') },
+    { label: 'Expertise', hint: 'Technical capabilities', href: h('expertise') },
+    { label: 'L//IOS', hint: 'Flagship project page', href: '/lios/' },
+    { label: 'L//IOS Analyst', hint: 'Data intelligence, real screenshots', href: '/lios/#data' },
+    { label: 'L//IOS Markets', hint: 'Markets and research intelligence', href: '/lios/#markets' },
+    { label: 'L//IOS Health', hint: 'Android health and training app', href: '/lios/#health' },
+    { label: 'Intelligence Lab', hint: 'Try the analytics demo', href: h('lab') },
+    { label: 'Principles', hint: 'How I work', href: h('philosophy') },
+    { label: 'Projects', hint: 'All work, including earlier builds', href: h('projects') },
+    { label: 'Contact', hint: 'LinkedIn and GitHub', href: h('contact') },
+    { label: 'LinkedIn', hint: 'Opens LinkedIn', href: 'https://www.linkedin.com/in/ryan-law-92a629104/', ext: true },
+    { label: 'GitHub', hint: 'Opens GitHub', href: 'https://github.com/lawryan', ext: true },
+  ];
+};
+
+/** Quick navigation: Ctrl/⌘ K or "/" opens a filterable list of destinations. Plain search, no AI. */
+function Palette() {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  const [i, setI] = useState(0);
+  const input = useRef<HTMLInputElement>(null);
+  const last = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const show = () => { last.current = document.activeElement as HTMLElement; setOpen(true); setQ(''); setI(0); };
+    const key = (e: KeyboardEvent) => {
+      const typing = /input|textarea|select/i.test((e.target as HTMLElement)?.tagName || '');
+      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing)) { e.preventDefault(); show(); }
+    };
+    window.addEventListener('keydown', key);
+    window.addEventListener('open-palette', show);
+    return () => { window.removeEventListener('keydown', key); window.removeEventListener('open-palette', show); };
+  }, []);
+  useEffect(() => { if (open) setTimeout(() => input.current?.focus(), 0); else last.current?.focus?.(); }, [open]);
+  if (!open) return null;
+  const list = DESTS().filter(d => (d.label + ' ' + d.hint).toLowerCase().includes(q.trim().toLowerCase()));
+  const go = (d: Dest) => {
+    setOpen(false);
+    if (d.ext) { window.open(d.href, '_blank', 'noopener'); return; }
+    location.href = d.href;
+  };
+  return (
+    <div className="pal-back" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
+      <div className="pal" role="dialog" aria-modal="true" aria-label="Jump to a section">
+        <input ref={input} id="pal-q" value={q} placeholder="Jump to… (Experience, L//IOS, Lab)" aria-label="Search sections" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-activedescendant={list[i] ? `pal-${i}` : undefined}
+          onChange={e => { setQ(e.target.value); setI(0); }}
+          onKeyDown={e => {
+            if (e.key === 'Escape') setOpen(false);
+            if (e.key === 'ArrowDown') { e.preventDefault(); setI(v => Math.min(v + 1, list.length - 1)); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); setI(v => Math.max(v - 1, 0)); }
+            if (e.key === 'Enter' && list[i]) go(list[i]);
+            if (e.key === 'Tab') e.preventDefault();
+          }} />
+        <ul id="pal-list" role="listbox">
+          {list.map((d, n) => (
+            <li key={d.label} id={`pal-${n}`} role="option" aria-selected={n === i} onMouseEnter={() => setI(n)} onClick={() => go(d)}>
+              <b>{d.label}</b><span>{d.hint}{d.ext ? ' ↗' : ''}</span>
+            </li>
+          ))}
+          {list.length === 0 && <li className="pal-empty">No matches. Try “L//IOS” or “contact”.</li>}
+        </ul>
+        <div className="pal-foot"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>Enter</kbd> go</span><span><kbd>Esc</kbd> close</span></div>
+      </div>
+    </div>
   );
 }
 

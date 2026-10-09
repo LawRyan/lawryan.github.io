@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import {
-  REVIEW_MODE, site, contact, focus, evolution, about, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
+  REVIEW_MODE, site, contact, arc, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
-import { Nav, Footer, Intro, SectionHead, SignalField, Review, Status, useReveal, type NavItem } from '../components/common';
-import { IntelligencePreview, HealthPreview, DataPreview } from '../components/previews';
+import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, type NavItem } from '../components/common';
+import SignalPanel from '../components/SignalPanel';
+import LoopDiagram from '../components/LoopDiagram';
+import { Shot } from '../components/Shot';
 import Lab from '../lab/Lab';
 
-const NAV: NavItem[] = [
+export const HOME_NAV: NavItem[] = [
   { href: '#home', label: 'Home', id: 'home' },
   { href: '#about', label: 'About', id: 'about' },
   { href: '#experience', label: 'Experience', id: 'experience' },
@@ -23,10 +25,10 @@ export default function Home() {
     <>
       <Intro />
       <a className="skip" href="#main">Skip to content</a>
-      <Nav items={NAV} home="#home" />
+      <Nav items={HOME_NAV} home="#home" />
       <main id="main">
         <Hero />
-        <About />
+        <Story />
         <Experience />
         <Impact />
         <Expertise />
@@ -41,11 +43,7 @@ export default function Home() {
   );
 }
 
-/**
- * The page is rendered by script, so when someone arrives with a #section link
- * (e.g. /#lab from the L//IOS page) the browser looks for it before it exists.
- * Jump there once it's rendered, and again after fonts settle the layout.
- */
+/** Content is rendered by script, so jump to a #section once it exists. */
 function useHashOnLoad() {
   useEffect(() => {
     const id = decodeURIComponent(location.hash.slice(1));
@@ -61,100 +59,121 @@ function Hero() {
     <section className="hero" id="home" aria-labelledby="hero-h">
       <SignalField />
       <div className="wrap">
-        <div className="hero-name">{site.name}</div>
-        <h1 id="hero-h">
-          {site.headline.lead} <span className="serif">{site.headline.em}</span> {site.headline.tail}
-        </h1>
-        <div className="hero-role">
-          <strong>{site.title}</strong>
-          <Review />
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <p className="hero-name"><span className="live-dot" aria-hidden="true" />{site.name}</p>
+            <h1 id="hero-h" className="hero-h">
+              {site.headline.lead} <span className="serif">{site.headline.em}</span> {site.headline.tail}
+            </h1>
+            <p className="hero-role"><strong>{site.title}</strong><Review /></p>
+            <p className="hero-tags">{site.roles.map((r, i) => <span key={r}>{r}{i < site.roles.length - 1 && <i aria-hidden="true">/</i>}</span>)}</p>
+            <div className="hero-ctas">
+              <a className="btn btn-primary" href="#impact">Explore my work <span className="arr" aria-hidden="true">→</span></a>
+              <a className="btn btn-lios" href="/lios/">Discover L//IOS <span className="arr" aria-hidden="true">→</span></a>
+            </div>
+          </div>
+          <div className="hero-viz"><SignalPanel /></div>
         </div>
-        <div className="chips" style={{ marginTop: 14 }}>
-          {site.roles.map(r => <span key={r} className="chip">{r}</span>)}
-        </div>
-        <div className="hero-ctas">
-          <a className="btn btn-primary" href="#impact">Explore my work <span className="arr">→</span></a>
-          <a className="btn btn-lios" href="/lios/">Discover L//IOS <span className="arr">→</span></a>
-        </div>
-        <div className="hero-foot">
-          {focus.map(f => (
-            <article key={f.k}>
-              <span className="eyebrow"><b>//</b>{f.k}</span>
-              <h2>{f.title}</h2>
-              <p>{f.body}</p>
-            </article>
+        <dl className="proof" aria-label="Selected outcomes">
+          {metrics.map(m => (
+            <div key={m.label}>
+              <dt>{m.label}</dt>
+              <dd><span className="v">{m.value}</span><span className="n">{m.note}</span></dd>
+            </div>
           ))}
-        </div>
+        </dl>
       </div>
     </section>
   );
 }
 
-function About() {
+function Story() {
   return (
-    <section className="section" id="about" aria-labelledby="about-h">
+    <section className="section story" id="about" aria-labelledby="about-h">
       <div className="wrap">
-        <SectionHead eyebrow="About" title={<span id="about-h">From building websites to building <span className="serif">intelligence</span>.</span>} />
-        <div className="about-grid">
-          <div className="about-copy rv">
-            <p>{site.intro}</p>
-            {about.map(p => <p key={p.slice(0, 20)}>{p}</p>)}
+        <div className="story-grid">
+          <div className="rv">
+            <Eyebrow>About</Eyebrow>
+            <h2 id="about-h" className="h-display">{story.statement}</h2>
           </div>
-          <ol className="evo" aria-label="Career progression">
-            {evolution.map(e => (
-              <li key={e.stage} className="rv">
-                <span className="yr">{e.years}</span>
-                <div>
-                  <h3>{e.stage}</h3>
-                  <p>{e.text}</p>
-                </div>
-                <span className="evo-bar" aria-hidden="true" />
-              </li>
-            ))}
-          </ol>
+          <div className="story-copy rv">
+            <p className="lead">{site.intro}</p>
+            {story.paragraphs.map(p => <p key={p.slice(0, 18)}>{p}</p>)}
+          </div>
         </div>
+        <ol className="arc rv" aria-label="Career arc">
+          {arc.map((a, i) => (
+            <li key={a.stage} style={{ ['--i' as string]: i }} className={i === arc.length - 1 ? 'now' : undefined}>
+              <span className="arc-node" aria-hidden="true" />
+              <span className="arc-when">{a.when}</span>
+              <h3>{a.stage}</h3>
+              <p>{a.text}</p>
+            </li>
+          ))}
+        </ol>
+        <figure className="why rv">
+          <p className="why-lead">{story.why.lead}</p>
+          <blockquote>{story.why.q}</blockquote>
+          <figcaption>{story.why.tail} <a className="link-arrow" href="#lios">See L//IOS <span className="arr" aria-hidden="true">↓</span></a></figcaption>
+        </figure>
       </div>
     </section>
   );
 }
+
+const T0 = 2015, T1 = 2026.9;
+const pos = (t: number) => ((t - T0) / (T1 - T0)) * 100;
 
 function Experience() {
   const [sel, setSel] = useState(experience[0].id);
   const r = experience.find(x => x.id === sel)!;
+  const order = [...experience].sort((a, b) => a.from - b.from);
+  const move = (dir: number) => {
+    const i = order.findIndex(x => x.id === sel);
+    const n = order[(i + dir + order.length) % order.length];
+    setSel(n.id);
+    document.getElementById(`tl-${n.id}`)?.focus();
+  };
+  const years = Array.from({ length: 12 }, (_, i) => T0 + i);
   return (
     <section className="section" id="experience" aria-labelledby="xp-h">
       <div className="wrap">
-        <SectionHead eyebrow="Experience" title={<span id="xp-h">Where the business meets the build.</span>} lede="I sit between business requirements and technical execution: understanding what a markets team needs, then building and validating the systems that deliver it." />
-        <div className="xp">
-          <ul className="xp-list rv" role="tablist" aria-label="Career timeline" aria-orientation="vertical">
-            {experience.map(x => (
-              <li key={x.id} className="xp-item">
-                <button role="tab" id={`tab-${x.id}`} aria-controls="xp-panel" aria-selected={sel === x.id} onClick={() => setSel(x.id)}
-                  onKeyDown={e => {
-                    const i = experience.findIndex(y => y.id === sel);
-                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                      e.preventDefault();
-                      const n = experience[(i + (e.key === 'ArrowDown' ? 1 : experience.length - 1)) % experience.length];
-                      setSel(n.id); document.getElementById(`tab-${n.id}`)?.focus();
-                    }
-                  }}>
-                  <span className="xp-when">{x.when}</span>
-                  <span className="xp-title">{x.title}</span>
-                  <span className="xp-org">{x.org}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          <div className="xp-panel rv" id="xp-panel" role="tabpanel" aria-labelledby={`tab-${r.id}`}>
-            <div key={r.id} className="xp-anim">
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                <span className="xp-when">{r.when}</span>
-                {r.flag && <Review>{r.flag}</Review>}
-              </div>
+        <div className="sec-head rv">
+          <Eyebrow>Experience</Eyebrow>
+          <h2 id="xp-h" className="h-section">Where the business meets the build.</h2>
+          <p className="lede">I bridge business requirements and technical execution: understanding what a markets team needs, then building and validating the systems that deliver it.</p>
+        </div>
+        <div className="tl rv" role="tablist" aria-label="Career timeline, 2015 to today" onKeyDown={e => {
+          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+        }}>
+          <div className="tl-axis" aria-hidden="true">
+            {years.map(yv => <span key={yv} style={{ left: `${pos(yv)}%` }}>{yv}</span>)}
+          </div>
+          {order.map(x => {
+            const to = x.to === null ? T1 : x.to;
+            const isBand = to !== undefined;
+            return (
+              <button key={x.id} id={`tl-${x.id}`} role="tab" aria-selected={sel === x.id} aria-controls="tl-panel" tabIndex={sel === x.id ? 0 : -1}
+                className={`tl-item tl-${x.kind}${isBand ? ' band' : ' point'}`}
+                style={{ left: `${pos(x.from)}%`, ...(isBand ? { width: `${pos(to!) - pos(x.from)}%` } : {}) }}
+                onClick={() => setSel(x.id)}>
+                <span className="tl-mark" aria-hidden="true" />
+                <span className="tl-label"><b>{x.title}</b><span>{x.org} · {x.when}</span></span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="tl-panel" id="tl-panel" role="tabpanel" aria-labelledby={`tl-${r.id}`}>
+          <div key={r.id} className="xp-anim tl-panel-in">
+            <div>
+              <span className="mono muted">{r.when}</span>
               <h3>{r.title}</h3>
-              <div className="org">{r.org}</div>
+              <p className="org">{r.org} {r.flag && <Review>{r.flag}</Review>}</p>
+            </div>
+            <div>
               <p className="sum">{r.summary}</p>
-              {r.points.length > 0 && <ul className="xp-points">{r.points.map(p => <li key={p}>{p}</li>)}</ul>}
+              {r.points.length > 0 && <ul className="scope" aria-label="Scope">{r.points.map(p => <li key={p}>{p}</li>)}</ul>}
             </div>
           </div>
         </div>
@@ -164,40 +183,41 @@ function Experience() {
 }
 
 function Impact() {
-  const steps = [['Ingest', 'source feeds'], ['Reconcile', 'match & align'], ['Validate', 'rules engine'], ['Resolve', 'exceptions'], ['Report', 'certified output']];
+  const [sel, setSel] = useState(cases[0].id);
+  const c = cases.find(x => x.id === sel)!;
+  const rows: [string, string][] = [['Problem', c.problem], ['My contribution', c.contribution], ['Approach', c.approach], ['Impact', c.impact]];
   return (
-    <section className="section" id="impact" aria-labelledby="impact-h">
+    <section className="section impact" id="impact" aria-labelledby="impact-h">
       <div className="wrap">
-        <SectionHead
-          eyebrow="Impact"
-          review={<Review>Employer metrics</Review>}
-          title={<span id="impact-h">Reliable data, less manual work, <span className="serif">clearer</span> answers.</span>}
-          lede="Selected outcomes from my work in Capital Markets, described in general terms. No client, trade or proprietary detail is shown."
-        />
-        <div className="metrics rv">
-          {metrics.map(m => (
-            <div key={m.label} className="metric">
-              <span className="v">{m.value}</span>
-              <span className="l">{m.label}</span>
-              <span className="n">{m.note}</span>
-            </div>
-          ))}
+        <div className="sec-head rv">
+          <Eyebrow review={<Review>Employer metrics</Review>}>Impact</Eyebrow>
+          <h2 id="impact-h" className="h-section">Reliable data, less manual work, <span className="serif">clearer</span> answers.</h2>
+          <p className="lede">Four pieces of work from Capital Markets, described in general terms. No client, trade or proprietary detail is shown.</p>
         </div>
-        <div className="cases">
-          {cases.map(c => (
-            <article key={c.title} className="case rv">
-              <span className="eyebrow"><b>//</b>{c.k}</span>
-              <h3>{c.title}</h3>
-              <p>{c.body}</p>
-              <div className="chips">{c.tags.map(t => <span key={t} className="chip">{t}</span>)}</div>
-            </article>
-          ))}
-        </div>
-        <div className="flow rv" aria-label="How a data control framework works, in general terms">
-          <span className="eyebrow">How I approach a data control framework · general pattern</span>
-          <div className="flow-steps">
-            {steps.map(([b, s], i) => <div key={b} className="flow-step" style={{ ['--i' as string]: i }}><b>{b}</b><span>{s}</span></div>)}
+        <div className="cs rv">
+          <div className="cs-list" role="tablist" aria-label="Case studies" aria-orientation="vertical">
+            {cases.map((x, i) => (
+              <button key={x.id} id={`cs-${x.id}`} role="tab" aria-selected={sel === x.id} aria-controls="cs-panel" onClick={() => setSel(x.id)}>
+                <span className="cs-n">{String(i + 1).padStart(2, '0')}</span>
+                <span><span className="cs-k">{x.k}</span><span className="cs-t">{x.title}</span></span>
+              </button>
+            ))}
           </div>
+          <article className="cs-panel" id="cs-panel" role="tabpanel" aria-labelledby={`cs-${c.id}`}>
+            <div key={c.id} className="xp-anim">
+              <h3>{c.title}</h3>
+              <dl>{rows.map(([k, v]) => <div key={k} className={k === 'Impact' ? 'hl' : undefined}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+              <div className="chips">{c.tags.map(t => <span key={t} className="chip">{t}</span>)}</div>
+            </div>
+          </article>
+        </div>
+        <div className="flow rv" aria-label="The general pattern I use for data controls">
+          <span className="eyebrow">The pattern behind it · general, not employer-specific</span>
+          <ol className="flow-steps">
+            {[['Ingest', 'source feeds'], ['Reconcile', 'match & align'], ['Validate', 'rules engine'], ['Resolve', 'exceptions'], ['Report', 'certified output']].map(([b, s], i) => (
+              <li key={b} className="flow-step" style={{ ['--i' as string]: i }}><b>{b}</b><span>{s}</span></li>
+            ))}
+          </ol>
         </div>
       </div>
     </section>
@@ -209,7 +229,10 @@ function Expertise() {
   return (
     <section className="section" id="expertise" aria-labelledby="exp-h">
       <div className="wrap">
-        <SectionHead eyebrow="Expertise" title={<span id="exp-h">Markets knowledge, data discipline, and the tools to build.</span>} />
+        <div className="sec-head rv">
+          <Eyebrow>Expertise</Eyebrow>
+          <h2 id="exp-h" className="h-section">Markets knowledge, data discipline, and the tools to build.</h2>
+        </div>
         <div className="kit rv">
           {expertise.map(g => (
             <div key={g.group} className="kit-col">
@@ -219,7 +242,7 @@ function Expertise() {
           ))}
         </div>
         <div className="kit-legend">
-          {levels.map(([l, d]) => <span key={l} className="muted" style={{ fontSize: '0.85rem', display: 'inline-flex', gap: 8, alignItems: 'center' }}><span className={`lvl lvl-${l}`}>{l}</span>{d}</span>)}
+          {levels.map(([l, d]) => <span key={l}><span className={`lvl lvl-${l}`}>{l}</span>{d}</span>)}
         </div>
       </div>
     </section>
@@ -227,13 +250,12 @@ function Expertise() {
 }
 
 function Lios() {
-  const P = [IntelligencePreview, HealthPreview, DataPreview];
   return (
     <section className="section lios-sec" id="lios" aria-labelledby="lios-h">
       <div className="wrap">
-        <div className="eyebrow rv" style={{ marginBottom: 20 }}><b style={{ color: 'var(--lios)' }}>//</b>Independent project · Flagship</div>
+        <Eyebrow tone="lios">Independent project · Flagship</Eyebrow>
         <div className="lios-intro">
-          <h2 id="lios-h" className="rv"><span className="wordmark" aria-label="L//IOS">L<span className="sl">//</span>IOS</span></h2>
+          <h2 id="lios-h" className="rv"><span className="wordmark">L<span className="sl">//</span>IOS</span><span className="sr-only">: {lios.tagline}</span></h2>
           <div className="rv">
             <p className="tag">{lios.tagline}</p>
             <p>{lios.statement}</p>
@@ -246,23 +268,35 @@ function Lios() {
             <figcaption className="eyebrow">The idea behind L//IOS</figcaption>
           </div>
         </figure>
-        <div className="pillars">
-          {lios.pillars.map((p, i) => {
-            const Prev = P[i];
-            return (
-              <a key={p.id} href={`/lios/#${p.id}`} className="pillar rv" style={{ textDecoration: 'none' }}>
-                <div className="pillar-top"><span className="eyebrow">{p.short}</span><Status s={p.status} /></div>
-                <h3>{p.name}<small>{p.line}</small></h3>
-                <div style={{ minHeight: 0 }}>{i === 1 ? <HealthPreview single /> : <Prev compact />}</div>
-                <p>{p.body}</p>
-                <span className="link-arrow">Explore {p.short} <span className="arr">→</span></span>
-              </a>
-            );
-          })}
+        <div className="feature rv">
+          <div className="feature-copy">
+            <div className="pillar-top"><span className="eyebrow eyebrow-lios"><b aria-hidden="true">//</b>01 · {lios.pillars[0].line}</span><Status s={lios.pillars[0].status} /></div>
+            <h3>{lios.pillars[0].name}</h3>
+            <p>{lios.pillars[0].body}</p>
+            <p className="app-flow mono">{lios.pillars[0].flow}</p>
+            <ul className="proof-list">{lios.pillars[0].proof.slice(0, 3).map(x => <li key={x}>{x}</li>)}</ul>
+            <div className="lios-ctas" style={{ marginTop: 6 }}>
+              <a className="link-arrow" href="/lios/#data">See it in depth <span className="arr" aria-hidden="true">→</span></a>
+              <a className="link-arrow" href="#lab">Try it in miniature <span className="arr" aria-hidden="true">↓</span></a>
+            </div>
+          </div>
+          <div className="feature-shot"><Shot shot={lios.pillars[0].shots[0]} sizes="(max-width: 960px) 100vw, 58vw" /></div>
         </div>
-        <div style={{ marginTop: 32, display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-          <a className="btn btn-lios" href="/lios/">Open the L//IOS project page <span className="arr">→</span></a>
-          <a className="link-arrow" href="#lab">Try the Intelligence Lab <span className="arr">↓</span></a>
+        <div className="pillars two">
+          {lios.pillars.slice(1).map((p, n) => (
+            <a key={p.id} href={`/lios/#${p.id}`} className={`pillar rv pillar-${p.id}`}>
+              <div className="pillar-top"><span className="eyebrow">0{n + 2} · {p.short}</span><Status s={p.status} /></div>
+              <h3>{p.name}<small>{p.line}</small></h3>
+              <div className="pillar-prev"><Shot shot={p.shots[0]} sizes="(max-width: 960px) 100vw, 40vw" /></div>
+              <p>{p.body}</p>
+              <span className="link-arrow">Explore {p.short} <span className="arr" aria-hidden="true">→</span></span>
+            </a>
+          ))}
+        </div>
+        <LoopDiagram />
+        <div className="lios-ctas">
+          <a className="btn btn-lios" href="/lios/">Open the L//IOS project page <span className="arr" aria-hidden="true">→</span></a>
+          <a className="link-arrow" href="#lab">Try the Intelligence Lab <span className="arr" aria-hidden="true">↓</span></a>
         </div>
         <p className="disclaimer">{lios.disclaimer}</p>
       </div>
@@ -272,13 +306,13 @@ function Lios() {
 
 function LabSection() {
   return (
-    <section className="section" id="lab" aria-labelledby="lab-h">
+    <section className="section lab-sec" id="lab" aria-labelledby="lab-h">
       <div className="wrap">
-        <SectionHead
-          eyebrow="Intelligence Lab"
-          title={<span id="lab-h">Beyond the dashboard, <span className="serif">in miniature</span>.</span>}
-          lede="A small working demo of the approach behind L//IOS Data Intelligence. Change the filters and the insights recalculate. Click any insight, month or bar to see the records behind it."
-        />
+        <div className="sec-head rv">
+          <Eyebrow>Intelligence Lab</Eyebrow>
+          <h2 id="lab-h" className="h-section">Beyond the dashboard, <span className="serif">in miniature</span>.</h2>
+          <p className="lede">A working demo of the idea behind L//IOS Data Intelligence. Pick a dataset, ask a question, and follow the answer down to the records that prove it.</p>
+        </div>
         <Lab />
       </div>
     </section>
@@ -289,11 +323,14 @@ function Philosophy() {
   return (
     <section className="section philo" id="philosophy" aria-labelledby="philo-h">
       <div className="wrap">
-        <SectionHead eyebrow="How I work" title={<span id="philo-h">Five principles.</span>} />
+        <div className="sec-head rv">
+          <Eyebrow>How I work</Eyebrow>
+          <h2 id="philo-h" className="h-section">Five principles.</h2>
+        </div>
         <ul className="principles">
           {principles.map(p => (
             <li key={p.t} className="rv">
-              <span className="t"><span className="s">//</span>{p.t}</span>
+              <span className="t"><span className="s" aria-hidden="true">//</span>{p.t}</span>
               <span className="d">{p.d}</span>
             </li>
           ))}
@@ -311,13 +348,13 @@ function Projects() {
     const inner = (
       <>
         <span className="cat">{p.cat} · {p.year}</span>
-        <h3>{p.name}{p.img && <img className="thumb" src={p.img} alt="" loading="lazy" width="64" height="40" />}</h3>
+        <h3>{p.name}{p.img && <img className="thumb" src={p.img} alt={`Screenshot of ${p.name}`} loading="lazy" decoding="async" width="64" height="40" />}</h3>
         <p>{p.body}</p>
         <span className="go" aria-hidden="true">{p.href ? '↗' : ''}</span>
       </>
     );
     return (
-      <li className={`proj rv${p.cat === 'Flagship' ? ' flag' : ''}`}>
+      <li className={`proj${p.cat === 'Flagship' ? ' flag' : ''}`}>
         {p.href ? <a href={p.href} {...(p.internal ? {} : { target: '_blank', rel: 'noopener noreferrer' })}>{inner}</a> : <div>{inner}</div>}
       </li>
     );
@@ -325,11 +362,15 @@ function Projects() {
   return (
     <section className="section" id="projects" aria-labelledby="proj-h">
       <div className="wrap">
-        <SectionHead eyebrow="Projects" title={<span id="proj-h">The work, and the path to it.</span>} lede="L//IOS leads. The earlier builds stay as a record of how I learned: the first apps, charts and sites I made." />
+        <div className="sec-head rv">
+          <Eyebrow>Projects</Eyebrow>
+          <h2 id="proj-h" className="h-section">The work, and the path to it.</h2>
+          <p className="lede">L//IOS leads. The earlier builds stay as a record of how I learned: the first apps, charts and sites I made.</p>
+        </div>
         <div className="filters" role="group" aria-label="Filter projects">
           {cats.map(c => <button key={c} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</button>)}
         </div>
-        <ul className="proj-list">{list.map(p => <Row key={p.name} p={p} />)}</ul>
+        <ul className="proj-list" aria-live="polite">{list.map(p => <Row key={p.name} p={p} />)}</ul>
       </div>
     </section>
   );
@@ -341,17 +382,17 @@ function Contact() {
     { k: 'GitHub', v: 'lawryan', href: contact.github },
     { k: 'Email', v: contact.email, href: contact.email ? `mailto:${contact.email}` : '' },
     { k: 'Résumé', v: contact.resume ? 'Download PDF' : '', href: contact.resume },
-  ];
+  ].filter(i => i.href || REVIEW_MODE);
   return (
     <section className="contact" id="contact" aria-labelledby="contact-h">
       <SignalField density={18} />
       <div className="wrap">
-        <div className="eyebrow rv"><b>//</b>Contact</div>
-        <h2 id="contact-h" className="rv" style={{ marginTop: 18 }}>Let’s build something <span className="serif">meaningful</span>.</h2>
-        <p className="muted rv" style={{ marginTop: 20, fontSize: 'var(--step-1)', maxWidth: '34rem' }}>Whether it’s markets data, analytics, automation or applied AI, I’m always glad to compare notes.</p>
-        <div className="contact-links rv" style={{ ['--n' as string]: items.filter(i => i.href || REVIEW_MODE).length }}>
-          {items.filter(i => i.href || REVIEW_MODE).map(i => i.href
-            ? <a key={i.k} href={i.href} {...(i.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}><span className="k">{i.k}</span><span className="v">{i.v} ↗</span></a>
+        <Eyebrow>Contact</Eyebrow>
+        <h2 id="contact-h" className="rv">Let’s build something <span className="serif">meaningful</span>.</h2>
+        <p className="contact-lede rv">Whether it’s markets data, analytics, automation or applied AI, I’m always glad to compare notes.</p>
+        <div className="contact-links rv" style={{ ['--n' as string]: items.length }}>
+          {items.map(i => i.href
+            ? <a key={i.k} href={i.href} {...(i.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}><span className="k">{i.k}</span><span className="v">{i.v} <span aria-hidden="true">↗</span></span></a>
             : <div key={i.k} className="slot"><span className="k">{i.k}</span><span className="v"><Review>Add in content.ts</Review></span></div>)}
         </div>
       </div>
