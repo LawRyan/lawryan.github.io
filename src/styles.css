@@ -981,3 +981,25 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 /* L//IOS name inside headings, tabs and nav: same treatment as the app wordmark */
 .lmark { font-family: var(--f-brand); font-weight: 700; letter-spacing: 0; font-size: 0.92em; white-space: nowrap; }
 .lmark .sl { color: var(--signal); }
+
+/* Review fixes, Oct 2026 */
+.app, .app-stage, .gallery, .app-grid > *, .feature-shot { min-width: 0; }
+.gallery-thumbs { max-width: 100%; }
+@media (max-width: 860px) {
+  /* Case studies: swipeable cards instead of a long stacked list on phones */
+  .cs-list { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; border-top: 0; padding-bottom: 6px; margin: 0 calc(-1 * var(--gutter)); padding-left: var(--gutter); padding-right: var(--gutter); scroll-padding-left: var(--gutter); scrollbar-width: none; }
+  .cs-list::-webkit-scrollbar { display: none; }
+  .cs-list button { flex: 0 0 min(72%, 260px); scroll-snap-align: start; border: 1px solid var(--line-2); border-radius: 12px; padding: 14px 14px; grid-template-columns: 1.8rem minmax(0, 1fr); }
+  .cs-list button:hover { padding-left: 14px; }
+  .cs-list button[aria-selected='true'] { padding-left: 14px; border-color: var(--signal); }
+}
+@media (max-width: 560px) {
+  /* Expertise: two skills per row, level shown by its dot (legend below) */
+  .kit-col ul { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; }
+  .kit-col li { justify-content: flex-start; align-items: baseline; gap: 8px; font-size: 0.9rem; padding: 9px 0; }
+  .kit-col li .lvl { order: -1; transform: translateY(-1px); }
+  .kit-col li .lvl { font-size: 0; gap: 0; flex: none; }
+  .kit-col li .lvl::before { width: 7px; height: 7px; }
+  .kit-col { padding: 20px 18px 22px; gap: 12px; }
+}
+.cs > * { min-width: 0; }

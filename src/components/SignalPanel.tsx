@@ -100,7 +100,7 @@ export default function SignalPanel() {
       <dl className="sigp-read">
         <div><dt>Trend</dt><dd className={live >= 0 ? 'up' : 'down'}>{k > WIN ? `${live >= 0 ? '+' : ''}${live.toFixed(1)}%` : '—'}</dd></div>
         <div><dt>Outlier</dt><dd className={flagged ? 'watch' : ''}>{flagged ? `z = ${z[flag].toFixed(1)}` : 'scanning'}</dd></div>
-        <div><dt>Next step</dt><dd>{flagged ? 'Review point ' + (flag + 1) : '—'}</dd></div>
+        <div><dt>Next step</dt><dd>{flagged ? 'Review #' + (flag + 1) : '—'}</dd></div>
       </dl>
     </figure>
   );

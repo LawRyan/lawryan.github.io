@@ -186,7 +186,7 @@ function Impact() {
         <div className="sec-head rv">
           <Eyebrow review={<Review>Employer metrics</Review>}>Impact</Eyebrow>
           <h2 id="impact-h" className="h-section">Reliable data, less manual work, <span className="serif">clearer</span> answers.</h2>
-          <p className="lede">Four pieces of work from Capital Markets, described in general terms. No client, trade or proprietary detail is shown.</p>
+          <p className="lede">Selected work from Capital Markets, described in general terms. No client, trade or proprietary detail is shown.</p>
         </div>
         <div className="cs rv">
           <div className="cs-list" role="tablist" aria-label="Case studies" aria-orientation="vertical">
