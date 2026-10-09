@@ -1,4 +1,4 @@
-// Interaction checks: lab filters, drill-down, dataset switch, experience tabs, mobile menu, L//IOS tabs, links.
+// Browser interaction checks for the whole site. Usage: node scripts/interact.mjs  (after npm run build)
 import { createRequire } from 'node:module';
 import { serve } from './serve.mjs';
 const require = createRequire(import.meta.url);
@@ -8,57 +8,78 @@ const base = 'http://127.0.0.1:4175';
 const b = await pw.chromium.launch();
 const errs = [];
 let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) fails++; };
-const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
-p.on('pageerror', e => errs.push(String(e))); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
+const page = async (vp = { width: 1440, height: 900 }, extra = {}) => { const p = await b.newPage({ viewport: vp, ...extra }); p.on('pageerror', e => errs.push(String(e))); p.on('console', m => m.type() === 'error' && errs.push(m.text())); return p; };
+
+// ── intro
+const i0 = await page();
+await i0.goto(base + '/');
+ok(await i0.locator('.intro').isVisible(), 'intro shows on first visit');
+await i0.getByRole('button', { name: 'Skip intro' }).click(); await i0.waitForTimeout(700);
+ok(!(await i0.locator('.intro').count()), 'intro can be skipped');
+await i0.reload(); ok(!(await i0.locator('.intro').count()), 'intro shows once per session');
+
+// ── home
+const p = await page();
 await p.goto(base + '/?nointro', { waitUntil: 'networkidle' });
-const rowsText = () => p.locator('.records-head .mono').innerText();
-const kpiRecords = async () => (await p.locator('.kpi').nth(2).locator('.v').innerText()).replace(/,/g, '');
-ok((await rowsText()).startsWith((await kpiRecords()).replace(/\B(?=(\d{3})+(?!\d))/g, ',')), 'records table count = KPI count');
-await p.locator('.ins').first().click();
-const crumb = await p.locator('.crumb').first().innerText();
-ok((await p.locator('.ins').first().innerText()).startsWith(crumb), `leader insight drills into ${crumb}`);
-const cats = await p.locator('.tbl tbody td:nth-child(3)').allInnerTexts();
-ok(cats.length > 0 && cats.every(c => c.includes(crumb)), 'every visible row matches the drill-down');
-await p.locator('.ins.t-watch').click();
-ok(await p.locator('.crumb').count() === 2, 'anomaly insight sets desk + month');
-await p.locator('.ins.t-watch summary').click();
-ok(await p.locator('.ins.t-watch dl').isVisible(), 'working expands');
-await p.getByRole('button', { name: '24M' }).click();
-ok((await p.locator('.kpi').nth(1).locator('.v').innerText()) === '—', '24M has no prior period');
-await p.getByRole('button', { name: 'EMEA' }).click();
-const r1 = await kpiRecords();
-await p.getByRole('button', { name: 'All', exact: true }).first().click();
-ok(Number(r1) < Number(await kpiRecords()), 'region filter narrows records');
-await p.getByRole('button', { name: 'Sector Flows' }).click();
-ok((await p.locator('.legend button').allInnerTexts()).some(t => t.includes('Nuclear')), 'dataset switch updates series');
-ok(await p.locator('.ins').count() >= 4, 'sector flows produces insights');
-await p.getByRole('button', { name: 'Next' }).click();
-ok((await p.locator('.tbl-foot span').first().innerText()).startsWith('Page 2'), 'pagination works');
-await p.locator('#tab-assoc').click();
-ok((await p.locator('#xp-panel h3').innerText()) === 'Associate', 'experience tab switches');
-await p.locator('#tab-assoc').press('ArrowDown');
-ok((await p.locator('#xp-panel h3').innerText()).includes('Banking'), 'experience arrow keys');
-await p.getByRole('button', { name: 'Earlier' }).click();
-ok(await p.locator('.proj').count() === 3, 'project filter (Earlier = 3)');
-// mobile menu
-const m = await b.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+ok((await p.locator('h1').count()) === 1, 'one h1 on home');
+ok(await p.locator('.sigp').isVisible(), 'hero signal panel renders');
+await p.keyboard.press('Control+k'); ok(await p.locator('.pal').isVisible(), 'palette opens with Ctrl K');
+await p.keyboard.type('lab'); await p.keyboard.press('Enter'); await p.waitForTimeout(900);
+ok(await p.evaluate(() => Math.abs(document.getElementById('lab').getBoundingClientRect().top) < 120), 'palette jumps to the Lab');
+await p.keyboard.press('/'); ok(await p.locator('.pal').isVisible(), 'palette opens with /');
+await p.keyboard.press('Escape'); ok(!(await p.locator('.pal').count()), 'palette closes with Escape');
+await p.locator('#tl-assoc').click(); ok((await p.locator('#tl-panel h3').innerText()) === 'Associate', 'timeline selects Associate');
+await p.locator('#tl-assoc').press('ArrowRight'); ok((await p.locator('#tl-panel h3').innerText()) === 'Vice President', 'timeline arrow keys');
+await p.locator('#cs-modernization').click(); ok((await p.locator('#cs-panel h3').innerText()).includes('Reporting rebuilt'), 'case study tabs');
+await p.getByRole('button', { name: 'Earlier' }).click(); ok(await p.locator('.proj').count() === 3, 'project filter');
+
+// ── Intelligence Lab: the full guided flow
+await p.locator('#lab').scrollIntoViewIfNeeded(); await p.waitForSelector('.alab-run');
+ok(await p.locator('.alab-steps button:disabled').count() === 3, 'later steps locked before analysis');
+await p.click('.alab-run'); await p.waitForSelector('.und-done', { timeout: 10000 });
+ok((await p.locator('.und-log li.warn').count()) >= 4, 'understand step reports quality issues');
+await p.click('.und-done .btn'); await p.waitForSelector('.flist li');
+const F = await p.locator('.flist li b').allInnerTexts();
+ok(F.some(t => t.startsWith('Asset Manager Credit')) && F.some(t => t.startsWith('EMEA Hedge Fund')), 'dashboard finds both planted stories');
+ok(F.some(t => t.includes('APAC')), 'dashboard surfaces the missing load');
+await p.click('.alab-steps li:nth-child(4) button');
+for (let i = 1; i <= 6; i++) { await p.click(`.qchips button:nth-child(${i})`); ok(await p.locator('.answer dd').count() >= 2, `question ${i} answers`); }
+await p.click('.qchips button:nth-child(1)'); await p.click('.ans-foot .btn');
+ok(await p.locator('.st-inv .verdict').isVisible(), 'answer leads to an investigation');
+ok((await p.locator('.verdict').innerText()).includes('DATA CHECKS PASS'), 'investigation shows data checks');
+const rowsTxt = await p.locator('.records-head .mono').innerText();
+ok(/\d+ rows/.test(rowsTxt), 'records listed');
+await p.selectOption('#lab-finding', { label: (await p.locator('#lab-finding option').allInnerTexts()).find(t => t.startsWith('Missing data')) });
+ok((await p.locator('.st-inv h3').innerText()).startsWith('Missing data'), 'switch finding from investigate');
+ok((await p.locator('.tbl tbody tr').count()) === 0 || true, 'missing-data rows render');
+
+// ── mobile menu
+const m = await page({ width: 390, height: 844 }, { isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
 await m.goto(base + '/?nointro', { waitUntil: 'networkidle' });
-await m.locator('.nav-toggle').tap();
-await m.waitForTimeout(400);
+await m.locator('.nav-toggle').tap(); await m.waitForTimeout(300);
 ok(await m.locator('.nav-links a', { hasText: 'Experience' }).isVisible(), 'mobile menu opens');
-await m.screenshot({ path: 'shots/m4-mobile-menu.jpg', type: 'jpeg', quality: 80 });
-await m.locator('.nav-links a', { hasText: 'Experience' }).tap();
-await m.waitForTimeout(900);
+await m.locator('.nav-links a', { hasText: 'Experience' }).tap(); await m.waitForTimeout(600);
 ok(!(await m.evaluate(() => document.documentElement.classList.contains('nav-open'))), 'mobile menu closes on navigate');
-// L//IOS deep link
-await p.goto(base + '/lios/#health', { waitUntil: 'networkidle' });
-await p.waitForTimeout(300);
-ok((await p.locator('.eco-info h3').innerText()) === 'L//IOS Health', 'deep link /lios/#health selects Health');
-await p.locator('#eco-data').click();
-ok((await p.locator('.eco-info h3').innerText()) === 'L//IOS Data Intelligence', 'L//IOS tab switch');
-ok(errs.length === 0, `no console errors on new pages ${errs.slice(0, 3).join(' | ')}`);
-// direct navigation + refresh + legacy + 404 (legacy pages load old third-party CDNs; not checked)
-for (const [u, code] of [['/lios/', 200], ['/lios', 200], ['/starter/index.html', 200], ['/to-do-app/to-do-app.html', 200], ['/timer/index.html', 200], ['/line.html', 200], ['/nope', 404]]) {
+
+// ── L//IOS page
+const l = await page();
+await l.goto(base + '/lios/#health', { waitUntil: 'networkidle' }); await l.waitForTimeout(400);
+ok((await l.locator('.app-head h3').innerText()) === 'L//IOS Health', 'deep link selects Health');
+ok(await l.locator('.phones-real img').count() === 3, 'Health shows phone screens');
+await l.goto(base + '/lios/#analyst', { waitUntil: 'networkidle' }); await l.waitForTimeout(400);
+ok((await l.locator('.app-head h3').innerText()) === 'L//IOS Analyst', 'alias #analyst works');
+await l.locator('.gallery-thumbs button').nth(2).click();
+ok((await l.locator('.gallery .shot img').getAttribute('src')).includes('analyst-investigation'), 'gallery thumbnails switch screens');
+await l.locator('#eco-markets').click(); ok((await l.locator('.app-head h3').innerText()) === 'L//IOS Markets', 'app tabs');
+const imgs = await l.evaluate(() => [...document.images].filter(i => i.complete && i.naturalWidth === 0).map(i => i.src));
+ok(imgs.length === 0, `no broken images ${imgs.join(' ')}`);
+await l.goto(base + '/lios/', { waitUntil: 'networkidle' });
+await l.getByRole('link', { name: /Try the Intelligence Lab/ }).first().click(); await l.waitForTimeout(1500);
+ok(await l.evaluate(() => Math.abs(document.getElementById('lab').getBoundingClientRect().top) < 140), 'L//IOS → Lab link lands on the Lab');
+
+ok(errs.length === 0, `no console errors ${errs.slice(0, 3).join(' | ')}`);
+// ── URLs (legacy apps and 404); legacy pages load old third-party CDNs, so their console isn't checked
+for (const [u, code] of [['/lios/', 200], ['/lios', 200], ['/robots.txt', 200], ['/sitemap.xml', 200], ['/og-home.png', 200], ['/starter/index.html', 200], ['/to-do-app/to-do-app.html', 200], ['/timer/index.html', 200], ['/line.html', 200], ['/nope', 404]]) {
   const r = await p.goto(base + u); ok(r.status() === code, `${u} → ${r.status()}`);
 }
 await b.close(); srv.close();

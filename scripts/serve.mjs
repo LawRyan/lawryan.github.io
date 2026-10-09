@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 const root = 'dist';
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.JPG': 'image/jpeg', '.woff2': 'font/woff2', '.txt': 'text/plain', '.pdf': 'application/pdf' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.JPG': 'image/jpeg', '.woff2': 'font/woff2', '.txt': 'text/plain', '.pdf': 'application/pdf', '.xml': 'application/xml', '.webp': 'image/webp' };
 export function serve(port = 4173) {
   return new Promise(res => {
     const s = createServer(async (req, rsp) => {

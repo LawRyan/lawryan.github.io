@@ -11,12 +11,12 @@ const pages = [
   {
     entry: 'src/main-home.tsx', out: 'index.html', path: '/', og: 'home',
     title: 'Ryan Law — Capital Markets, Data & Intelligence',
-    desc: 'Ryan Law, Vice President at RBC Capital Markets. Reporting, data quality, analytics and automation — and L//IOS, an independent ecosystem of intelligent applications.',
+    desc: 'Ryan Law, Vice President at RBC Capital Markets: reporting, data quality, analytics and automation. Creator of L//IOS, independent software that understands data and shows its working.',
   },
   {
     entry: 'src/main-lios.tsx', out: 'lios/index.html', path: '/lios/', og: 'lios',
     title: 'L//IOS — An Operating System for Insight',
-    desc: 'L//IOS is an independent project by Ryan Law: intelligent applications for markets research, personal performance and analytics that explains itself.',
+    desc: 'L//IOS is an independent project by Ryan Law: L//IOS Analyst for data intelligence, L//IOS Markets for research, and L//IOS Health on Android. Real screenshots, demo data.',
   },
 ];
 
