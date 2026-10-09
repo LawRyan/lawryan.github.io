@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   REVIEW_MODE, site, contact, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
+import HeroSignals from '../components/HeroSignals';
 import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
 import SignalPanel from '../components/SignalPanel';
 import LoopDiagram from '../components/LoopDiagram';
@@ -25,6 +26,7 @@ export default function Home() {
     <>
       <Intro />
       <a className="skip" href="#main">Skip to content</a>
+      <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
       <Nav items={HOME_NAV} home="#home" />
       <main id="main">
         <Hero />
@@ -57,7 +59,7 @@ function useHashOnLoad() {
 function Hero() {
   return (
     <section className="hero" id="home" aria-labelledby="hero-h">
-      <SignalField />
+      <HeroSignals />
       <div className="wrap">
         <div className="hero-grid">
           <div className="hero-copy">

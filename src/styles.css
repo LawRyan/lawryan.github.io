@@ -132,7 +132,7 @@ p { margin: 0; text-wrap: pretty; }
 /* ───────── Hero ───────── */
 .hero { position: relative; padding-block: clamp(56px, 10vh, 120px) clamp(48px, 8vh, 96px); overflow: hidden; isolation: isolate; }
 .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
-.hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(80% 60% at 20% 30%, rgba(9,12,17,0.0), rgba(9,12,17,0.65) 70%), linear-gradient(180deg, rgba(9,12,17,0) 60%, var(--bg) 100%); pointer-events: none; }
+.hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(80% 60% at 20% 30%, rgba(9,12,17,0.0), rgba(9,12,17,0.35) 75%), linear-gradient(180deg, rgba(9,12,17,0) 82%, var(--bg) 100%); pointer-events: none; }
 .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-bottom: 36px; }
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 4px var(--signal-dim); }
 .hero-name { font-family: var(--f-mono); font-size: 0.9rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--silver); margin-bottom: 22px; }
@@ -1044,3 +1044,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-var
 .pick-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 10px; }
 .pick-list button { border: 1px solid var(--line); border-radius: 10px; padding: 14px 14px; height: 100%; align-items: start; }
 .pick-list button:hover { border-color: var(--line-2); }
+
+/* Aurora: very soft cyan/lavender light drifting behind the page */
+.aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.aurora i { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; opacity: 0.2; will-change: transform; }
+.aurora i:nth-child(1) { background: radial-gradient(circle, rgba(111,211,242,0.9) 0%, rgba(111,211,242,0.25) 35%, transparent 68%); top: -22vmax; left: -12vmax; animation: aur1 46s ease-in-out infinite alternate; }
+.aurora i:nth-child(2) { background: radial-gradient(circle, rgba(183,168,255,0.9) 0%, rgba(183,168,255,0.25) 35%, transparent 68%); top: 18vh; right: -24vmax; opacity: 0.14; animation: aur2 58s ease-in-out infinite alternate; }
+.aurora i:nth-child(3) { background: radial-gradient(circle, rgba(63,143,176,0.9) 0%, rgba(63,143,176,0.25) 35%, transparent 68%); bottom: -30vmax; left: 22vw; opacity: 0.12; animation: aur3 64s ease-in-out infinite alternate; }
+@keyframes aur1 { to { transform: translate(18vw, 14vh) scale(1.15); } }
+@keyframes aur2 { to { transform: translate(-16vw, 20vh) scale(0.9); } }
+@keyframes aur3 { to { transform: translate(-14vw, -18vh) scale(1.2); } }
+main, footer { position: relative; z-index: 1; }
+@media (max-width: 760px) { .aurora i { opacity: 0.14; } }
+@media (prefers-reduced-motion: reduce) { .aurora i { animation: none; } }
