@@ -447,9 +447,9 @@ export interface Project {
   internal?: boolean;
 }
 export const projects: Project[] = [
-  { name: 'LEI validator', cat: 'Data Analytics', year: '2018', body: 'At work: a Legal Entity Identifier validator that checks entities against the GLEIF API and flags invalid ones.', tags: ['JavaScript', 'API', 'Data quality'] },
   { name: 'L//IOS', cat: 'Flagship', year: 'Ongoing', body: 'Three applications: L//IOS Analyst for data intelligence, L//IOS Markets for research, and L//IOS Health on Android.', tags: ['TypeScript', 'React', 'Kotlin', 'SQLite'], href: '/lios/', internal: true },
   { name: 'Intelligence Lab', cat: 'Experimental', year: '2026', body: 'A browser-sized version of L//IOS Analyst: it reads a set of synthetic files, checks them, and investigates what changed.', tags: ['TypeScript', 'Analytics', 'Synthetic data'], href: '#lab', internal: true },
+  { name: 'LEI validator', cat: 'Data Analytics', year: '2018', body: 'At work: a Legal Entity Identifier validator that checks entities against the GLEIF API and flags invalid ones.', tags: ['JavaScript', 'API', 'Data quality'] },
   { name: 'JavaScript chart studies', cat: 'Data Analytics', year: 'Earlier', body: 'Early experiments visualizing data in the browser with D3 and C3.', tags: ['D3', 'C3', 'JavaScript'], href: '/line.html' },
   { name: 'ShipSimple', cat: 'Web Development', year: 'Earlier', body: 'Front end for an e-commerce shipping startup.', tags: ['HTML', 'Sass', 'JavaScript', 'Bootstrap'], href: 'http://www.shipsimple.io/', img: '/legacy-assets/shipsimple-white.JPG' },
   { name: 'Responsive travel site', cat: 'Web Development', year: '2018', body: 'A single-page site built from a PSD design, fully responsive across screen sizes.', tags: ['HTML', 'CSS', 'JavaScript'], img: '/legacy-assets/p2-white.JPG' },

@@ -357,7 +357,7 @@ function Projects() {
     const inner = (
       <>
         <span className="cat">{p.cat} · {p.year}</span>
-        <h3>{p.name}{p.img && <img className="thumb" src={p.img} alt={`Screenshot of ${p.name}`} loading="lazy" decoding="async" width="64" height="40" />}</h3>
+        <h3><Brand text={p.name} />{p.img && <img className="thumb" src={p.img} alt={`Screenshot of ${p.name}`} loading="lazy" decoding="async" width="64" height="40" />}</h3>
         <p>{p.body}</p>
         <span className="go" aria-hidden="true">{p.href ? '↗' : ''}</span>
       </>
