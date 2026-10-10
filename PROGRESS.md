@@ -102,3 +102,19 @@ Everything below is on `polish` for Ryan to review; `master` (the live site) is 
 - Safari and Firefox couldn't be tested here (only Chromium is available). Spot-check on an iPhone.
 - Older project thumbnails left as they are (no better source images).
 - Fixed income case study still has no concrete outcome.
+
+## Night 2: Oct 9–10, branch `polish-2` (not published)
+**Try it on your own CSV (Intelligence Lab)**
+- Drop a CSV/TSV (or use a messy sample). It's read by the browser and analysed in a Web Worker; nothing is uploaded or stored.
+- It reports how each column was read (measure, dimension, date, identifier), data-quality checks with their method and the affected rows,
+  a trend if there's a date, the biggest mover by category, and plain-English facts computed from the rows (no AI).
+- Handles quotes, BOMs, CRLF, `;` files with decimal commas, day/month vs month/day dates, two-digit years, up to 10 MB / 200,000 rows / 200 columns.
+- `src/lab/own.ts` + 64 independent checks in `own.test.ts`; browser tests confirm no network requests during analysis.
+
+**Impact**: a small visual per case study from the approved figures (95% and 97% shown indexed, before = 100).
+
+**Phone**: hero lines start once the page is idle. Measured: no single effect drives blocking time; the remaining ~350 ms on a throttled phone is page size + hydration (a bigger restructure; not attempted).
+
+**Review**: an independent review found 2 high, 5 medium and 7 low issues in the CSV feature; all fixed, with regression tests.
+
+**Checks (last run)**: 73 + 64 unit checks; all browser checks; matrix at 1920/1440/768/390/360 clean; accessibility audit clean incl. the own-file report.
