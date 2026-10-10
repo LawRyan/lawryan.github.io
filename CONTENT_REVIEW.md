@@ -43,3 +43,12 @@ site. To change any of it, edit `src/content.ts`, or ask Claude to.
 - **Hero signal panel**: a 64-point synthetic series. The trend and outlier figures are computed live from it.
 - **Intelligence Lab**: three synthetic CSVs generated in the browser (fictional firms, seeded). It plants two stories and five data problems. The engine finds them without being told, and 73 automated checks recompute every figure from the raw rows (`npm test`). It is labelled "Synthetic data · no AI".
 - **L//IOS screenshots**: demo or synthetic data only, as above.
+
+## Overnight copy edits (branch `polish`)
+| # | Change |
+|---|------|
+| 4.1 | Intro: "…explore how AI can change the way we understand information." (removed a repeated "decisions") |
+| 4.2 | About: "…automate what doesn't need a person, and build the validation…" (removed a repeated "repetitive") |
+| 4.3 | KYC case study now says 4,000+ PDFs and 300+ hours, matching the timeline and résumé |
+| 4.4 | Lab intro mentions the new "Watch it run" button |
+| 4.5 | 404 page: "That page isn't in the data." |
