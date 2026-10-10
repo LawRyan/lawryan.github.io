@@ -1,5 +1,6 @@
 // Independent checks for the "own file" profiler. Figures are recomputed from the raw text
 // with simple string handling, not the engine's helpers.
+import { questions, answer, findings } from './ownflow';
 import { analyse, decode, parseDelimited, parseNumber, parseDate, dateOrder, sniffDelimiter, sampleCsv } from './own';
 
 let checks = 0, failures = 0;
@@ -214,6 +215,16 @@ eq(parseDate('19-Sep-03'), Date.UTC(2003, 8, 19), 'd-Mon-yy dates');
 { const t = 'Desk,Revenue\n' + Array.from({ length: 120 }, (_, i) => `D${i % 12},${i + 1}`).join('\n');
   const r = analyse('d.csv', t.length, t); const b = r.dash.breakdowns[0];
   eq([b.items.length, b.otherCount, b.items.reduce((s, x) => s + x.v, 0) + b.others, r.dash.kpis[0].value], [8, 4, 7260, '7,260'], 'breakdown: top 8 plus others adds up to the total'); }
+
+// ── own file through Ask and Investigate
+{ const t = sampleCsv(); const r = analyse('s.csv', t.length, t);
+  const qs = questions(r); eq(qs.map(q => q.id), ['latest', 'concentration', 'growth', 'largest', 'trust'], 'sample: questions fit the columns');
+  for (const q of qs) { const x = answer(r, q.id); ok(x.lines.length >= 2 && x.lines.every(l => l.text && !/undefined|NaN/.test(l.text)), `answer "${q.q}" is complete`); }
+  ok((answer(r, 'largest').rows ?? []).length === 10, 'largest: ten rows to investigate');
+  const F = findings(r); ok(F.length >= 5 && F.every(f => f.rows.every(n => n >= 2 && n <= r.file.rows + 1)), 'findings point at real rows');
+  const g = F.find(f => f.id === 'seg:3:Gizmos'); ok(!!g && g.rows.length === 263 && g.checks!.some(c => !c.pass), 'segment finding runs checks on its own rows'); }
+{ const t = 'Team,Status\n' + Array.from({ length: 30 }, (_, i) => `${['A', 'B', 'C'][i % 3]},${i % 4 ? 'open' : 'closed'}`).join('\n');
+  const r = analyse('c.csv', t.length, t); eq(questions(r).map(q => q.id), ['concentration', 'trust'], 'no dates or amounts: only questions that fit'); }
 
 console.log(`own-file: ${checks} checks, ${failures} failures`);
 if (failures) process.exitCode = 1;
