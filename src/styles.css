@@ -1088,9 +1088,9 @@ main, footer { position: relative; z-index: 1; }
 
 /* Scroll thread: section rail in the left margin, wide screens only */
 .thread { display: none; }
-@media (min-width: 1380px) {
-  .thread { display: block; position: fixed; z-index: 40; top: 22vh; bottom: 22vh; left: calc(50vw - 620px + 6px); width: 2px; opacity: 0; transform: translateX(-6px); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); pointer-events: none; }
-  .thread.on { opacity: 1; transform: none; pointer-events: auto; }
+@media (min-width: 1440px) {
+  .thread { display: block; visibility: hidden; position: fixed; z-index: 40; top: 22vh; bottom: 22vh; left: calc(50vw - 620px + 6px); width: 2px; opacity: 0; transform: translateX(-6px); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease), visibility 0s linear 0.5s; pointer-events: none; }
+  .thread.on { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
   .thread-track { position: absolute; inset: 0; background: var(--line-2); border-radius: 2px; overflow: hidden; }
   .thread-track i { position: absolute; inset: 0; background: linear-gradient(180deg, var(--signal), var(--lios)); transform-origin: top; }
   .thread ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
@@ -1132,3 +1132,9 @@ main, footer { position: relative; z-index: 1; }
   .contact-links a::after { content: ' (' attr(href) ')'; font-size: 9pt; color: #555; }
   @page { margin: 14mm; }
 }
+
+/* Review fixes */
+/* Intro: never cover the page for long, even if scripts are slow or off */
+.intro { animation: introFallback 0.4s ease 3.2s forwards; }
+@keyframes introFallback { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+@media print { .dot-on { background: none; box-shadow: none; border: 5px solid #5b4bb5; width: 0; height: 0; } }

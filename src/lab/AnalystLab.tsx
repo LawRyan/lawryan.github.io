@@ -44,6 +44,18 @@ export default function AnalystLab() {
   const can = (s: Step) => s === 'files' || s === 'understand' || ran;
 
   const [tour, setTour] = useState<number | null>(null);
+  const stopBtn = useRef<HTMLButtonElement>(null);
+  const touring = tour !== null;
+  // keyboard focus: onto Stop when the tour starts, back to the current step when it ends
+  const wasTouring = useRef(false);
+  useEffect(() => {
+    if (touring && !wasTouring.current) stopBtn.current?.focus();
+    if (!touring && wasTouring.current) {
+      const a = document.activeElement;
+      if (!a || a === document.body || top.current?.contains(a)) bar.current?.querySelector<HTMLElement>('[aria-current="step"]')?.focus();
+    }
+    wasTouring.current = touring;
+  }, [touring]);
   useEffect(() => {
     if (tour === null) return;
     const t = TOUR[tour];
@@ -61,7 +73,7 @@ export default function AnalystLab() {
   };
 
   return (
-    <div className="alab rv" ref={top} onPointerDownCapture={stopTour} onKeyDownCapture={stopTour}>
+    <div className="alab rv" ref={top} onPointerDownCapture={stopTour} onKeyDownCapture={e => { if (e.key === 'Escape' && tour !== null) setTour(null); else if (e.key !== 'Tab' && e.key !== 'Shift') stopTour(e); }}>
       <div className="alab-bar">
         <div className="alab-brand"><b>L<span>//</span>IOS</b> <span>Analyst · in miniature</span></div>
         <ol className="alab-steps" aria-label="Demo steps" ref={bar}>
@@ -79,7 +91,7 @@ export default function AnalystLab() {
         <div className="tour-bar" role="status">
           <span className="mono tour-n">Auto-play · {tour + 1} / {TOUR.length}</span>
           <p>{TOUR[tour].cap}</p>
-          <button className="btn tour-stop" onClick={() => setTour(null)}>Stop</button>
+          <button ref={stopBtn} className="btn tour-stop" onClick={() => setTour(null)}>Stop</button>
           <i key={tour} className="tour-prog" style={{ animationDuration: `${TOUR[tour].ms}ms` }} />
         </div>
       )}

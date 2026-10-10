@@ -64,8 +64,8 @@ function writeHtml(meta, pre = {}) {
     const rel = f => '/' + f.replace(/^dist\//, '');
     const html = tpl
       .replaceAll('%TITLE%', p.title).replaceAll('%DESC%', p.desc).replaceAll('%PATH%', p.path).replaceAll('%OG%', p.og)
-      .replace('%CSS%', rel(css)).replace('%JS%', rel(js)).replace('%LD%', ldFor(p.og))
-      .replace('<div id="root"></div>', `<div id="root">${pre[p.og] ?? ''}</div>`);
+      .replace('%CSS%', rel(css)).replace('%JS%', rel(js)).replace('%LD%', () => ldFor(p.og))
+      .replace('<div id="root"></div>', () => `<div id="root">${pre[p.og] ?? ''}</div>`);
     mkdirSync(dirname(join(OUT, p.out)), { recursive: true });
     writeFileSync(join(OUT, p.out), html);
   }
