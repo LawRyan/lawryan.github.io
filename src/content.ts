@@ -12,7 +12,7 @@ export const site = {
   roles: ['Capital Markets', 'Data & Analytics', 'AI Innovation'],
   headline: { lead: 'Turning complex data into', em: 'intelligent', tail: 'decisions.' },
   intro:
-    "I'm Ryan Law, Vice President of Client Intelligence at RBC Capital Markets, where I've spent eleven years turning markets data into decisions. I build analytical systems, automate complex workflows, and explore how artificial intelligence can change the way we understand information and make decisions.",
+    "I'm Ryan Law, Vice President of Client Intelligence at RBC Capital Markets, where I've spent eleven years turning markets data into decisions. I build analytical systems, automate complex workflows, and explore how AI can change the way we understand information.",
   url: 'https://lawryan.github.io/',
 };
 
@@ -50,7 +50,7 @@ export const story = {
   statement: 'I’ve spent my career where markets meet data.',
   paragraphs: [
     'Banking taught me how markets businesses actually run: the questions leaders ask, the pressure on the numbers, and how much depends on data being right.',
-    'From my first role I looked for the repetitive work that could be automated. Today I design reporting and analytical systems for Capital Markets, automate the repetitive parts of the workflow, and build the validation that makes the output trustworthy.',
+    'From my first role I looked for the repetitive work that could be automated. Today I design reporting and analytical systems for Capital Markets, automate what doesn’t need a person, and build the validation that makes the output trustworthy.',
   ],
   why: {
     lead: 'After years of building reporting, dashboards and validation frameworks, I kept coming back to one question:',
@@ -238,8 +238,8 @@ export const cases = [
     title: 'Data quality for 20,000+ clients in KYC refresh',
     problem: 'A global KYC refresh depended on accurate client data across front and back office, with reporting that was built by hand.',
     contribution: 'Acted as the link between every line of business on data quality, and rebuilt the reporting.',
-    approach: 'Legacy reports rebuilt to feed from source data; a bot to determine KYC requirements and handle outreach; a macro to remediate missed documents.',
-    impact: '20,000+ clients covered, 4,000 PDF files remediated, and an estimated 300 hours saved.',
+    approach: 'Reports rebuilt to feed from source data, a bot that worked out KYC requirements and handled outreach, and a macro to fix missed documents.',
+    impact: '20,000+ clients covered, 4,000+ PDF files remediated, and 300+ hours saved.',
     tags: ['KYC', 'Automation', 'VBA'],
   },
 ];
