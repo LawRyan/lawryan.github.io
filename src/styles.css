@@ -1061,3 +1061,16 @@ main, footer { position: relative; z-index: 1; }
 /* L//IOS page: same aurora, lavender-led */
 .aurora-lios i:nth-child(1) { background: radial-gradient(circle, rgba(183,168,255,0.9) 0%, rgba(183,168,255,0.25) 35%, transparent 68%); }
 .aurora-lios i:nth-child(2) { background: radial-gradient(circle, rgba(111,211,242,0.9) 0%, rgba(111,211,242,0.25) 35%, transparent 68%); opacity: 0.11; }
+
+/* Lab polish: one-row step bar, no empty KPI tile, visible Ask placeholder */
+.ask-empty { border: 1px dashed var(--line-2); border-radius: 10px; padding: 18px 16px; color: var(--ink-3); font-size: 0.92rem; line-height: 1.5; }
+@media (max-width: 1180px) {
+  .alab-brand > span { display: none; }
+  .alab-bar { flex-wrap: nowrap; }
+  .alab-steps { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+  .alab-steps::-webkit-scrollbar { display: none; }
+  .alab-steps button { white-space: nowrap; }
+}
+@media (max-width: 1000px) { .kpis5 > :last-child { grid-column: span 2; } }
+@media (max-width: 560px) { .alab-bar { gap: 10px; padding: 10px 12px; } .alab-steps button { padding: 8px 8px; gap: 5px; } }
+@media (max-width: 1180px) { .alab-steps { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); position: relative; } }

@@ -18,6 +18,13 @@ export default function AnalystLab() {
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [records, setRecords] = useState<{ label: string; rows: (t: Trade) => boolean } | null>(null);
   const top = useRef<HTMLDivElement>(null);
+  const bar = useRef<HTMLOListElement>(null);
+  // keep the current step visible when the step bar scrolls sideways on small screens
+  useEffect(() => {
+    const ol = bar.current, b = ol?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (!ol || !b || ol.scrollWidth <= ol.clientWidth) return;
+    ol.scrollTo({ left: Math.max(0, b.offsetLeft - ol.clientWidth / 2 + b.offsetWidth / 2), behavior: reducedMotion() ? 'auto' : 'smooth' });
+  }, [step]);
   const analysis = useMemo(() => (ran ? { prof: profile(files), rels: relationships(files), q: quality(files), k: kpis(files), F: findings(files) } : null), [ran, files]);
 
   const go = (s: Step) => {
@@ -32,7 +39,7 @@ export default function AnalystLab() {
     <div className="alab rv" ref={top}>
       <div className="alab-bar">
         <div className="alab-brand"><b>L<span>//</span>IOS</b> <span>Analyst · in miniature</span></div>
-        <ol className="alab-steps" aria-label="Demo steps">
+        <ol className="alab-steps" aria-label="Demo steps" ref={bar}>
           {STEPS.map(([s, l], i) => (
             <li key={s}>
               <button aria-current={step === s ? 'step' : undefined} disabled={!can(s)} onClick={() => (s === 'understand' && !ran ? (setRan(true), go('understand')) : go(s))}>
