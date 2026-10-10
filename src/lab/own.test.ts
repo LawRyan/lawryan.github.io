@@ -1,7 +1,7 @@
 // Independent checks for the "own file" profiler. Figures are recomputed from the raw text
 // with simple string handling, not the engine's helpers.
 import { questions, answer, findings } from './ownflow';
-import { analyse, decode, parseDelimited, parseNumber, parseDate, dateOrder, sniffDelimiter, sampleCsv } from './own';
+import { analyse, decode, parseDelimited, parseNumber, parseDate, dateOrder, sniffDelimiter, sampleCsv, pct } from './own';
 
 let checks = 0, failures = 0;
 const ok = (c: boolean, m: string) => { checks++; if (!c) { failures++; console.error('FAIL', m); } };
@@ -215,6 +215,33 @@ eq(parseDate('19-Sep-03'), Date.UTC(2003, 8, 19), 'd-Mon-yy dates');
 { const t = 'Desk,Revenue\n' + Array.from({ length: 120 }, (_, i) => `D${i % 12},${i + 1}`).join('\n');
   const r = analyse('d.csv', t.length, t); const b = r.dash.breakdowns[0];
   eq([b.items.length, b.otherCount, b.items.reduce((s, x) => s + x.v, 0) + b.others, r.dash.kpis[0].value], [8, 4, 7260, '7,260'], 'breakdown: top 8 plus others adds up to the total'); }
+
+// ── broad-sweep regressions (one per fix)
+const A = (t: string, n = 'f.csv') => analyse(n, t.length, t);
+const gen = (n: number, f: (i: number) => string) => Array.from({ length: n }, (_, i) => f(i)).join('\n');
+const day = (i: number) => new Date(Date.UTC(2025, 0, 1) + i * 86_400_000).toISOString().slice(0, 10);
+{ const r = A('Order #,Date,Total\n' + gen(40, i => `#${1000 + i},${day(i)},${i + 1}`)); eq(r.file.rows, 40, 'rows starting with # are data, not comments'); }
+{ const r = A('# note\nDate,X\n' + gen(30, i => `${day(i)},${i}`)); eq([r.file.rows, r.header[0]], [30, 'Date'], 'a lone # line is still a comment'); }
+eq([parseNumber('1.2M'), parseNumber('450K'), parseNumber('3.5bn'), parseNumber('2.5e+03'), parseNumber('$1.2M')], [1.2e6, 450e3, 3.5e9, 2500, 1.2e6], 'K/M/B suffixes and scientific notation');
+eq([parseDate('2025-03'), parseDate('2024Q3'), parseDate('Q1 2025')], [Date.UTC(2025, 2, 1), Date.UTC(2024, 6, 1), Date.UTC(2025, 0, 1)], 'months and quarters as dates');
+{ const r = A('Date,Desk,Revenue\n' + gen(60, i => `${45658 + i},${'AB'[i % 2]},${i}`)); eq([r.columns[0].role, r.columns[0].dates?.order], ['date', 'XL'], 'Excel serial dates under a date name'); }
+{ const r = A('Year,Country,GDP\n' + gen(60, i => `${1880 + i},${['CA', 'MX'][i % 2]},${100 + i}`)); ok(r.columns[0].role === 'date' && !r.checks.some(c => c.id.startsWith('dates-')), 'Year column is a date; 1880s are not errors'); }
+{ const r = A('Account,Amount\n' + gen(80, i => `${['Travel', 'Meals', 'Rent'][i % 3]},${i}`)); eq(r.columns[0].role, 'dimension', '“Account” with three values is a category, not an ID'); }
+{ const r = A('Dept,Budget,Actual\n' + gen(40, i => `${'ABCD'[i % 4]},${10000 + ((i * 7919) % 80000)},${9000 + ((i * 6007) % 70000)}`)); eq([r.columns[1].role, r.dash.kpis[0].label], ['measure', 'Total Actual'], 'unique amounts are measures; Actual beats Budget'); }
+{ const r = A('Date,Region,Amount\n' + gen(60, i => `${day(i)},${['NA', 'EU', 'APAC'][i % 3]},${i}`)); ok(r.dash.breakdowns[0]?.items.some(x => x.value.startsWith('NA')) && !r.checks.some(c => c.id.startsWith('blank-')), '“NA” among region codes is North America'); }
+{ const r = A('Date,Desk,PnL\n' + gen(60, i => `${day(i)},${'AB'[i % 2]},${i % 7 - 3}`)); eq(r.dash.kpis[0].label, 'Total PnL', 'P&L is added up'); }
+{ const r = A('Date,Item,UnitCost,OnHand\n' + gen(60, i => `${day(i)},x${i % 4},${(i % 9) + 1.5},${i}`)); eq(r.dash.kpis[0].label, 'Total OnHand', 'unit cost is a level; quantities are the headline'); }
+{ const r = A('Month,Fund,Return\n' + gen(36, i => `2024-${String((i % 12) + 1).padStart(2, '0')},${'ABC'[Math.floor(i / 12)]},${(i % 5) - 1.5}%`)); ok(r.dash.kpis[0].label === 'Average Return' && /%$/.test(r.dash.kpis[0].value), 'percentages are averaged and shown as %'); }
+{ const r = A('Date,Pair,Rate\n' + gen(90, i => `${day(Math.floor(i / 3))},${['EURUSD', 'USDJPY', 'USDCAD'][i % 3]},${[1.08, 150, 1.36][i % 3]}`)); ok(r.dash.ctx.mixedBy === 'Pair' && r.dash.kpis[0].watch === true, 'averaging rates on different scales is flagged'); }
+{ const r = A('Date,Region,Amount\n' + gen(300, i => `${day(i % 200)},${'NSEW'[i % 4]},${(i * 37) % 999 + 1}`)); ok(!r.checks.some(c => c.id.startsWith('outliers-')), 'evenly spread amounts produce no false extremes'); }
+{ const r = A('Date,Total\n' + gen(60, i => `${day(i)},${i % 10 === 0 ? 9999999 : 100 + i}`)); ok(r.checks.some(c => c.id.startsWith('placeholder-')) && r.dash.ctx.excluded.length === 6, '9999999 placeholders flagged and left out'); }
+{ const r = A('Date,Region,Amount\n' + gen(200, i => `${day(i % 50)},${'NS'[i % 2]},${i % 9}`)); const d = r.checks.find(c => c.id === 'dups'); ok(!d || d.severity === 'LOW' || r.columns.some(c => c.role === 'identifier'), 'duplicates without an ID column are low severity'); }
+{ const r = A('Due,Client,Amount\n' + gen(60, i => `${new Date(Date.UTC(2027, 0, 1) + i * 5 * 86_400_000).toISOString().slice(0, 10)},C${i % 3},${i}`)); ok(!r.checks.some(c => c.id.startsWith('dates-')) && !!r.trend, 'a schedule of future dates is not an error'); }
+{ const r = A('Report\n\nDate,Region,Amount\n' + gen(30, i => `${day(i)},${'NS'[i % 2]},${i}`) + '\n,Total,999\n\nEnd of report\n'); eq([r.file.rows, r.checks.filter(c => c.severity !== 'OK').length], [30, 0], 'footer lines and the Total row are left out'); }
+{ const r = A(gen(40, i => `${day(i)},${'ABC'[i % 3]},${i}`)); eq([r.file.headerless, r.file.rows], [true, 40], 'headerless file whose first row has text'); }
+{ const r = A('Quarter,Seg,Revenue\n' + gen(32, i => `${2022 + Math.floor(i / 8)}Q${(Math.floor(i / 2) % 4) + 1},${'RI'[i % 2]},${100 + i}`)); eq(r.trend?.grain, 'quarter', 'quarterly data is charted by quarter'); }
+{ const r = A('Date,Customer,Amount\n' + gen(600, i => `${day(i % 90)},Cust${(i * 13) % 200},${i % 50}`)); ok(r.dash.breakdowns.some(b => b.dimension === 'Customer' && b.otherCount > 0), 'many customers: top 8 plus the rest'); }
+eq(pct(-0.0001), '0%', 'no −0.0%');
 
 // ── own file through Ask and Investigate
 { const t = sampleCsv(); const r = analyse('s.csv', t.length, t);

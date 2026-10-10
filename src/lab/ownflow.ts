@@ -3,16 +3,15 @@
  * Pure functions over an OwnAnalysis: deterministic, no network, no model.
  * Row numbers follow own.ts: data row i is row number i + 2 (header = 1); add file.lineOffset for the file line.
  */
-import { parseDate, parseNumber, isBlank, fmt, pct, type OwnAnalysis, type OwnInsight, type OwnTrend, type Point, type Severity } from './own';
+import { bucketOf, parseDate, parseNumber, isBlank, fmt as fmtPlain, fmtFor, pct as pctRel, pp, type OwnAnalysis, type OwnInsight, type Point, type Severity } from './own';
 
-const DAY = 86_400_000;
-type Grain = OwnTrend['grain'];
 
-export function bucketOf(g: Grain, t: number) {
-  if (g === 'day') return Math.floor(t / DAY) * DAY;
-  if (g === 'week') { const d = new Date(t); const dow = (d.getUTCDay() + 6) % 7; return Math.floor(t / DAY) * DAY - dow * DAY; }
-  const d = new Date(t); return g === 'month' ? Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) : Date.UTC(d.getUTCFullYear(), 0, 1);
-}
+
+/** formatters for the file in hand: a percentage measure stays a percentage, and its changes are in percentage points */
+let fmt = fmtPlain, pct = pctRel, isPct = false;
+const use = (a: OwnAnalysis) => { isPct = !!a.dash.ctx.percent; fmt = fmtFor(isPct); pct = isPct ? pp : pctRel; };
+/** the change from one value to another, as text: relative %, or percentage points for percentages */
+const delta = (from: number, to: number) => (isPct ? pp(to - from) : from ? pctRel((to - from) / Math.abs(from)) : '—');
 
 /** The measure value of a row (1 when the file has no measure and rows are counted); null when unusable. */
 export function valueOf(a: OwnAnalysis, row: string[]): number | null {
@@ -78,6 +77,7 @@ export function questions(a: OwnAnalysis): OwnQuestion[] {
 }
 
 export function answer(a: OwnAnalysis, id: OwnQuestion['id']): OwnAnswer {
+  use(a);
   const q = questions(a).find(x => x.id === id)?.q ?? '';
   const c = a.dash.ctx, ex = excludedSet(a), W = what(a);
   const issues = a.checks.filter(x => x.severity !== 'OK');
@@ -85,8 +85,8 @@ export function answer(a: OwnAnalysis, id: OwnQuestion['id']): OwnAnswer {
 
   if (id === 'latest') {
     const lt = lastTwo(a)!, g = a.trend!.grain;
-    const ch = lt.prev.v ? (lt.cur.v - lt.prev.v) / Math.abs(lt.prev.v) : undefined;
-    const lines: OwnAnswer['lines'] = [{ tag: 'FACT', text: `${cap(W)} in ${lt.cur.label}: ${fmt(lt.cur.v)}, ${ch === undefined ? 'with nothing the period before' : `${pct(ch)} vs ${lt.prev.label} (${fmt(lt.prev.v)})`}.` }];
+    const ch = isPct || lt.prev.v ? delta(lt.prev.v, lt.cur.v) : undefined;
+    const lines: OwnAnswer['lines'] = [{ tag: 'FACT', text: `${cap(W)} in ${lt.cur.label}: ${fmt(lt.cur.v)}, ${ch === undefined ? 'with nothing the period before' : `${ch} vs ${lt.prev.label} (${fmt(lt.prev.v)})`}.` }];
     const main = a.dash.breakdowns[0];
     let bars: OwnAnswer['bars'], rows: number[] | undefined, rowsLabel: string | undefined;
     if (main && c.agg !== 'avg') {
@@ -106,6 +106,7 @@ export function answer(a: OwnAnalysis, id: OwnQuestion['id']): OwnAnswer {
         rows = R.get(top.k); rowsLabel = `${main.dimension} = “${top.k}” · ${lt.cur.label}`;
       }
     }
+    if (c.mixedBy) lines.push({ tag: 'DATA CHECK', text: `This average mixes ${c.mixedBy} values on very different scales, so compare within each ${c.mixedBy} instead (Investigate shows each one).` });
     lines.push({ tag: 'DATA CHECK', text: `${a.trend!.partialLast ? `The last ${g} in the file is partial, so the comparison uses the last two full ${g}s. ` : ''}${leftOut}` });
     lines.push({ tag: 'INTERPRETATION', text: 'This locates the change arithmetically. The reasons behind it are not in the file and are not guessed.' });
     return { id, q, lines, bars, rows, rowsLabel, tools: ['group by period', `compare ${lt.prev.label} with ${lt.cur.label}`, main ? `split by ${main.dimension}` : 'total'] };
@@ -144,14 +145,14 @@ export function answer(a: OwnAnalysis, id: OwnQuestion['id']): OwnAnswer {
 
   if (id === 'largest') {
     const scored: { r: number; v: number }[] = [];
-    a.cells.forEach((r, i) => { const v = valueOf(a, r); if (v !== null) scored.push({ r: i + 2, v }); });
+    a.cells.forEach((r, i) => { if (ex.has(i + 2)) return; const v = valueOf(a, r); if (v !== null) scored.push({ r: i + 2, v }); });
     scored.sort((x, y) => y.v - x.v);
     const top = scored.slice(0, 10), all = scored.reduce((s, x) => s + x.v, 0), t10 = top.reduce((s, x) => s + x.v, 0);
-    const flaggedTop = top.filter(x => ex.has(x.r)).length;
+    const nEx = c.measure === undefined ? 0 : c.excluded.length;
     const lines: OwnAnswer['lines'] = [
       { tag: 'FACT', text: `The largest ${c.measureName} is ${fmt(top[0]?.v ?? 0)} (line ${(top[0]?.r ?? 0) + a.file.lineOffset}).` },
       ...(c.agg === 'sum' && all > 0 ? [{ tag: 'FACT' as Tag, text: `The top ${top.length} rows are ${Math.round((t10 / all) * 100)}% of the total across ${plural(scored.length, 'row')}.` }] : []),
-      { tag: 'DATA CHECK', text: flaggedTop ? `${plural(flaggedTop, 'of these rows is', 'of these rows are')} flagged as extreme and left out of totals and trends. Check them before using the totals.` : 'None of these rows is flagged as an extreme value.' },
+      { tag: 'DATA CHECK', text: nEx ? `${plural(nEx, 'row')} with extreme or placeholder values (or impossible dates) ${nEx === 1 ? 'is' : 'are'} left out of this list; Investigate shows them under the data issues.` : 'No extreme or placeholder values had to be left out.' },
     ];
     return { id, q, lines, bars: top.slice(0, 6).map(x => ({ label: `Line ${x.r + a.file.lineOffset}`, v: x.v, text: fmt(x.v) })), rows: top.map(x => x.r), rowsLabel: `Top ${top.length} rows by ${c.measureName}`, tools: [`sort by ${c.measureName}`, 'top 10'] };
   }
@@ -178,7 +179,13 @@ export interface OwnFinding {
 }
 
 /** Everything worth investigating: the dashboard's insights first, then every data issue. */
+const found = new WeakMap<OwnAnalysis, OwnFinding[]>();
 export function findings(a: OwnAnalysis): OwnFinding[] {
+  const hit = found.get(a); if (hit) return hit;
+  const out = computeFindings(a); found.set(a, out); return out;
+}
+function computeFindings(a: OwnAnalysis): OwnFinding[] {
+  use(a);
   const out: OwnFinding[] = [];
   const seen = new Set<string>();
   for (const i of a.dash.insights) { const f = fromInsight(a, i); if (f && !seen.has(f.id)) { seen.add(f.id); out.push(f); } }
@@ -187,6 +194,7 @@ export function findings(a: OwnAnalysis): OwnFinding[] {
 }
 
 export function fromInsight(a: OwnAnalysis, i: OwnInsight): OwnFinding | null {
+  use(a);
   if (i.check) return fromCheck(a, i.check);
   if (i.filter && i.filter.col >= 0) return segment(a, i.filter.col, i.filter.value, i);
   if (i.kind === 'TREND' && a.trend) {
@@ -195,7 +203,7 @@ export function fromInsight(a: OwnAnalysis, i: OwnInsight): OwnFinding | null {
     const W = what(a);
     return {
       id: 'trend', kind: 'TREND', title: i.title, text: i.text, rows, rowsLabel: lt ? `Rows in ${lt.cur.label}` : 'Rows',
-      numbers: lt ? [{ label: lt.cur.label, value: fmt(lt.cur.v) }, { label: lt.prev.label, value: fmt(lt.prev.v) }, { label: 'Change', value: lt.prev.v ? pct((lt.cur.v - lt.prev.v) / Math.abs(lt.prev.v)) : '—' }, { label: 'Rows in period', value: rows.length.toLocaleString('en-US') }] : [],
+      numbers: lt ? [{ label: lt.cur.label, value: fmt(lt.cur.v) }, { label: lt.prev.label, value: fmt(lt.prev.v) }, { label: 'Change', value: delta(lt.prev.v, lt.cur.v) }, { label: 'Rows in period', value: rows.length.toLocaleString('en-US') }] : [],
       series: { all: a.trend.points, highlight: lt ? a.trend.points.findIndex(p => p.t === lt.cur.t) : undefined },
       ...verdictFor(a, rows, [{ name: 'Full periods compared', pass: true, detail: a.trend.partialLast ? `The last ${a.trend.grain} is partial and is left out of the comparison.` : `Both ${a.trend.grain}s are complete.` }]),
       method: `${cap(W)} per ${a.trend.grain} from “${a.trend.date}”; the last two full ${a.trend.grain}s are compared.`,
@@ -206,13 +214,14 @@ export function fromInsight(a: OwnAnalysis, i: OwnInsight): OwnFinding | null {
 
 /** A dimension value (from a bar or an insight) as something to investigate. */
 export function segment(a: OwnAnalysis, col: number, value: string, from?: OwnInsight): OwnFinding {
+  use(a);
   const rows = rowsWhere(a, col, value), dim = a.header[col];
   const b = a.dash.breakdowns.find(x => x.col === col), item = b?.items.find(x => x.value === value);
   const allRows = a.cells.map((_, k) => k + 2);
   const v = total(a, rows), all = total(a, allRows);
   const numbers = [
-    { label: a.dash.ctx.agg === 'count' ? 'Rows' : a.dash.ctx.agg === 'avg' ? `Average ${a.dash.ctx.measureName}` : a.dash.ctx.measureName, value: fmt(Math.round(v * 100) / 100) },
-    ...(a.dash.ctx.agg !== 'avg' && all ? [{ label: 'Share of total', value: `${Math.round((v / all) * 100)}%` }] : [{ label: `File average`, value: fmt(Math.round(all * 100) / 100) }]),
+    { label: a.dash.ctx.agg === 'count' ? 'Rows' : a.dash.ctx.agg === 'avg' ? `Average ${a.dash.ctx.measureName}` : a.dash.ctx.measureName, value: fmt(v) },
+    ...(a.dash.ctx.agg !== 'avg' && all ? [{ label: 'Share of total', value: `${Math.round((v / all) * 100)}%` }] : [{ label: `File average`, value: fmt(all) }]),
     ...(item?.change !== undefined ? [{ label: '2nd half vs 1st', value: pct(item.change) }] : []),
     { label: 'Rows', value: rows.length.toLocaleString('en-US') },
   ];

@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { reducedMotion } from '../components/common';
-import { analyseAsync, decode, sampleCsv, fmt, pct, LIMITS, type OwnAnalysis, type OwnBreakdown, type OwnColumn, type OwnInsight, type Point } from './own';
+import { analyseAsync, decode, sampleCsv, fmt, fmtFor, pct, pp, LIMITS, type OwnAnalysis, type OwnBreakdown, type OwnColumn, type OwnInsight, type Point } from './own';
 import { answer as askOwn, findings as ownFindings, fromInsight, questions, segment, type OwnAnswer, type OwnFinding, type OwnQuestion } from './ownflow';
 
 /**
@@ -179,7 +179,7 @@ export function OwnUnderstandStep({ a, onNext }: { a: OwnAnalysis; onNext: () =>
 }
 
 function summary(c: OwnColumn) {
-  if (c.num && c.role === 'measure') return `total ${fmt(c.num.sum)} · ${fmt(c.num.min)} to ${fmt(c.num.max)}`;
+  if (c.num && c.role === 'measure') { const f = fmtFor(c.percent); return c.percent ? `${f(c.num.min)} to ${f(c.num.max)}, average ${f(c.num.mean)}` : `total ${fmt(c.num.sum)} · ${fmt(c.num.min)} to ${fmt(c.num.max)}`; }
   if (c.dates) return `${new Date(c.dates.min).toISOString().slice(0, 10)} to ${new Date(c.dates.max).toISOString().slice(0, 10)}`;
   if (c.top) return c.top.slice(0, 3).map(t => `${t.value} (${t.count.toLocaleString('en-US')})`).join(', ');
   return c.examples.slice(0, 2).map(e => `“${e.slice(0, 24)}”`).join(', ');
@@ -198,7 +198,7 @@ export function OwnDashboardStep({ a, onInvestigate, onAsk }: { a: OwnAnalysis; 
             <div key={k.label} className="kpi">
               <span className="k" title={k.label}>{k.label}</span>
               <span className={`v${k.value.length > 11 ? ' sm' : ''}`}>{k.value}</span>
-              {k.change !== undefined ? <span className={`d ${k.change >= 0 ? 'up' : 'down'}`}>{pct(k.change)}</span> : k.watch ? <span className="d watch">review</span> : null}
+              {k.change !== undefined ? <span className={`d ${k.change >= 0 ? 'up' : 'down'}`}>{k.changeText ?? pct(k.change)}</span> : k.watch ? <span className="d watch">review</span> : null}
               <span className="d muted">{k.sub}</span>
             </div>
           ))}
@@ -207,12 +207,12 @@ export function OwnDashboardStep({ a, onInvestigate, onAsk }: { a: OwnAnalysis; 
         {a.trend && (
           <div className="chart-card">
             <div className="chart-head"><span className="eyebrow">{a.trend.measure} by {a.trend.grain} · {a.trend.agg === 'sum' ? 'total' : a.trend.agg === 'avg' ? 'average' : 'count'}</span><span className="mono muted small">from “{a.trend.date}”{a.trend.partialLast ? ' · dashed = partial' : ''}</span></div>
-            <Line points={a.trend.points} partial={a.trend.partialLast} />
+            <Line points={a.trend.points} partial={a.trend.partialLast} percent={a.dash.ctx.percent} />
           </div>
         )}
         {a.dash.breakdowns.length > 0 && (
           <div className="own-bds">
-            {a.dash.breakdowns.map(b => <Breakdown key={b.col} b={b} onPick={v => { const sg = segment(a, b.col, v); onInvestigate(ownFindings(a).find(x => x.id === sg.id) ?? sg); }} />)}
+            {a.dash.breakdowns.map(b => <Breakdown key={b.col} b={b} percent={a.dash.ctx.percent} onPick={v => { const sg = segment(a, b.col, v); onInvestigate(ownFindings(a).find(x => x.id === sg.id) ?? sg); }} />)}
           </div>
         )}
         {!a.trend && !a.dash.breakdowns.length && <p className="muted own-nochart">No date column or repeating categories were found, so there is nothing to chart. The checks and the column summary still apply.</p>}
@@ -221,15 +221,17 @@ export function OwnDashboardStep({ a, onInvestigate, onAsk }: { a: OwnAnalysis; 
         <div className="side-head"><span className="eyebrow">What you need to know</span><button className="link-arrow small" onClick={onAsk}>Ask a question →</button></div>
         <ol className="flist">
           {a.dash.insights.map((x, i) => {
-            const f = fromInsight(a, x);
+            // worked out on click, not on every render (large files)
+            const can = !!x.check || (!!x.filter && x.filter.col >= 0) || (x.kind === 'TREND' && !!a.trend);
+            const open = () => { const f = ownFindings(a).find(y => y.title === x.title) ?? fromInsight(a, x); if (f) onInvestigate(f); };
             return (
               <li key={i}>
-                <button onClick={() => f && onInvestigate(f)} disabled={!f}>
+                <button onClick={open} disabled={!can}>
                   <span className="fn mono">{String(i + 1).padStart(2, '0')}</span>
                   <span>
                     <b>{x.title}</b>
                     <span className="ft">{x.text}</span>
-                    <span className="fmeta"><i className={`kd own-kd-${x.kind.toLowerCase()}`} />{KIND[x.kind]}{x.severity && <em className="bad">{x.severity}</em>}{f && <span className="inv">Investigate →</span>}</span>
+                    <span className="fmeta"><i className={`kd own-kd-${x.kind.toLowerCase()}`} />{KIND[x.kind]}{x.severity && <em className="bad">{x.severity}</em>}{can && <span className="inv">Investigate →</span>}</span>
                   </span>
                 </button>
               </li>
@@ -242,21 +244,22 @@ export function OwnDashboardStep({ a, onInvestigate, onAsk }: { a: OwnAnalysis; 
   );
 }
 
-function Breakdown({ b, onPick }: { b: OwnBreakdown; onPick: (v: string) => void }) {
+function Breakdown({ b, onPick, percent }: { b: OwnBreakdown; onPick: (v: string) => void; percent?: boolean }) {
+  const F = fmtFor(percent), C = percent ? pp : pct;
   const max = Math.max(...b.items.map(x => Math.abs(x.v)), 1e-9);
   return (
     <div className="chart-card own-bd">
       <div className="chart-head"><span className="eyebrow">{b.agg === 'count' ? 'Rows' : b.agg === 'avg' ? `Average ${b.measure}` : b.measure} by {b.dimension}</span>{b.halves && <span className="mono muted small">change: 2nd half vs 1st</span>}</div>
       <div className="dbars">
         {b.items.map(x => (
-          <button key={x.value} className="dbar own-dbar" onClick={() => onPick(x.value)} aria-label={`${b.dimension} ${x.value}: ${fmt(x.v)}${x.change !== undefined ? `, ${pct(x.change)}` : ''}. Investigate.`}>
+          <button key={x.value} className="dbar own-dbar" onClick={() => onPick(x.value)} aria-label={`${b.dimension} ${x.value}: ${F(x.v)}${x.change !== undefined ? `, ${C(x.change)}` : ''}. Investigate.`}>
             <span className="nm" title={x.value}>{x.value}</span>
             <span className="tr"><span style={{ width: `${Math.max(1, (Math.abs(x.v) / max) * 100)}%` }} /></span>
-            <span className="val">{fmt(x.v)}</span>
-            <span className={`val ${x.change === undefined ? 'muted' : x.change >= 0 ? 'up' : 'down'}`}>{x.change === undefined ? '' : pct(x.change)}</span>
+            <span className="val">{F(x.v)}</span>
+            <span className={`val ${x.change === undefined ? 'muted' : x.change >= 0 ? 'up' : 'down'}`}>{x.change === undefined ? '' : C(x.change)}</span>
           </button>
         ))}
-        {b.otherCount > 0 && <div className="dbar own-dbar other"><span className="nm muted">{b.otherCount} more</span><span /><span className="val muted">{b.agg === 'avg' ? '' : fmt(b.others)}</span><span /></div>}
+        {b.otherCount > 0 && <div className="dbar own-dbar other"><span className="nm muted">{b.otherCount} more</span><span /><span className="val muted">{b.agg === 'avg' ? '' : F(b.others)}</span><span /></div>}
       </div>
     </div>
   );
@@ -360,7 +363,7 @@ export function OwnInvestigateStep({ a, finding: f, onPick }: { a: OwnAnalysis; 
           {s && a.trend && (
             <div className="chart-card">
               <div className="chart-head"><span className="eyebrow">{s.seg ? `“${s.segLabel}”` : a.trend.measure} · by {a.trend.grain}</span><span className="mono muted small">{s.seg ? 'When did it move?' : 'Latest full period highlighted'}</span></div>
-              <Line points={s.seg ?? s.all} partial={a.trend.partialLast} highlight={s.highlight} />
+              <Line points={s.seg ?? s.all} partial={a.trend.partialLast} highlight={s.highlight} percent={a.dash.ctx.percent} />
             </div>
           )}
           {f.method && <p className="mono muted small">Method: {f.method}</p>}
@@ -412,7 +415,7 @@ function Records({ a, label, rows }: { a: OwnAnalysis; label: string; rows: numb
 export const answerFinding = (x: OwnAnswer): OwnFinding => ({ id: `ask:${x.id}`, kind: x.id === 'trust' ? 'ISSUE' : 'SHARE', title: x.q, text: x.lines[0]?.text ?? '', rows: x.rows ?? [], rowsLabel: x.rowsLabel ?? x.q, numbers: [{ label: 'Rows', value: (x.rows?.length ?? 0).toLocaleString('en-US') }] });
 export { askOwn };
 
-function Line({ points, partial, highlight }: { points: Point[]; partial: boolean; highlight?: number }) {
+function Line({ points, partial, highlight, percent }: { points: Point[]; partial: boolean; highlight?: number; percent?: boolean }) {
   // drawn at roughly its on-screen width so labels stay readable on phones
   const narrow = typeof matchMedia !== 'undefined' && matchMedia('(max-width: 560px)').matches;
   const W = narrow ? 330 : 640, H = narrow ? 180 : 200, L = 48, R = 10, T = 10, B = 24;
@@ -428,7 +431,7 @@ function Line({ points, partial, highlight }: { points: Point[]; partial: boolea
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg own-line" role="img" aria-label={`Line chart, ${points.length} periods, from ${points[0].label} to ${points[points.length - 1].label}`}>
       {highlight !== undefined && highlight >= 0 && <rect x={x(highlight) - hw / 2} y={T} width={hw} height={H - T - B} className="own-hl" />}
-      {[0, 0.5, 1].map(f => { const v = min + span * f; return <g key={f}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="grid" /><text x={L - 6} y={y(v) + 4} textAnchor="end" className="axis">{fmt(span > 100 ? Math.round(v) : Math.round(v * 100) / 100)}</text></g>; })}
+      {[0, 0.5, 1].map(f => { const v = min + span * f; return <g key={f}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="grid" /><text x={L - 6} y={y(v) + 4} textAnchor="end" className="axis">{percent ? fmtFor(true)(v) : fmt(span > 100 ? Math.round(v) : Math.round(v * 100) / 100)}</text></g>; })}
       <path d={d(solid)} className="own-path" />
       {partial && points.length > 1 && <path d={d(points.slice(-2), points.length - 2)} className="own-path partial" />}
       {points.map((p, i) => (i % every === 0 ? <text key={p.t} x={x(i)} y={H - 6} textAnchor="middle" className="axis">{p.label.replace(/ \d{4}$/, '')}</text> : null))}
