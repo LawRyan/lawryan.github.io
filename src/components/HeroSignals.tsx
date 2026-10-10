@@ -38,7 +38,7 @@ export default function HeroSignals({ tint = 'signal' }: { tint?: 'signal' | 'li
       const count = Math.ceil(W / DX) + 4;
       lines = Array.from({ length: n }, (_, i) => {
         const depth = n === 1 ? 1 : i / (n - 1);
-        const l: Line = { pts: [], v: 0, base: Math.min(H, window.innerHeight) * ((narrow ? 0.66 : 0.6) + depth * (narrow ? 0.24 : 0.3)), amp: 12 + depth * 16, alpha: 0.16 + depth * 0.2, flags: new Map() };
+        const l: Line = { pts: [], v: 0, base: H * ((narrow ? 0.45 : 0.355) + depth * (narrow ? 0.39 : 0.48)), amp: 12 + depth * 16, alpha: 0.16 + depth * 0.2, flags: new Map() };
         for (let k = 0; k < count; k++) l.pts.push(step(l));
         return l;
       });
@@ -56,7 +56,11 @@ export default function HeroSignals({ tint = 'signal' }: { tint?: 'signal' | 'li
       build();
     };
 
+    let lastPaint = 0;
     const draw = (now: number) => {
+      // 30 fps is plenty for lines moving ~22 px/s, and halves the work
+      if (!reduce && now - lastPaint < 31) { if (visible) raf = requestAnimationFrame(draw); return; }
+      lastPaint = now;
       resize();
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (!reduce) {
@@ -85,9 +89,9 @@ export default function HeroSignals({ tint = 'signal' }: { tint?: 'signal' | 'li
       ctx.clearRect(0, 0, W, H);
       const detX = W * DETECT;
       // detector: a faint vertical scan line
-      const g = ctx.createLinearGradient(0, Math.min(H, window.innerHeight) * 0.5, 0, Math.min(H, window.innerHeight));
+      const g = ctx.createLinearGradient(0, H * 0.19, 0, H);
       g.addColorStop(0, `rgba(${A},0)`); g.addColorStop(0.5, `rgba(${A},0.12)`); g.addColorStop(1, `rgba(${A},0)`);
-      ctx.fillStyle = g; const vh = Math.min(H, window.innerHeight); ctx.fillRect(detX, vh * 0.5, 1, vh * 0.5);
+      ctx.fillStyle = g; ctx.fillRect(detX, H * 0.19, 1, H * 0.81);
 
       lines.forEach((l, li) => {
         const fade = ctx.createLinearGradient(0, 0, W, 0);
@@ -138,5 +142,6 @@ export default function HeroSignals({ tint = 'signal' }: { tint?: 'signal' | 'li
     draw(performance.now());
     return () => { cancelAnimationFrame(raf); io.disconnect(); window.removeEventListener('resize', onResize); };
   }, [A]);
-  return <canvas ref={ref} className="hero-canvas" aria-hidden="true" />;
+  // the canvas only covers the band the lines live in (38–100% of the first screen), which keeps repaints small
+  return <canvas ref={ref} className="hero-canvas sig-band" aria-hidden="true" />;
 }

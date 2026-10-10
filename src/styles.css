@@ -1138,3 +1138,5 @@ main, footer { position: relative; z-index: 1; }
 .intro { animation: introFallback 0.4s ease 3.2s forwards; }
 @keyframes introFallback { to { opacity: 0; visibility: hidden; pointer-events: none; } }
 @media print { .dot-on { background: none; box-shadow: none; border: 5px solid #5b4bb5; width: 0; height: 0; } }
+
+.hero-canvas.sig-band { top: 38vh; bottom: auto; height: 62vh; }
