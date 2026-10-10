@@ -197,5 +197,23 @@ eq(parseDate('19-Sep-03'), Date.UTC(2003, 8, 19), 'd-Mon-yy dates');
 { const t = 'x\n' + Array.from({ length: 30 }, (_, i) => `${i},NA`).join('\n'); }
 { const t = 'id,v\n1,NA\n2,5\n3,n/a\n4,7\n'; const r = analyse('na.csv', t.length, t); const v = r.columns.find(c => c.name === 'v')!; eq([v.type, v.empty], ['number', 2], 'NA markers count as blank, not text'); }
 
+// ── dashboard
+{ const t = sampleCsv(); const r = analyse('s.csv', t.length, t); const d = r.dash;
+  eq(d.kpis.map(k => k.label), ['Total Amount ($)', 'Rows', 'Period', 'Product', 'Data quality'], 'sample: KPI tiles');
+  ok(d.kpis[0].change === r.trend?.change, 'headline tile carries the trend change');
+  ok(d.breakdowns.length >= 2 && d.breakdowns.every(b => b.items.length >= 2 && b.items.length <= 8), 'sample: breakdowns by dimension');
+  const b = d.breakdowns[0]; ok(b.items.every((x, i) => !i || b.items[i - 1].v >= x.v), 'breakdown sorted largest first');
+  ok(d.quality > 0.9 && d.quality < 1 && d.flaggedRows > 0, 'quality = share of rows not flagged');
+  ok(d.insights.some(i => i.kind === 'TREND') && d.insights.some(i => i.kind === 'ISSUE' && i.check), 'insights include trend and issues');
+  ok(d.insights.filter(i => i.filter).every(i => r.header[i.filter!.col] !== undefined), 'insight filters point at real columns'); }
+{ const t = 'Name,Price,Date\n' + Array.from({ length: 40 }, (_, i) => `n${i},${10 + i},2024-01-${String(1 + (i % 28)).padStart(2, '0')}`).join('\n');
+  const r = analyse('p.csv', t.length, t); eq([r.dash.kpis[0].label, r.dash.kpis.at(-1)!.value], ['Average Price', '100.0%'], 'price file: averaged headline, clean quality'); }
+{ const t = 'Team,Status\n' + Array.from({ length: 30 }, (_, i) => `${['A', 'B', 'C'][i % 3]},${i % 4 ? 'open' : 'closed'}`).join('\n');
+  const r = analyse('c.csv', t.length, t); eq([r.dash.kpis[0].label, r.dash.breakdowns[0]?.agg], ['Rows', 'count'], 'no measure: counts rows'); }
+
+{ const t = 'Desk,Revenue\n' + Array.from({ length: 120 }, (_, i) => `D${i % 12},${i + 1}`).join('\n');
+  const r = analyse('d.csv', t.length, t); const b = r.dash.breakdowns[0];
+  eq([b.items.length, b.otherCount, b.items.reduce((s, x) => s + x.v, 0) + b.others, r.dash.kpis[0].value], [8, 4, 7260, '7,260'], 'breakdown: top 8 plus others adds up to the total'); }
+
 console.log(`own-file: ${checks} checks, ${failures} failures`);
 if (failures) process.exitCode = 1;
