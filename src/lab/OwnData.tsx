@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { analyseAsync, decode, sampleCsv, fmt, LIMITS, type OwnAnalysis, type OwnCheck, type OwnColumn, type Point } from './own';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { reducedMotion } from '../components/common';
+import { analyseAsync, decode, sampleCsv, fmt, pct, LIMITS, type OwnAnalysis, type OwnBreakdown, type OwnCheck, type OwnColumn, type OwnInsight, type Point } from './own';
 
 /**
  * "Try it on your own file". The file is read by the browser (File API) and analysed in a
@@ -78,66 +79,165 @@ export default function OwnData({ onBack }: { onBack: () => void }) {
 
 const ROLE_LABEL: Record<OwnColumn['role'], string> = { measure: 'Measure', dimension: 'Dimension', date: 'Date', identifier: 'Identifier', text: 'Free text', empty: 'Empty' };
 
+type Tab = 'dash' | 'quality' | 'cols';
+interface Drill { label: string; rows: number[]; total: number }
+const KIND: Record<OwnInsight['kind'], string> = { TREND: 'Trend', MOVER: 'Mover', SHARE: 'Share', ISSUE: 'Data issue' };
+
 function Report({ a }: { a: OwnAnalysis }) {
   const issues = a.checks.filter(c => c.severity !== 'OK');
+  const [tab, setTab] = useState<Tab>('dash');
+  const [drill, setDrill] = useState<Drill | null>(null);
+  const tabs: [Tab, string][] = [['dash', 'Dashboard'], ['quality', `Data quality${issues.length ? ` · ${issues.length}` : ''}`], ['cols', 'Columns']];
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const onKey = (e: KeyboardEvent, k: number) => {
+    const n = ({ ArrowRight: k + 1, ArrowLeft: k - 1, Home: 0, End: tabs.length - 1 } as Record<string, number>)[e.key];
+    if (n === undefined) return; e.preventDefault();
+    const m = (n + tabs.length) % tabs.length; setTab(tabs[m][0]); tabRefs.current[m]?.focus();
+  };
+  const byValue = (col: number, value: string, label: string) => {
+    const rows: number[] = []; a.cells.forEach((r, i) => { if ((r[col] ?? '').trim() === value) rows.push(i + 2); });
+    setDrill({ label, rows, total: rows.length });
+  };
+  const byCheck = (id: string) => { const c = a.checks.find(x => x.id === id); if (c) setDrill({ label: c.title, rows: c.rows, total: c.affected }); };
+  const readNote = a.facts.find(f => f.startsWith('To read this file'));
   return (
     <div className="own-report">
-      <dl className="inv-nums own-nums">
-        <div><dt>Rows</dt><dd>{a.file.rows.toLocaleString('en-US')}</dd></div>
-        <div><dt>Columns</dt><dd>{a.file.cols}</dd></div>
-        <div><dt>Issues</dt><dd className={issues.length ? 'warn' : 'up'}>{issues.length}</dd></div>
-        <div><dt>Separator</dt><dd>{a.file.delimiter === '\t' ? 'tab' : `“${a.file.delimiter}”`}</dd></div>
-      </dl>
+      <div className="own-tabs" role="tablist" aria-label="Report views">
+        {tabs.map(([id, label], k) => (
+          <button key={id} ref={el => { tabRefs.current[k] = el; }} role="tab" id={`own-tab-${id}`} aria-controls={`own-panel-${id}`} aria-selected={tab === id} tabIndex={tab === id ? 0 : -1} className={tab === id ? 'on' : ''} onClick={() => setTab(id)} onKeyDown={e => onKey(e, k)}>{label}</button>
+        ))}
+      </div>
 
-      <section className="own-facts" aria-label="What it found">
-        <span className="eyebrow">What it found</span>
-        <ul>{a.facts.map(f => <li key={f}><span className="fact-tag">FACT</span>{f}</li>)}</ul>
-        <p className="mono muted small">Every sentence is computed from your rows. No language model is involved.</p>
-      </section>
-
-      {(a.trend || a.movers) && (
-        <div className="own-charts">
-          {a.trend && (
-            <div className="chart-card">
-              <div className="chart-head"><span className="eyebrow">{a.trend.measure} by {a.trend.grain} · {a.trend.agg === 'sum' ? 'total' : a.trend.agg === 'avg' ? 'average' : 'count'}</span><span className="mono muted small">from “{a.trend.date}”</span></div>
-              <Line points={a.trend.points} partial={a.trend.partialLast} />
+      {tab === 'dash' && (
+        <div role="tabpanel" id="own-panel-dash" aria-labelledby="own-tab-dash" className="own-dash">
+          <div className="own-dash-main">
+            <div className="kpis5 own-kpis" style={{ ['--n' as string]: a.dash.kpis.length }}>
+              {a.dash.kpis.map(k => (
+                <div key={k.label} className="kpi">
+                  <span className="k" title={k.label}>{k.label}</span>
+                  <span className={`v${k.value.length > 11 ? ' sm' : ''}`}>{k.value}</span>
+                  {k.change !== undefined ? <span className={`d ${k.change >= 0 ? 'up' : 'down'}`}>{pct(k.change)}</span> : k.watch ? <span className="d watch">review</span> : null}
+                  <span className="d muted">{k.sub}</span>
+                </div>
+              ))}
             </div>
-          )}
-          {a.movers && (
-            <div className="chart-card">
-              <div className="chart-head"><span className="eyebrow">{a.movers.mode === 'halves' ? `Change by ${a.movers.dimension}` : `${a.movers.measure} by ${a.movers.dimension}`}</span><span className="mono muted small">{a.movers.mode === 'halves' ? 'second half vs first' : 'largest groups'}</span></div>
-              <Bars items={a.movers.items} diverging={a.movers.mode === 'halves'} />
-            </div>
-          )}
+            {readNote && <p className="mono muted small own-readnote">{readNote}</p>}
+            {a.trend && (
+              <div className="chart-card">
+                <div className="chart-head"><span className="eyebrow">{a.trend.measure} by {a.trend.grain} · {a.trend.agg === 'sum' ? 'total' : a.trend.agg === 'avg' ? 'average' : 'count'}</span><span className="mono muted small">from “{a.trend.date}”{a.trend.partialLast ? ' · dashed = partial' : ''}</span></div>
+                <Line points={a.trend.points} partial={a.trend.partialLast} />
+              </div>
+            )}
+            {a.dash.breakdowns.length > 0 && (
+              <div className={`own-bds n${Math.min(a.dash.breakdowns.length, 3)}`}>
+                {a.dash.breakdowns.map(b => <Breakdown key={b.col} b={b} onPick={v => byValue(b.col, v, `${b.dimension} = “${v}”`)} />)}
+              </div>
+            )}
+            {!a.trend && !a.dash.breakdowns.length && <p className="muted own-nochart">No date column or repeating categories were found, so there is nothing to chart. The data-quality checks and column summary still apply.</p>}
+          </div>
+          <aside className="dash-side own-side" aria-label="What you need to know">
+            <div className="side-head"><span className="eyebrow">What you need to know</span></div>
+            <ol className="flist">
+              {a.dash.insights.map((f, i) => {
+                const body = (
+                  <>
+                    <span className="fn mono">{String(i + 1).padStart(2, '0')}</span>
+                    <span>
+                      <b>{f.title}</b>
+                      <span className="ft">{f.text}</span>
+                      <span className="fmeta"><i className={`kd own-kd-${f.kind.toLowerCase()}`} />{KIND[f.kind]}{f.severity && <em className="bad">{f.severity}</em>}{(f.filter || f.check) && <span className="inv">Show rows →</span>}</span>
+                    </span>
+                  </>
+                );
+                const act = f.check ? () => byCheck(f.check!) : f.filter && f.filter.col >= 0 ? () => byValue(f.filter!.col, f.filter!.value, `${a.header[f.filter!.col]} = “${f.filter!.value}”`) : null;
+                return <li key={i}>{act ? <button onClick={act}>{body}</button> : <div className="flist-static">{body}</div>}</li>;
+              })}
+            </ol>
+            <p className="mono muted small own-side-note">Every line is computed from your rows. No language model is involved.</p>
+          </aside>
+          {drill && <Records a={a} d={drill} onClose={() => setDrill(null)} />}
         </div>
       )}
 
-      <section aria-label="Data quality checks">
-        <span className="eyebrow">Data quality · {issues.length ? `${issues.length} to review` : 'nothing to fix'}</span>
-        <ul className="own-checks">{a.checks.map(c => <Check key={c.id} c={c} a={a} />)}</ul>
-      </section>
+      {tab === 'quality' && (
+        <section role="tabpanel" id="own-panel-quality" aria-labelledby="own-tab-quality">
+          <span className="eyebrow">Data quality · {issues.length ? `${issues.length} to review` : 'nothing to fix'} · {(a.dash.quality * 100).toFixed(1)}% of rows pass the checks (blank values aren’t counted against it)</span>
+          <ul className="own-checks">{a.checks.map(c => <Check key={c.id} c={c} a={a} />)}</ul>
+        </section>
+      )}
 
-      <section aria-label="Columns">
-        <span className="eyebrow">How it read each column</span>
-        <div className="tbl-wrap own-cols">
+      {tab === 'cols' && (
+        <section role="tabpanel" id="own-panel-cols" aria-labelledby="own-tab-cols">
+          <dl className="inv-nums own-nums">
+            <div><dt>Rows</dt><dd>{a.file.rows.toLocaleString('en-US')}</dd></div>
+            <div><dt>Columns</dt><dd>{a.file.cols}</dd></div>
+            <div><dt>Separator</dt><dd>{a.file.delimiter === '\t' ? 'tab' : a.file.delimiter === ' ' ? 'space' : `“${a.file.delimiter}”`}</dd></div>
+            <div><dt>Encoding</dt><dd>{a.file.encoding}</dd></div>
+          </dl>
+          <ul className="own-facts-list">{a.facts.slice(0, a.facts.length - (a.trend?.statement ? 1 : 0) - (a.movers ? 1 : 0)).map(f => <li key={f}>{f}</li>)}</ul>
+          <span className="eyebrow">How it read each column</span>
+          <div className="tbl-wrap own-cols">
+            <table className="tbl">
+              <thead><tr><th>Column</th><th>Read as</th><th className="n">Filled</th><th className="n">Distinct</th><th>Summary</th><th>Why</th></tr></thead>
+              <tbody>
+                {a.columns.map(c => (
+                  <tr key={c.index}>
+                    <td>{c.name}</td>
+                    <td><span className={`role role-${c.role}`}>{ROLE_LABEL[c.role]}</span></td>
+                    <td className="n">{a.file.rows ? Math.round((c.filled / a.file.rows) * 100) : 0}%</td>
+                    <td className="n">{c.distinct.toLocaleString('en-US')}</td>
+                    <td className="own-sum">{summary(c)}</td>
+                    <td className="muted small">{c.reasons.join('; ')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function Breakdown({ b, onPick }: { b: OwnBreakdown; onPick: (v: string) => void }) {
+  const max = Math.max(...b.items.map(x => Math.abs(x.v)), 1e-9);
+  return (
+    <div className="chart-card own-bd">
+      <div className="chart-head"><span className="eyebrow">{b.agg === 'count' ? 'Rows' : b.agg === 'avg' ? `Average ${b.measure}` : b.measure} by {b.dimension}</span>{b.halves && <span className="mono muted small">change: 2nd half vs 1st</span>}</div>
+      <div className="dbars">
+        {b.items.map(x => (
+          <button key={x.value} className="dbar own-dbar" onClick={() => onPick(x.value)} aria-label={`${b.dimension} ${x.value}: ${fmt(x.v)}${x.change !== undefined ? `, ${pct(x.change)}` : ''}. Show rows.`}>
+            <span className="nm" title={x.value}>{x.value}</span>
+            <span className="tr"><span style={{ width: `${Math.max(1, (Math.abs(x.v) / max) * 100)}%` }} /></span>
+            <span className="val">{fmt(x.v)}</span>
+            <span className={`val ${x.change === undefined ? 'muted' : x.change >= 0 ? 'up' : 'down'}`}>{x.change === undefined ? '' : pct(x.change)}</span>
+          </button>
+        ))}
+        {b.otherCount > 0 && <div className="dbar own-dbar other"><span className="nm muted">{b.otherCount} more</span><span /><span className="val muted">{b.agg === 'avg' ? '' : fmt(b.others)}</span><span /></div>}
+      </div>
+    </div>
+  );
+}
+
+function Records({ a, d, onClose }: { a: OwnAnalysis; d: Drill; onClose: () => void }) {
+  const head = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { head.current?.focus({ preventScroll: true }); head.current?.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' }); }, [d]);
+  const rows = d.rows.slice(0, 50);
+  return (
+    <section className="own-records" aria-label="Matching rows">
+      <div className="own-records-head">
+        <h4 ref={head} tabIndex={-1}>{d.label} <span className="muted mono small">· {d.total.toLocaleString('en-US')} row{d.total === 1 ? '' : 's'}{d.total > rows.length ? `, first ${rows.length} shown` : ''}</span></h4>
+        <button className="btn" onClick={onClose}>Close</button>
+      </div>
+      {rows.length ? (
+        <div className="tbl-wrap own-rows">
           <table className="tbl">
-            <thead><tr><th>Column</th><th>Read as</th><th className="n">Filled</th><th className="n">Distinct</th><th>Summary</th><th>Why</th></tr></thead>
-            <tbody>
-              {a.columns.map(c => (
-                <tr key={c.index}>
-                  <td>{c.name}</td>
-                  <td><span className={`role role-${c.role}`}>{ROLE_LABEL[c.role]}</span></td>
-                  <td className="n">{a.file.rows ? Math.round((c.filled / a.file.rows) * 100) : 0}%</td>
-                  <td className="n">{c.distinct.toLocaleString('en-US')}</td>
-                  <td className="own-sum">{summary(c)}</td>
-                  <td className="muted small">{c.reasons.join('; ')}</td>
-                </tr>
-              ))}
-            </tbody>
+            <thead><tr><th className="n">Line</th>{a.header.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
+            <tbody>{rows.map(n => <tr key={n}><td className="n">{n + a.file.lineOffset}</td>{a.cells[n - 2].map((v, i) => <td key={i}>{v === '' ? <span className="muted">·blank·</span> : v}</td>)}</tr>)}</tbody>
           </table>
         </div>
-      </section>
-    </div>
+      ) : <p className="muted">This check is about columns, not rows; see Data quality.</p>}
+    </section>
   );
 }
 
@@ -190,24 +290,5 @@ function Line({ points, partial }: { points: Point[]; partial: boolean }) {
       {partial && points.length > 1 && <path d={d(points.slice(-2), points.length - 2)} className="own-path partial" />}
       {points.map((p, i) => (i % every === 0 ? <text key={p.t} x={x(i)} y={H - 6} textAnchor="middle" className="axis">{p.label.replace(/ \d{4}$/, '')}</text> : null))}
     </svg>
-  );
-}
-
-function Bars({ items, diverging }: { items: { value: string; delta: number; b: number }[]; diverging: boolean }) {
-  const vals = items.map(i => (diverging ? i.delta : i.b));
-  const max = Math.max(...vals.map(Math.abs), 1);
-  return (
-    <ul className="own-bars">
-      {items.map((it, k) => {
-        const v = vals[k], w = (Math.abs(v) / max) * 100;
-        return (
-          <li key={it.value}>
-            <span className="own-bar-k" title={it.value}>{it.value}</span>
-            <span className={`own-bar-track${diverging ? ' div' : ''}`}><i className={v < 0 ? 'neg' : 'pos'} style={{ width: `${diverging ? w / 2 : w}%` }} /></span>
-            <span className={`own-bar-v mono ${diverging ? (v < 0 ? 'down' : 'up') : ''}`}>{diverging && v > 0 ? '+' : ''}{fmt(v)}</span>
-          </li>
-        );
-      })}
-    </ul>
   );
 }

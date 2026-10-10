@@ -20,10 +20,15 @@ export interface OwnCheck { id: string; severity: Severity; title: string; detai
 export interface Point { label: string; t: number; v: number }
 export interface OwnTrend { date: string; measure: string; agg: 'sum' | 'count' | 'avg'; grain: 'day' | 'week' | 'month' | 'year'; points: Point[]; partialLast: boolean; statement: string; change?: number }
 export interface OwnMovers { dimension: string; measure: string; agg: 'sum' | 'count'; mode: 'halves' | 'share'; items: { value: string; a: number; b: number; delta: number }[]; statement: string }
+export interface OwnBreakdown { dimension: string; col: number; agg: 'sum' | 'avg' | 'count'; measure: string; halves: boolean; items: { value: string; v: number; rows: number; change?: number }[]; others: number; otherCount: number }
+export interface OwnKpi { label: string; value: string; sub: string; change?: number; watch?: boolean }
+export type InsightKind = 'TREND' | 'MOVER' | 'SHARE' | 'ISSUE';
+export interface OwnInsight { kind: InsightKind; title: string; text: string; severity?: Severity; check?: string; filter?: { col: number; value: string } }
+export interface OwnDash { kpis: OwnKpi[]; breakdowns: OwnBreakdown[]; insights: OwnInsight[]; quality: number; flaggedRows: number }
 export interface OwnAnalysis {
   file: { name: string; bytes: number; rows: number; cols: number; delimiter: string; truncated: boolean; colsTruncated: number; encoding: string;
     /** add to an internal row number (data row index + 2) to get the line in the file */ lineOffset: number; skippedTop: number; headerless: boolean; totalRowDropped: boolean };
-  columns: OwnColumn[]; checks: OwnCheck[]; trend?: OwnTrend; movers?: OwnMovers; facts: string[];
+  columns: OwnColumn[]; checks: OwnCheck[]; trend?: OwnTrend; movers?: OwnMovers; facts: string[]; dash: OwnDash;
   /** raw access for "show rows" (1-based file line numbers: header = 1) */
   header: string[]; cells: string[][];
 }
@@ -482,6 +487,70 @@ export function analyse(name: string, bytes: number, text: string, encoding = 'U
     }
   }
 
+  // ── dashboard: KPI tiles, breakdowns by up to three dimensions, and a short list of things to know
+  const flagged = new Set<number>();
+  // blanks and short rows are often legitimate (a series that starts later, an optional field), so they don't lower the score
+  const soft = (c: OwnCheck) => c.id.startsWith('blank-') || c.id === 'short';
+  for (const c of checks) if (c.severity !== 'OK' && !soft(c)) for (const r of c.rows) flagged.add(r);
+  const softN = checks.filter(c => c.severity !== 'OK' && soft(c)).length;
+  const quality = N ? 1 - flagged.size / N : 1;
+  const breakdowns: OwnBreakdown[] = [];
+  const bAgg: OwnBreakdown['agg'] = measure ? mAgg : 'count';
+  const bWhat = measure ? measure.name : 'Rows';
+  const half = dateCol && dateCol.dates && trend ? Math.floor((dateCol.dates.min + (dateCol.dates.max - dateCol.dates.min) / 2) / DAY) * DAY + DAY : null;
+  for (const d of dims.slice().sort((x, y) => (x === dim ? -1 : y === dim ? 1 : x.distinct - y.distinct)).slice(0, 3)) {
+    const S = new Map<string, { s: number; n: number; a: number; b: number; an: number; bn: number; rows: number }>();
+    cells.forEach((r, i) => {
+      const k = (r[d.index] ?? '').trim(); if (isBlank(k)) return;
+      const e = S.get(k) ?? { s: 0, n: 0, a: 0, b: 0, an: 0, bn: 0, rows: 0 }; S.set(k, e); e.rows++;
+      if (skip.has(i + 2)) return;
+      const v = measure ? parseNumber(r[measure.index], measure.decimalComma) : 1; if (v === null) return;
+      e.s += v; e.n++;
+      if (half !== null && dateCol) { const t = parseDate(r[dateCol.index], dateCol.dates!.order); if (t !== null) { if (t < half) { e.a += v; e.an++; } else { e.b += v; e.bn++; } } }
+    });
+    const val = (s: number, n: number) => (bAgg === 'avg' ? (n ? s / n : 0) : s);
+    const all = [...S.entries()].map(([value, e]) => {
+      const a = val(e.a, e.an), b = val(e.b, e.bn);
+      return { value, v: r2(val(e.s, e.n)), rows: e.rows, change: half !== null && e.an && e.bn && a !== 0 ? (b - a) / Math.abs(a) : undefined };
+    }).sort((x, y) => y.v - x.v || y.rows - x.rows);
+    const items = all.slice(0, 8), rest = all.slice(8);
+    if (items.length >= 2) breakdowns.push({ dimension: d.name, col: d.index, agg: bAgg, measure: bWhat, halves: half !== null, items, others: bAgg === 'avg' ? 0 : r2(rest.reduce((t, x) => t + x.v, 0)), otherCount: rest.length });
+  }
+
+  const kpis: OwnKpi[] = [];
+  if (measure) {
+    let s = 0, n = 0;
+    cells.forEach((r, i) => { if (skip.has(i + 2)) return; const v = parseNumber(r[measure!.index], measure!.decimalComma); if (v !== null) { s += v; n++; } });
+    kpis.push({ label: mAgg === 'avg' ? `Average ${measure.name}` : `Total ${measure.name}`, value: fmt(r2(mAgg === 'avg' ? (n ? s / n : 0) : s)), change: trend?.change, sub: trend?.change !== undefined ? `latest full ${trend.grain} vs the one before` : `across ${plural(n, 'row')}${nOut ? `, ${nOut} extreme left out` : ''}` });
+  }
+  kpis.push({ label: 'Rows', value: N.toLocaleString('en-US'), change: !measure ? trend?.change : undefined, sub: !measure && trend?.change !== undefined ? `latest full ${trend.grain} vs the one before` : `${width} column${width === 1 ? '' : 's'}` });
+  if (dateCol?.dates) {
+    const { min: d0, max: d1 } = dateCol.dates, long = d1 - d0 > 400 * DAY;
+    const sameYear = new Date(d0).getUTCFullYear() === new Date(d1).getUTCFullYear();
+    const period = long ? `${monthLabel(d0)} – ${monthLabel(d1)}` : `${sameYear ? dayLabel(d0).replace(/ \d{4}$/, '') : dayLabel(d0)} – ${dayLabel(d1)}`;
+    kpis.push({ label: 'Period', value: period, sub: trend ? `${trend.points.length} ${trend.grain}s from “${dateCol.name}”` : `from “${dateCol.name}”` });
+  }
+  const main = breakdowns[0];
+  if (main) {
+    const c = columns[main.col], lead = main.items[0];
+    const tot = main.items.reduce((t, x) => t + x.v, 0) + main.others;
+    kpis.push({ label: c.name, value: `${c.distinct.toLocaleString('en-US')}`, sub: main.agg === 'avg' ? `distinct values · highest: ${lead.value}` : `distinct values · top: ${lead.value}${tot > 0 ? ` (${Math.round((lead.v / tot) * 100)}%)` : ''}` });
+  }
+  const nIssues = checks.filter(c => c.severity !== 'OK').length;
+  kpis.push({ label: 'Data quality', value: `${(quality * 100).toFixed(quality > 0.999 && quality < 1 ? 2 : 1)}%`, watch: nIssues > 0, sub: nIssues ? `of rows pass the checks${softN ? ' (blanks not counted)' : ''} · ${plural(nIssues, 'issue')} to review` : 'no issues found' });
+
+  const insights: OwnInsight[] = [];
+  if (trend?.statement) insights.push({ kind: 'TREND', title: trend.change === undefined ? `${trend.measure} by ${trend.grain}` : `${trend.measure} ${trend.change >= 0 ? 'up' : 'down'} ${pct(trend.change).replace(/^[+−]/, '')} in the latest ${trend.grain}`, text: trend.statement });
+  if (movers) { const t = movers.items[0]; insights.push({ kind: movers.mode === 'halves' ? 'MOVER' : 'SHARE', title: movers.mode === 'halves' ? `“${t.value}” moved most by ${movers.dimension}` : `“${t.value}” leads by ${movers.dimension}`, text: movers.statement, filter: { col: columns.find(c => c.name === movers!.dimension)?.index ?? -1, value: t.value } }); }
+  for (const b of breakdowns.slice(movers ? 1 : 0, 3)) {
+    const t = b.items[0]; if (b.agg === 'avg') continue;
+    const tot = b.items.reduce((s, x) => s + x.v, 0) + b.others; if (!tot) continue;
+    insights.push({ kind: 'SHARE', title: `“${t.value}” is the largest ${b.dimension}`, text: `${fmt(t.v)}${b.agg === 'count' ? ` ${t.v === 1 ? 'row' : 'rows'}` : ` ${b.measure}`}, ${Math.round((t.v / tot) * 100)}% of the total across ${plural(b.items.length + b.otherCount, 'value')}.`, filter: { col: b.col, value: t.value } });
+  }
+
+  for (const c of checks.filter(c => c.severity !== 'OK').sort((x, y) => sevRank[x.severity] - sevRank[y.severity]).slice(0, 4)) insights.push({ kind: 'ISSUE', title: c.title, text: c.detail, severity: c.severity, check: c.id });
+  const dash: OwnDash = { kpis, breakdowns, insights, quality, flaggedRows: flagged.size };
+
   // ── plain facts
   const byRole = (r: ColRole) => columns.filter(c => c.role === r).length;
   const facts = [
@@ -500,7 +569,7 @@ export function analyse(name: string, bytes: number, text: string, encoding = 'U
   if (trend?.statement) facts.push(trend.statement);
   if (movers) facts.push(movers.statement);
 
-  return { file: { name, bytes, rows: N, cols: width, delimiter, truncated, colsTruncated, encoding, lineOffset, skippedTop, headerless, totalRowDropped }, columns, checks, trend, movers, facts, header, cells };
+  return { file: { name, bytes, rows: N, cols: width, delimiter, truncated, colsTruncated, encoding, lineOffset, skippedTop, headerless, totalRowDropped }, columns, checks, trend, movers, facts, dash, header, cells };
 }
 
 /** A small, deliberately messy CSV so visitors without a file can try it. Deterministic. */

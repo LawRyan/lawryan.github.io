@@ -1219,3 +1219,42 @@ main, footer { position: relative; z-index: 1; }
 @keyframes cvIn { from { opacity: 0; transform: translateY(4px); } }
 @media (prefers-reduced-motion: reduce) { .cv-row i, .cv-flow li { animation: none; } }
 @media print { .cv-before { border: 1px solid #999; } .cv-after { border: 1px solid #0b6e8c; } }
+
+/* ── own file: dashboard view (mirrors the demo's Dashboard step) */
+.own-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.own-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--ink-2); font: inherit; font-size: 0.92rem; padding: 10px 14px; min-height: 44px; cursor: pointer; white-space: nowrap; margin-bottom: -1px; }
+.own-tabs button:hover { color: var(--ink); }
+.own-tabs button.on { color: var(--ink); border-bottom-color: var(--signal); }
+.own-dash { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.own-dash-main { padding: clamp(14px, 2.2vw, 22px); display: grid; gap: 14px; align-content: start; min-width: 0; border-right: 1px solid var(--line); }
+.own-kpis { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); }
+.own-kpis .k { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.own-kpis .v.sm { font-size: 1rem; line-height: 1.6; }
+.own-kpis .d.muted { line-height: 1.35; }
+.own-readnote { margin: -4px 0 0; }
+.own-bds { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+.dbar.own-dbar { width: 100%; grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr) 4.4rem 3.8rem; background: none; border: 0; color: inherit; font: inherit; font-size: 0.86rem; text-align: left; padding: 5px 4px; border-radius: 6px; cursor: pointer; min-height: 32px; }
+.dbar.own-dbar:hover { background: rgba(255,255,255,0.04); }
+.dbar.own-dbar.other { cursor: default; }
+.dbar.own-dbar.other:hover { background: none; }
+.own-dbar .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.own-dbar .val.up { color: var(--up); } .own-dbar .val.down { color: var(--down, #f08a8a); }
+.own-bd .dbars { gap: 2px; margin: 6px 0 4px; }
+.own-side .flist-static { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 8px; border-top: 1px solid var(--line); padding: 14px 4px; }
+.own-side-note { margin-top: 12px; }
+.own-kd-trend { background: var(--lios); } .own-kd-mover { background: var(--signal); } .own-kd-share { background: var(--silver); } .own-kd-issue { background: var(--watch); }
+.own-nochart { padding: 8px 0; }
+.own-records { grid-column: 1 / -1; border-top: 1px solid var(--line); padding: clamp(14px, 2.2vw, 22px); display: grid; gap: 10px; min-width: 0; }
+.own-records-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.own-records-head h4 { margin: 0; font-weight: 500; font-size: 1rem; }
+.own-records .own-rows { max-height: 420px; overflow: auto; }
+.own-facts-list { list-style: none; margin: 4px 0 8px; padding: 0; display: grid; gap: 6px; color: var(--ink-2); font-size: 0.92rem; }
+#own-panel-quality, #own-panel-cols { display: grid; gap: 12px; min-width: 0; }
+@media (max-width: 1000px) { .own-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .own-kpis > :last-child { grid-column: auto; } .own-dash { grid-template-columns: 1fr; } .own-dash-main { border-right: 0; border-bottom: 1px solid var(--line); } }
+@media (max-width: 560px) {
+  .dbar.own-dbar { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: 'nm v c' 'tr tr tr'; row-gap: 6px; column-gap: 10px; font-size: 0.86rem; padding: 7px 4px; }
+  .own-dbar .nm { grid-area: nm; } .own-dbar .tr { grid-area: tr; } .own-dbar .val { grid-area: v; } .dbar.own-dbar .val:last-child { grid-area: c; display: block; min-width: 3.2rem; }
+  .own-kpis .k { white-space: normal; }
+  .own-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .own-kpis > :last-child:nth-child(odd) { grid-column: span 2; }
+}

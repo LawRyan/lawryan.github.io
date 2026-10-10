@@ -68,8 +68,15 @@ await op.goto(base + '/?nointro'); await op.locator('#lab').scrollIntoViewIfNeed
 await op.click('.own-link'); await op.waitForSelector('.own-drop');
 const sent = []; op.on('request', r => { if (!/\/assets\/own-worker-/.test(r.url())) sent.push(r.url()); });
 await op.getByRole('button', { name: 'Use a messy sample' }).click(); await op.waitForSelector('.own-report', { timeout: 15000 });
-const facts = (await op.locator('.own-facts li').allInnerTexts()).join(' ');
-ok(/Gizmos/.test(facts) && /duplicate|spelled/.test(await op.locator('.own-checks').innerText()), 'own file: sample analysed, story and issues found');
+ok(await op.locator('.own-kpis .kpi').count() >= 4 && await op.locator('.own-line').count() === 1 && await op.locator('.own-dbar').count() >= 4, 'own file: dashboard with KPI tiles, trend and breakdowns');
+const side = await op.locator('.own-side').innerText();
+ok(/Gizmos/.test(side) && /duplicate|spelled/.test(side), 'own file: sample analysed, story and issues found');
+await op.locator('.own-dbar', { hasText: 'Gizmos' }).first().click(); await op.waitForSelector('.own-records');
+ok(/Product = “Gizmos” · 263 rows/.test(await op.locator('.own-records h4').innerText()) && await op.evaluate(() => document.activeElement?.tagName === 'H4'), 'own file: a bar drills into its rows, focus follows');
+await op.locator('.own-side button', { hasText: 'duplicate' }).click();
+ok(/duplicate/.test(await op.locator('.own-records h4').innerText()) && await op.locator('.own-records tbody tr').count() === 7, 'own file: an issue drills into its rows');
+await op.click('#own-tab-quality'); ok(/spelled/.test(await op.locator('.own-checks').innerText()), 'own file: data quality tab');
+await op.keyboard.press('ArrowRight'); ok(await op.locator('#own-panel-cols .own-cols').isVisible(), 'own file: arrow keys move between tabs');
 ok(sent.length === 0, `own file: no network requests during analysis ${sent.join(' ')}`);
 await op.getByRole('button', { name: 'Try another file' }).click();
 await op.setInputFiles('.own-drop input[type=file]', { name: 'tiny.csv', mimeType: 'text/csv', buffer: Buffer.from('Date,Team,Score\n2026-01-01,A,3\n2026-01-02,B,5\n2026-01-03,A,4\n') });
