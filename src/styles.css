@@ -1195,3 +1195,27 @@ main, footer { position: relative; z-index: 1; }
 .role-dimension { color: var(--up); background: rgba(99,214,160,0.08); } .role-empty { color: var(--ink-3); }
 @media (max-width: 860px) { .own-charts { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .own-check { grid-template-columns: 1fr; gap: 6px; } .own-facts li { grid-template-columns: 1fr; gap: 2px; } .own-bars li { grid-template-columns: minmax(0, 5.5rem) minmax(0, 1fr) 4.2rem; } }
+
+/* Case-study visuals */
+.cv { margin: 0 0 20px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,0.02); }
+.cv figcaption { font-size: 0.88rem; margin-top: 10px; color: var(--ink-2); }
+.cv figcaption strong { color: var(--signal); font-family: var(--f-mono); font-weight: 500; }
+.cv-bars { display: grid; gap: 8px; }
+.cv-row { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr) 2.4rem; gap: 10px; align-items: center; font-size: 0.8rem; }
+.cv-row span { font-family: var(--f-mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.cv-row b { font-family: var(--f-mono); font-weight: 400; color: var(--ink-2); text-align: right; }
+.cv-row i { display: block; height: 10px; border-radius: 3px; transform-origin: left; animation: cvGrow 0.9s var(--ease) both; }
+.cv-before { background: rgba(200,212,228,0.22); }
+.cv-after { background: var(--signal); min-width: 4px; animation-delay: 0.25s !important; }
+@keyframes cvGrow { from { transform: scaleX(0); } }
+.cv-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
+.cv-stats div { display: grid; gap: 2px; }
+.cv-stats b { font-family: var(--f-mono); font-weight: 500; font-size: 1.5rem; color: var(--ink); letter-spacing: -0.02em; }
+.cv-stats span { font-size: 0.82rem; color: var(--ink-2); }
+.cv-flow ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.cv-flow li { font-size: 0.82rem; padding: 6px 10px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ink); animation: cvIn 0.5s var(--ease) both; animation-delay: calc(var(--i) * 90ms); }
+.cv-flow li:not(:last-child)::after { content: '→'; margin-left: 10px; color: var(--signal); }
+.cv-flow li:nth-child(2) { border-color: rgba(111,211,242,0.5); color: var(--signal); }
+@keyframes cvIn { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .cv-row i, .cv-flow li { animation: none; } }
+@media print { .cv-before { border: 1px solid #999; } .cv-after { border: 1px solid #0b6e8c; } }

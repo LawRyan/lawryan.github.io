@@ -4,6 +4,7 @@ import {
 } from '../content';
 import HeroSignals from '../components/HeroSignals';
 import ScrollThread from '../components/ScrollThread';
+import CaseVisual from '../components/CaseVisual';
 
 const THREAD: [string, string][] = [['about', 'About'], ['experience', 'Experience'], ['impact', 'Impact'], ['expertise', 'Expertise'], ['lios', 'L//IOS'], ['lab', 'Lab'], ['philosophy', 'Principles'], ['projects', 'Projects'], ['contact', 'Contact']];
 import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
@@ -206,6 +207,7 @@ function Impact() {
           <article className="cs-panel" id="cs-panel" role="tabpanel" aria-labelledby={`cs-${c.id}`}>
             <div key={c.id} className="xp-anim">
               <h3>{c.title}</h3>
+              <CaseVisual id={c.id} />
               <dl>{rows.map(([k, v]) => <div key={k} className={k === 'Impact' ? 'hl' : undefined}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
               <div className="chips">{c.tags.map(t => <span key={t} className="chip">{t}</span>)}</div>
             </div>
