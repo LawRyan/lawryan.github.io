@@ -255,14 +255,12 @@ export function SignalField({ tint = 'signal', density = 30 }: { tint?: 'signal'
 
 /** ~1.4s initialization sequence, once per browser session. Click, Esc or "Skip" ends it. */
 export function Intro({ word = 'RYAN LAW' }: { word?: string }) {
-  const [state, setState] = useState<'on' | 'out' | 'gone'>(() => {
-    try {
-      if (reducedMotion() || location.hash || sessionStorage.getItem('rl-intro') || /[?&]nointro/.test(location.search)) return 'gone';
-    } catch { return 'gone'; }
-    return 'on';
-  });
+  // Rendered 'on' in the pre-built HTML; a tiny script in <head> adds .no-intro to <html>
+  // for repeat visits, deep links, ?nointro and reduced motion, and CSS hides it before first paint.
+  const [state, setState] = useState<'on' | 'out' | 'gone'>('on');
   useEffect(() => {
     if (state !== 'on') return;
+    if (document.documentElement.classList.contains('no-intro')) { setState('gone'); return; }
     try { sessionStorage.setItem('rl-intro', '1'); } catch { /* storage unavailable */ }
     const t = setTimeout(() => setState('out'), 1450);
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') setState('out'); };

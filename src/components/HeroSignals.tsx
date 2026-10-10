@@ -15,7 +15,8 @@ const DX = 9;            // px between points
 const SPEED = 22;        // px per second
 const DETECT = 0.7;      // detector position, share of width
 
-export default function HeroSignals() {
+export default function HeroSignals({ tint = 'signal' }: { tint?: 'signal' | 'lios' }) {
+  const A = tint === 'lios' ? '183,168,255' : '111,211,242';
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const c = ref.current!;
@@ -37,7 +38,7 @@ export default function HeroSignals() {
       const count = Math.ceil(W / DX) + 4;
       lines = Array.from({ length: n }, (_, i) => {
         const depth = n === 1 ? 1 : i / (n - 1);
-        const l: Line = { pts: [], v: 0, base: Math.min(H, window.innerHeight) * ((narrow ? 0.66 : 0.6) + depth * (narrow ? 0.24 : 0.3)), amp: 12 + depth * 16, alpha: 0.16 + depth * 0.2, flags: new Map() };
+        const l: Line = { pts: [], v: 0, base: H * ((narrow ? 0.45 : 0.355) + depth * (narrow ? 0.39 : 0.48)), amp: 12 + depth * 16, alpha: 0.16 + depth * 0.2, flags: new Map() };
         for (let k = 0; k < count; k++) l.pts.push(step(l));
         return l;
       });
@@ -55,7 +56,11 @@ export default function HeroSignals() {
       build();
     };
 
+    let lastPaint = 0;
     const draw = (now: number) => {
+      // 30 fps is plenty for lines moving ~22 px/s, and halves the work
+      if (!reduce && now - lastPaint < 31) { if (visible) raf = requestAnimationFrame(draw); return; }
+      lastPaint = now;
       resize();
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (!reduce) {
@@ -84,9 +89,9 @@ export default function HeroSignals() {
       ctx.clearRect(0, 0, W, H);
       const detX = W * DETECT;
       // detector: a faint vertical scan line
-      const g = ctx.createLinearGradient(0, Math.min(H, window.innerHeight) * 0.5, 0, Math.min(H, window.innerHeight));
-      g.addColorStop(0, 'rgba(111,211,242,0)'); g.addColorStop(0.5, 'rgba(111,211,242,0.12)'); g.addColorStop(1, 'rgba(111,211,242,0)');
-      ctx.fillStyle = g; const vh = Math.min(H, window.innerHeight); ctx.fillRect(detX, vh * 0.5, 1, vh * 0.5);
+      const g = ctx.createLinearGradient(0, H * 0.19, 0, H);
+      g.addColorStop(0, `rgba(${A},0)`); g.addColorStop(0.5, `rgba(${A},0.12)`); g.addColorStop(1, `rgba(${A},0)`);
+      ctx.fillStyle = g; ctx.fillRect(detX, H * 0.19, 1, H * 0.81);
 
       lines.forEach((l, li) => {
         const fade = ctx.createLinearGradient(0, 0, W, 0);
@@ -102,7 +107,7 @@ export default function HeroSignals() {
           const x = k * DX - shift - DX, y = l.base - l.pts[k] * l.amp * 0.5;
           if (x < 0 || x > W) return;
           const caught = x <= detX;
-          ctx.fillStyle = caught ? 'rgba(111,211,242,0.85)' : 'rgba(200,212,228,0.35)';
+          ctx.fillStyle = caught ? `rgba(${A},0.85)` : 'rgba(200,212,228,0.35)';
           ctx.beginPath(); ctx.arc(x, y, caught ? 2.4 : 1.6, 0, Math.PI * 2); ctx.fill();
           const id = `${li}:${serial + k}`;
           if (caught && !seen.has(id)) { seen.add(id); if (seen.size > 200) seen.clear(); pings.push({ line: li, idx: serial + k, born: reduce ? now - 900 : now, z }); }
@@ -116,10 +121,10 @@ export default function HeroSignals() {
         if (!l || age > 1 || k < 0) { if (!reduce) pings.splice(i, 1); continue; }
         const x = k * DX - shift - DX, y = l.base - l.pts[k] * l.amp * 0.5;
         const a = Math.max(0, 1 - age);
-        ctx.strokeStyle = `rgba(111,211,242,${0.8 * a})`; ctx.lineWidth = 1.2;
+        ctx.strokeStyle = `rgba(${A},${0.8 * a})`; ctx.lineWidth = 1.2;
         ctx.beginPath(); ctx.arc(x, y, 4 + age * 20, 0, Math.PI * 2); ctx.stroke();
         ctx.font = '10px "JetBrains Mono", ui-monospace, monospace';
-        ctx.fillStyle = `rgba(111,211,242,${0.9 * Math.min(1, a * 1.6)})`;
+        ctx.fillStyle = `rgba(${A},${0.9 * Math.min(1, a * 1.6)})`;
         ctx.fillText(`outlier · z ${p.z.toFixed(1)}`, x + 10, y - 10);
       }
 
@@ -136,6 +141,7 @@ export default function HeroSignals() {
     window.addEventListener('resize', onResize);
     draw(performance.now());
     return () => { cancelAnimationFrame(raf); io.disconnect(); window.removeEventListener('resize', onResize); };
-  }, []);
-  return <canvas ref={ref} className="hero-canvas" aria-hidden="true" />;
+  }, [A]);
+  // the canvas only covers the band the lines live in (38–100% of the first screen), which keeps repaints small
+  return <canvas ref={ref} className="hero-canvas sig-band" aria-hidden="true" />;
 }

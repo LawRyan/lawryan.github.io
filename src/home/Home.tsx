@@ -3,6 +3,9 @@ import {
   REVIEW_MODE, site, contact, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
 import HeroSignals from '../components/HeroSignals';
+import ScrollThread from '../components/ScrollThread';
+
+const THREAD: [string, string][] = [['about', 'About'], ['experience', 'Experience'], ['impact', 'Impact'], ['expertise', 'Expertise'], ['lios', 'L//IOS'], ['lab', 'Lab'], ['philosophy', 'Principles'], ['projects', 'Projects'], ['contact', 'Contact']];
 import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
 import SignalPanel from '../components/SignalPanel';
 import LoopDiagram from '../components/LoopDiagram';
@@ -28,6 +31,7 @@ export default function Home() {
       <a className="skip" href="#main">Skip to content</a>
       <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
       <Nav items={HOME_NAV} home="#home" />
+      <ScrollThread sections={THREAD} />
       <main id="main">
         <Hero />
         <Story />
@@ -307,7 +311,7 @@ function LabSection() {
         <div className="sec-head rv">
           <Eyebrow>Intelligence Lab</Eyebrow>
           <h2 id="lab-h" className="h-section">Beyond the dashboard, <span className="serif">in miniature</span>.</h2>
-          <p className="lede">A hands-on version of L//IOS Analyst. Give it three files and watch it work out the data, check it, build the dashboard and investigate what changed. Every number goes back to a row.</p>
+          <p className="lede">A hands-on version of L//IOS Analyst. Give it three files, or press “Watch it run”, and see it work out the data, check it, build the dashboard and investigate what changed. Every number goes back to a row.</p>
         </div>
         <LazyLab />
       </div>
@@ -318,7 +322,7 @@ function LabSection() {
 /** Load the Lab's code only when its section comes near, or when someone arrives at #lab. */
 function LazyLab() {
   const ref = useRef<HTMLDivElement>(null);
-  const [show, setShow] = useState(() => location.hash === '#lab');
+  const [show, setShow] = useState(false);
   useEffect(() => {
     if (show || !ref.current) return;
     if (!('IntersectionObserver' in window)) { setShow(true); return; }

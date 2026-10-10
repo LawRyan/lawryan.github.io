@@ -67,3 +67,38 @@ Touch targets under 32px on mobile: 12 on the homepage, 1 on /lios/.
 - 00:25 L//IOS: got access, captured real screenshots of all three apps, rewrote the pillars, built the screenshot gallery.
 - 00:45 Intelligence Lab rebuilt around the Analyst concept (per Ryan); engine + 73 tests.
 - 00:55 SEO files, palette fix, contrast fix, class-collision fix, new interaction tests, final matrix and before/after.
+
+## Overnight session: Oct 9–10, branch `polish` (not published)
+Everything below is on `polish` for Ryan to review; `master` (the live site) is unchanged.
+
+**Speed**
+- Pages are pre-rendered at build time and React hydrates them (`scripts/build.mjs` → `prerender()`).
+  Throttled phone (slow 4G, 4× CPU): home first paint 3.2 s → 1.8 s; L//IOS largest paint 4.2 s → 2.0 s.
+- Geist Mono subset to Latin (40 kB → 19 kB per weight).
+
+**Look and feel**
+- L//IOS page: lavender aurora and its own live signal lines.
+- Home: scroll thread in the left margin on wide screens (≥1440 px); click a node to jump.
+- New share previews (`og-home.png`, `og-lios.png`) in the current style.
+- Styled 404 page, print layout, richer structured data for search.
+
+**Intelligence Lab**
+- "Watch it run": auto-play through all five steps with captions; any click, or Escape, stops it.
+- Step bar stays on one row and keeps the current step in view; no empty KPI tile; Ask placeholder visible.
+
+**Fixes**
+- L//IOS page: tech table fits phones; compact roadmap tags.
+- Accessibility: instant focus rings, aurora fully still with reduced motion, hidden rail out of tab order,
+  tour keeps keyboard focus, intro can never cover the page if scripts are slow or off.
+
+**Checks (last run)**
+- `npm test` 73/73; `scripts/interact.mjs` all passed (now includes auto-play);
+  `scripts/matrix.mjs overnight`: 0 console errors, 0 sideways scroll, 0 small touch targets at 1920/1440/768/390/360.
+- Own accessibility audit: no unnamed controls, missing alt text, heading skips, duplicate ids or contrast failures;
+  every tab stop has a visible focus ring.
+- An independent review agent checked the diff; its 4 defects and 2 minor issues are fixed.
+
+**Not done / needs Ryan**
+- Safari and Firefox couldn't be tested here (only Chromium is available). Spot-check on an iPhone.
+- Older project thumbnails left as they are (no better source images).
+- Fixed income case study still has no concrete outcome.

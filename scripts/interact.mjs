@@ -24,8 +24,8 @@ await p.goto(base + '/?nointro', { waitUntil: 'networkidle' });
 ok((await p.locator('h1').count()) === 1, 'one h1 on home');
 ok(await p.locator('.sigp').isVisible(), 'hero signal panel renders');
 await p.keyboard.press('Control+k'); ok(await p.locator('.pal').isVisible(), 'palette opens with Ctrl K');
-await p.keyboard.type('lab'); await p.keyboard.press('Enter'); await p.waitForTimeout(900);
-ok(await p.evaluate(() => Math.abs(document.getElementById('lab').getBoundingClientRect().top) < 120), 'palette jumps to the Lab');
+await p.keyboard.type('lab'); await p.keyboard.press('Enter');
+ok(await p.waitForFunction(() => Math.abs(document.getElementById('lab').getBoundingClientRect().top) < 120, null, { timeout: 4000 }).then(() => true, () => false), 'palette jumps to the Lab');
 await p.keyboard.press('/'); ok(await p.locator('.pal').isVisible(), 'palette opens with /');
 await p.keyboard.press('Escape'); ok(!(await p.locator('.pal').count()), 'palette closes with Escape');
 await p.locator('#tl-assoc').click(); ok((await p.locator('#tl-panel h3').innerText()) === 'Client Intelligence Associate', 'timeline selects Associate');
@@ -52,6 +52,15 @@ ok(/\d+ rows/.test(rowsTxt), 'records listed');
 await p.selectOption('#lab-finding', { label: (await p.locator('#lab-finding option').allInnerTexts()).find(t => t.startsWith('Missing data')) });
 ok((await p.locator('.st-inv h3').innerText()).startsWith('Missing data'), 'switch finding from investigate');
 ok((await p.locator('.tbl tbody tr').count()) === 0 || true, 'missing-data rows render');
+
+// ── Lab auto-play: runs on its own, and any click stops it
+const tp = await page();
+await tp.goto(base + '/?nointro'); await tp.locator('#lab').scrollIntoViewIfNeeded(); await tp.waitForSelector('.alab-tour');
+await tp.click('.alab-tour'); await tp.waitForTimeout(3600);
+ok((await tp.locator('.alab-steps [aria-current="step"]').innerText()).includes('Understand'), 'auto-play advances on its own');
+await tp.click('.alab-body'); await tp.waitForTimeout(6500);
+ok(await tp.locator('.tour-bar').count() === 0 && (await tp.locator('.alab-steps [aria-current="step"]').innerText()).includes('Understand'), 'a click stops auto-play');
+await tp.close();
 
 // ── mobile menu
 const m = await page({ width: 390, height: 844 }, { isMobile: true, hasTouch: true, deviceScaleFactor: 2 });

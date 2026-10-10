@@ -1,4 +1,5 @@
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import './styles.css';
 import Home from './home/Home';
-createRoot(document.getElementById('root')!).render(<Home />);
+const root = document.getElementById('root')!;
+if (root.hasChildNodes()) hydrateRoot(root, <Home />); else createRoot(root).render(<Home />);
