@@ -36,6 +36,15 @@ const ldFor = og => JSON.stringify({
     : [person, { '@type': 'WebSite', name: 'Ryan Law', url: 'https://lawryan.github.io/', author: { '@id': 'https://lawryan.github.io/#ryan' } }],
 });
 
+// The own-file analyser runs in a Web Worker; bundle it separately and hand its URL to the app.
+async function buildWorker() {
+  const w = await esbuild.build({
+    entryPoints: ['src/lab/own.worker.ts'], bundle: true, format: 'iife', minify: !watch, target: ['es2020', 'safari15'],
+    outdir: join(OUT, 'assets'), entryNames: 'own-worker-[hash]', metafile: true, logLevel: 'warning',
+  });
+  return '/' + Object.keys(w.metafile.outputs).find(f => f.endsWith('.js')).replace(/^dist\//, '');
+}
+
 const options = {
   entryPoints: pages.map(p => p.entry),
   bundle: true,
@@ -51,7 +60,7 @@ const options = {
   jsx: 'automatic',
   metafile: true,
   external: ['/fonts/*', '/legacy-assets/*'],
-  define: { 'process.env.NODE_ENV': JSON.stringify(watch ? 'development' : 'production') },
+  define: { 'process.env.NODE_ENV': JSON.stringify(watch ? 'development' : 'production'), __OWN_WORKER__: '""' },
   logLevel: 'warning',
 };
 
@@ -95,7 +104,7 @@ async function prerender() {
     bundle: true, platform: 'node', format: 'esm', outfile: file, jsx: 'automatic',
     loader: { '.css': 'empty' }, logLevel: 'warning',
     banner: { js: "import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);" },
-    define: { 'process.env.NODE_ENV': '"production"' },
+    define: { 'process.env.NODE_ENV': '"production"', __OWN_WORKER__: '""' },
   });
   const m = await import(pathToFileURL(file).href);
   const out = { home: m.home(), lios: m.lios() };
@@ -107,6 +116,7 @@ if (/REVIEW_MODE = true/.test(readFileSync('src/content.ts', 'utf8'))) console.w
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 cpSync('public', OUT, { recursive: true });
+options.define.__OWN_WORKER__ = JSON.stringify(await buildWorker());
 
 if (watch) {
   const ctx = await esbuild.context({ ...options, plugins: [{ name: 'html', setup(b) { b.onEnd(r => r.metafile && writeHtml(r.metafile)); } }] });

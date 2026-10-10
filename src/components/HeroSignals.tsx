@@ -134,13 +134,17 @@ export default function HeroSignals({ tint = 'signal' }: { tint?: 'signal' | 'li
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
       cancelAnimationFrame(raf);
-      if (visible && !reduce) { last = performance.now(); raf = requestAnimationFrame(draw); }
+      if (visible && !reduce && started) { last = performance.now(); raf = requestAnimationFrame(draw); }
     });
     io.observe(c);
     const onResize = () => { if (reduce) draw(performance.now()); };
     window.addEventListener('resize', onResize);
-    draw(performance.now());
-    return () => { cancelAnimationFrame(raf); io.disconnect(); window.removeEventListener('resize', onResize); };
+    // start once the page is idle, so the first taps on a phone aren't competing with the animation
+    let idle = 0, usedIdle = false, started = false;
+    const start = () => { if (started) return; started = true; last = performance.now(); draw(last); };
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+    if (reduce) start(); else if (w.requestIdleCallback) { usedIdle = true; idle = w.requestIdleCallback(start, { timeout: 2500 }); } else idle = window.setTimeout(start, 1200);
+    return () => { cancelAnimationFrame(raf); if (usedIdle) w.cancelIdleCallback?.(idle); else clearTimeout(idle); io.disconnect(); window.removeEventListener('resize', onResize); };
   }, [A]);
   // the canvas only covers the band the lines live in (38–100% of the first screen), which keeps repaints small
   return <canvas ref={ref} className="hero-canvas sig-band" aria-hidden="true" />;

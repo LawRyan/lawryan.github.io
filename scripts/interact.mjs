@@ -62,6 +62,21 @@ await tp.click('.alab-body'); await tp.waitForTimeout(6500);
 ok(await tp.locator('.tour-bar').count() === 0 && (await tp.locator('.alab-steps [aria-current="step"]').innerText()).includes('Understand'), 'a click stops auto-play');
 await tp.close();
 
+// ── Lab: your own file (messy sample + a real upload), nothing leaves the browser
+const op = await page();
+await op.goto(base + '/?nointro'); await op.locator('#lab').scrollIntoViewIfNeeded(); await op.waitForSelector('.own-link');
+await op.click('.own-link'); await op.waitForSelector('.own-drop');
+const sent = []; op.on('request', r => { if (!/\/assets\/own-worker-/.test(r.url())) sent.push(r.url()); });
+await op.getByRole('button', { name: 'Use a messy sample' }).click(); await op.waitForSelector('.own-report', { timeout: 15000 });
+const facts = (await op.locator('.own-facts li').allInnerTexts()).join(' ');
+ok(/Gizmos/.test(facts) && /duplicate|spelled/.test(await op.locator('.own-checks').innerText()), 'own file: sample analysed, story and issues found');
+ok(sent.length === 0, `own file: no network requests during analysis ${sent.join(' ')}`);
+await op.getByRole('button', { name: 'Try another file' }).click();
+await op.setInputFiles('.own-drop input[type=file]', { name: 'tiny.csv', mimeType: 'text/csv', buffer: Buffer.from('Date,Team,Score\n2026-01-01,A,3\n2026-01-02,B,5\n2026-01-03,A,4\n') });
+await op.waitForSelector('.own-report'); ok((await op.locator('.own-head h3').innerText()) === 'tiny.csv', 'own file: real upload analysed');
+await op.getByRole('button', { name: 'Back to the demo' }).click(); ok(await op.locator('.alab-run').isVisible(), 'own file: back to the demo');
+await op.close();
+
 // ── mobile menu
 const m = await page({ width: 390, height: 844 }, { isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
 await m.goto(base + '/?nointro', { waitUntil: 'networkidle' });

@@ -5,6 +5,7 @@ import {
   type Files, type Finding, type Trade, type Node, type Answer,
 } from './analyst';
 import { reducedMotion } from '../components/common';
+import OwnData from './OwnData';
 
 type Step = 'files' | 'understand' | 'dashboard' | 'ask' | 'investigate';
 const STEPS: [Step, string][] = [['files', 'Files'], ['understand', 'Understand'], ['dashboard', 'Dashboard'], ['ask', 'Ask'], ['investigate', 'Investigate']];
@@ -21,6 +22,7 @@ const TOUR: { step: Step; ms: number; cap: string }[] = [
 export default function AnalystLab() {
   const files = useMemo(() => generateFiles(), []);
   const [step, setStep] = useState<Step>('files');
+  const [own, setOwn] = useState(false);
   const [ran, setRan] = useState(false);
   const [focus, setFocus] = useState<Finding | null>(null);
   const [answer, setAnswer] = useState<Answer | null>(null);
@@ -36,6 +38,7 @@ export default function AnalystLab() {
   const analysis = useMemo(() => (ran ? { prof: profile(files), rels: relationships(files), q: quality(files), k: kpis(files), F: findings(files) } : null), [ran, files]);
 
   const go = (s: Step) => {
+    setOwn(false);
     setStep(s);
     const el = top.current;
     if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
@@ -50,17 +53,21 @@ export default function AnalystLab() {
   const wasTouring = useRef(false);
   useEffect(() => {
     if (touring && !wasTouring.current) stopBtn.current?.focus();
-    if (!touring && wasTouring.current) {
+    if (!touring && wasTouring.current && !own) {
       const a = document.activeElement;
       if (!a || a === document.body || top.current?.contains(a)) bar.current?.querySelector<HTMLElement>('[aria-current="step"]')?.focus();
     }
     wasTouring.current = touring;
-  }, [touring]);
+  }, [touring, own]);
+  // returning from the own-file screen puts focus back on its link
+  const wasOwn = useRef(false);
+  useEffect(() => { if (wasOwn.current && !own) top.current?.querySelector<HTMLElement>('.own-link')?.focus(); wasOwn.current = own; }, [own]);
   useEffect(() => {
     if (tour === null) return;
     const t = TOUR[tour];
     const timers: ReturnType<typeof setTimeout>[] = [];
     if (tour === 0) top.current?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+    setOwn(false);
     if (t.step === 'understand') setRan(true);
     if (t.step === 'ask') { setAnswer(null); timers.push(setTimeout(() => setAnswer(ask(files, QUESTIONS[0])), 1400)); }
     if (t.step === 'investigate') { const f = findings(files)[0]; setFocus(f); setRecords({ label: f.title, rows: f.rows }); }
@@ -69,7 +76,11 @@ export default function AnalystLab() {
     return () => timers.forEach(clearTimeout);
   }, [tour, files]);
   const stopTour = (e: { target: EventTarget | null }) => {
-    if (tour !== null && !(e.target as HTMLElement | null)?.closest?.('.tour-bar')) setTour(null);
+    const t = e.target as HTMLElement | null;
+    if (tour === null || t?.closest?.('.tour-bar')) return;
+    setTour(null);
+    // the own-file link vanishes as the tour stops, so open it here rather than lose the click
+    if (t?.closest?.('.own-link')) setOwn(true);
   };
 
   return (
@@ -79,13 +90,13 @@ export default function AnalystLab() {
         <ol className="alab-steps" aria-label="Demo steps" ref={bar}>
           {STEPS.map(([s, l], i) => (
             <li key={s}>
-              <button aria-current={step === s ? 'step' : undefined} disabled={!can(s)} onClick={() => (s === 'understand' && !ran ? (setRan(true), go('understand')) : go(s))}>
+              <button aria-current={step === s && !own ? 'step' : undefined} disabled={!can(s)} onClick={() => (s === 'understand' && !ran ? (setRan(true), go('understand')) : go(s))}>
                 <span className="n">{String(i + 1).padStart(2, '0')}</span>{l}
               </button>
             </li>
           ))}
         </ol>
-        <span className="alab-badge">Synthetic data · no AI</span>
+        <span className="alab-badge">{own ? "Your file · no AI" : "Synthetic data · no AI"}</span>
       </div>
       {tour !== null && (
         <div className="tour-bar" role="status">
@@ -95,22 +106,23 @@ export default function AnalystLab() {
           <i key={tour} className="tour-prog" style={{ animationDuration: `${TOUR[tour].ms}ms` }} />
         </div>
       )}
-      <div className="alab-body" aria-live="polite">
-        {step === 'files' && <FilesStep files={files} onRun={() => { setRan(true); go('understand'); }} onTour={() => setTour(0)} />}
-        {step === 'understand' && analysis && <UnderstandStep files={files} a={analysis} onNext={() => go('dashboard')} />}
-        {step === 'dashboard' && analysis && <DashboardStep files={files} a={analysis} onInvestigate={investigate} onAsk={() => go('ask')} />}
-        {step === 'ask' && analysis && (
+      <div className="alab-body" aria-live={own ? 'off' : 'polite'}>
+        {own && <OwnData onBack={() => setOwn(false)} />}
+        {!own && step === 'files' && <FilesStep files={files} onRun={() => { setRan(true); go('understand'); }} onTour={() => setTour(0)} onOwn={() => setOwn(true)} />}
+        {!own && step === 'understand' && analysis && <UnderstandStep files={files} a={analysis} onNext={() => go('dashboard')} />}
+        {!own && step === 'dashboard' && analysis && <DashboardStep files={files} a={analysis} onInvestigate={investigate} onAsk={() => go('ask')} />}
+        {!own && step === 'ask' && analysis && (
           <AskStep answer={answer} onAsk={q => setAnswer(ask(files, q))}
             onRecords={a => { const f = a.finding && analysis.F.find(x => x.id === a.finding); if (f) investigate(f); else if (a.rows) { setFocus(null); setRecords({ label: a.rowsLabel || a.q, rows: a.rows }); go('investigate'); } }} />
         )}
-        {step === 'investigate' && analysis && <InvestigateStep files={files} finding={focus} records={records} findings={analysis.F} onPick={investigate} />}
+        {!own && step === 'investigate' && analysis && <InvestigateStep files={files} finding={focus} records={records} findings={analysis.F} onPick={investigate} />}
       </div>
     </div>
   );
 }
 
 /* ───────── 01 Files ───────── */
-function FilesStep({ files, onRun, onTour }: { files: Files; onRun: () => void; onTour: () => void }) {
+function FilesStep({ files, onRun, onTour, onOwn }: { files: Files; onRun: () => void; onTour: () => void; onOwn: () => void }) {
   const cards = [
     { name: 'Trades.csv', rows: files.trades.length, cols: 9, kb: Math.round(files.trades.length * 0.092), note: 'one row per trade, two years' },
     { name: 'Clients.csv', rows: files.clients.length, cols: 4, kb: 3, note: 'client master' },
@@ -126,6 +138,7 @@ function FilesStep({ files, onRun, onTour }: { files: Files; onRun: () => void; 
           <button className="btn btn-primary alab-run" onClick={onRun}>Analyse 3 files <span className="arr" aria-hidden="true">→</span></button>
           <button className="btn alab-tour" onClick={onTour}><span aria-hidden="true">▶</span> Watch it run · 30 s</button>
         </div>
+        <button className="linkish own-link" onClick={onOwn}>Or try it on your own CSV <span aria-hidden="true">→</span></button>
       </div>
       <ul className="filecards">
         {cards.map(c => (
