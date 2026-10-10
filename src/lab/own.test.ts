@@ -108,5 +108,69 @@ let ga = 0, gb = 0;
 for (const [i, r] of rows.entries()) { if (r[3] !== 'Gizmos' || !/^\d+(\.\d+)?$/.test(r[5]) || outRows.has(i + 2)) continue; const t = Date.parse(r[1] + 'T00:00:00Z'); if (t < mid) ga += Number(r[5]); else gb += Number(r[5]); }
 ok(Math.abs(a.movers!.items[0].delta - (gb - ga)) < 0.5, `Gizmos change recomputed: ${a.movers!.items[0].delta} vs ${gb - ga}`);
 
+// ── review fixes
+const DAYMS = 86_400_000;
+{ // a far-future typo must not take over the trend or the comparison
+  const lines = ['Date,Group,Amount'];
+  for (let d = 0; d < 120; d++) lines.push(`${new Date(Date.UTC(2026, 0, 1) + d * DAYMS).toISOString().slice(0, 10)},${['A1', 'A2', 'A3'][d % 3]},${100 + (d % 7)}`);
+  lines.push('2206-01-15,A2,500');
+  const t = lines.join('\n'); const r = analyse('typo.csv', t.length, t);
+  ok(!!r.trend && r.trend.points[r.trend.points.length - 1].t < Date.UTC(2026, 5, 1), 'future typo kept out of the trend');
+  ok(/out-of-range date/.test(r.trend!.statement), 'trend says the out-of-range date was left out');
+  ok(!r.movers || !/2116|2206/.test(r.movers.statement), 'future typo kept out of the comparison');
+  ok(!/: 0\b/.test(r.trend!.statement), 'no zero "latest period" from gap filling');
+}
+{ // sorted day-first file: early values have day <= 12
+  const lines = ['When,Amount'];
+  for (let d = 1; d <= 31; d++) for (let k = 0; k < 200; k++) lines.push(`${String(d).padStart(2, '0')}/01/2026,${k + 1}`);
+  const t = lines.join('\n'); const r = analyse('dmy.csv', t.length, t);
+  const c = r.columns.find(c => c.name === 'When')!;
+  eq([c.type, c.dates?.order], ['date', 'DMY'], 'day-first detected across the whole column');
+}
+{ // mixed date orders are flagged
+  const t = 'D,V\n13/01/2026,1\n01/14/2026,2\n02/02/2026,3\n'; const r = analyse('mix.csv', t.length, t);
+  ok(r.checks.some(c => c.id.startsWith('order-')), 'mixed day/month order flagged');
+}
+{ // semicolon file with dot decimals
+  const t = 'Item;Price\na;12.50\nb;3.75\nc;1,234.00\nd;8.10\n'; const r = analyse('dot.csv', t.length, t);
+  const c = r.columns.find(c => c.name === 'Price')!;
+  eq([c.type, c.num?.sum], ['number', 12.5 + 3.75 + 1234 + 8.1], 'semicolon file with dot decimals');
+}
+{ // a foreign key repeats legitimately: no "duplicate ID" issue
+  const lines = ['Trade ID,Client ID,Amount']; for (let i = 0; i < 300; i++) lines.push(`T${i},C${i % 20},${10 + (i % 9)}`);
+  const t = lines.join('\n'); const r = analyse('fk.csv', t.length, t);
+  ok(!r.checks.some(c => c.id.startsWith('dupid-')), 'foreign key not flagged as duplicate IDs');
+}
+{ // full duplicate rows are not double-counted as repeated IDs
+  ok(!a.checks.some(c => c.id.startsWith('dupid-')), 'sample: duplicate rows not double-counted');
+}
+{ // halves label: 1–31 Jan splits after 16 Jan; label says "to 15 Jan" and 16 Jan is in the second half
+  const lines = ['Date,G,Amount']; for (let d = 1; d <= 31; d++) for (const g of ['x', 'y', 'z']) lines.push(`2026-01-${String(d).padStart(2, '0')},${g},${g === 'x' && d >= 16 ? 10 : 1}`);
+  const t = lines.join('\n'); const r = analyse('half.csv', t.length, t);
+  ok(/to 16 Jan 2026/.test(r.movers!.statement) || /to 15 Jan 2026/.test(r.movers!.statement), 'halves label is a whole day');
+  const x = r.movers!.items.find(i => i.value === 'x')!;
+  const firstDays = /to 16 Jan/.test(r.movers!.statement) ? 16 : 15;
+  eq(x.a, firstDays >= 16 ? 15 + 10 : 15, 'first-half total matches the label');
+}
+{ // truncation flag ignores trailing blank lines
+  const body = Array.from({ length: 5 }, (_, i) => `${i}`).join('\n');
+  eq(parseDelimited('v\n' + body + '\n\n\n', ',', 6).truncated, false, 'trailing blank lines are not truncation');
+  eq(parseDelimited('v\n' + body + '\n6\n', ',', 6).truncated, true, 'real truncation flagged');
+}
+{ // duplicate headers stay unique
+  const r = analyse('h.csv', 0, 'Name,name,Name (2),Name\n1,2,3,4\n');
+  eq(new Set(r.header.map(h => h.toLowerCase())).size, 4, 'duplicate header names made unique');
+}
+{ // two-digit years
+  eq(new Date(parseDate('5/1/99')!).getUTCFullYear(), 1999, '99 is 1999');
+  eq(new Date(parseDate('5/1/26')!).getUTCFullYear(), 2026, '26 is 2026');
+}
+{ // very wide files are capped
+  const w = 400; const t = Array.from({ length: w }, (_, i) => `c${i}`).join(',') + '\n' + Array.from({ length: w }, (_, i) => i).join(',') + '\n';
+  const r = analyse('wide.csv', t.length, t);
+  eq([r.columns.length, r.file.colsTruncated], [200, 200], 'columns capped at 200');
+  ok(/first 200 of 400 columns/.test(r.facts[0]), 'cap is stated');
+}
+
 console.log(`own-file: ${checks} checks, ${failures} failures`);
 if (failures) process.exitCode = 1;

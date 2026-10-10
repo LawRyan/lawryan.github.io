@@ -53,12 +53,15 @@ export default function AnalystLab() {
   const wasTouring = useRef(false);
   useEffect(() => {
     if (touring && !wasTouring.current) stopBtn.current?.focus();
-    if (!touring && wasTouring.current) {
+    if (!touring && wasTouring.current && !own) {
       const a = document.activeElement;
       if (!a || a === document.body || top.current?.contains(a)) bar.current?.querySelector<HTMLElement>('[aria-current="step"]')?.focus();
     }
     wasTouring.current = touring;
-  }, [touring]);
+  }, [touring, own]);
+  // returning from the own-file screen puts focus back on its link
+  const wasOwn = useRef(false);
+  useEffect(() => { if (wasOwn.current && !own) top.current?.querySelector<HTMLElement>('.own-link')?.focus(); wasOwn.current = own; }, [own]);
   useEffect(() => {
     if (tour === null) return;
     const t = TOUR[tour];
@@ -73,7 +76,11 @@ export default function AnalystLab() {
     return () => timers.forEach(clearTimeout);
   }, [tour, files]);
   const stopTour = (e: { target: EventTarget | null }) => {
-    if (tour !== null && !(e.target as HTMLElement | null)?.closest?.('.tour-bar')) setTour(null);
+    const t = e.target as HTMLElement | null;
+    if (tour === null || t?.closest?.('.tour-bar')) return;
+    setTour(null);
+    // the own-file link vanishes as the tour stops, so open it here rather than lose the click
+    if (t?.closest?.('.own-link')) setOwn(true);
   };
 
   return (
@@ -99,7 +106,7 @@ export default function AnalystLab() {
           <i key={tour} className="tour-prog" style={{ animationDuration: `${TOUR[tour].ms}ms` }} />
         </div>
       )}
-      <div className="alab-body" aria-live="polite">
+      <div className="alab-body" aria-live={own ? 'off' : 'polite'}>
         {own && <OwnData onBack={() => setOwn(false)} />}
         {!own && step === 'files' && <FilesStep files={files} onRun={() => { setRan(true); go('understand'); }} onTour={() => setTour(0)} onOwn={() => setOwn(true)} />}
         {!own && step === 'understand' && analysis && <UnderstandStep files={files} a={analysis} onNext={() => go('dashboard')} />}

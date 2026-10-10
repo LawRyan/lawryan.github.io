@@ -3,7 +3,7 @@
  * Everything runs in the browser. No network, no model; every statement is computed from the rows.
  */
 
-export const LIMITS = { bytes: 10 * 1024 * 1024, rows: 200_000 };
+export const LIMITS = { bytes: 10 * 1024 * 1024, rows: 200_000, cols: 200 };
 
 export type ColType = 'number' | 'date' | 'boolean' | 'text';
 export type ColRole = 'measure' | 'dimension' | 'date' | 'identifier' | 'text' | 'empty';
@@ -11,7 +11,7 @@ export interface NumStats { min: number; max: number; mean: number; median: numb
 export interface OwnColumn {
   index: number; name: string; type: ColType; role: ColRole;
   filled: number; empty: number; distinct: number; examples: string[];
-  num?: NumStats; dates?: { min: number; max: number; order?: 'DMY' | 'MDY' };
+  num?: NumStats; dates?: { min: number; max: number; order?: 'DMY' | 'MDY' }; decimalComma?: boolean;
   top?: { value: string; count: number }[];
   reasons: string[];
 }
@@ -21,7 +21,7 @@ export interface Point { label: string; t: number; v: number }
 export interface OwnTrend { date: string; measure: string; agg: 'sum' | 'count'; grain: 'day' | 'week' | 'month'; points: Point[]; partialLast: boolean; statement: string; change?: number }
 export interface OwnMovers { dimension: string; measure: string; agg: 'sum' | 'count'; mode: 'halves' | 'share'; items: { value: string; a: number; b: number; delta: number }[]; statement: string }
 export interface OwnAnalysis {
-  file: { name: string; bytes: number; rows: number; cols: number; delimiter: string; truncated: boolean };
+  file: { name: string; bytes: number; rows: number; cols: number; delimiter: string; truncated: boolean; colsTruncated: number };
   columns: OwnColumn[]; checks: OwnCheck[]; trend?: OwnTrend; movers?: OwnMovers; facts: string[];
   /** raw access for "show rows" (1-based file line numbers: header = 1) */
   header: string[]; cells: string[][];
@@ -59,7 +59,7 @@ export function parseDelimited(text: string, delimiter = sniffDelimiter(text), m
     }
     if (ch === '"' && field === '') { q = true; i++; continue; }
     if (ch === delimiter) { row.push(field); field = ''; i++; continue; }
-    if (ch === '\r' || ch === '\n') { endRow(); if (ch === '\r' && text[i + 1] === '\n') i++; i++; if (rows.length >= maxRows) return { rows, truncated: i < n }; continue; }
+    if (ch === '\r' || ch === '\n') { endRow(); if (ch === '\r' && text[i + 1] === '\n') i++; i++; if (rows.length >= maxRows) { const re = /\S/g; re.lastIndex = i; return { rows, truncated: re.test(text) }; } continue; }
     field += ch; i++;
   }
   if (field !== '' || row.length) endRow();
@@ -85,7 +85,8 @@ export function parseNumber(raw: string, decimalComma = false): number | null {
 }
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-const utc = (y: number, m: number, d: number) => { if (y < 100) y += 2000; if (m < 1 || m > 12 || d < 1 || d > 31) return null; const t = Date.UTC(y, m - 1, d); const dt = new Date(t); return dt.getUTCDate() === d ? t : null; };
+const PIVOT = (new Date().getUTCFullYear() % 100) + 10;
+const utc = (y: number, m: number, d: number) => { if (y < 100) y += y <= PIVOT ? 2000 : 1900; if (m < 1 || m > 12 || d < 1 || d > 31) return null; const t = Date.UTC(y, m - 1, d); const dt = new Date(t); return dt.getUTCDate() === d ? t : null; };
 
 /** Parse a date. `order` resolves a/b/yyyy: 'DMY' or 'MDY'. Returns a UTC timestamp (ms) or null. */
 export function parseDate(raw: string, order: 'DMY' | 'MDY' = 'MDY'): number | null {
@@ -104,15 +105,16 @@ export function parseDate(raw: string, order: 'DMY' | 'MDY' = 'MDY'): number | n
 }
 
 /** Decide day-first vs month-first from the values themselves. */
-export function dateOrder(values: string[]): { order: 'DMY' | 'MDY'; ambiguous: boolean } {
+export function dateOrder(values: string[]): { order: 'DMY' | 'MDY'; ambiguous: boolean; mixed: boolean } {
   let dmy = 0, mdy = 0;
   for (const v of values) {
     const m = v.trim().match(/^(\d{1,2})[-/.](\d{1,2})[-/.]\d{2,4}/); if (!m) continue;
     if (+m[1] > 12) dmy++; else if (+m[2] > 12) mdy++;
   }
-  if (dmy && !mdy) return { order: 'DMY', ambiguous: false };
-  if (mdy && !dmy) return { order: 'MDY', ambiguous: false };
-  return { order: 'MDY', ambiguous: dmy === 0 && mdy === 0 && values.some(v => /^\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}/.test(v.trim())) };
+  if (dmy && !mdy) return { order: 'DMY', ambiguous: false, mixed: false };
+  if (mdy && !dmy) return { order: 'MDY', ambiguous: false, mixed: false };
+  if (dmy && mdy) return { order: dmy >= mdy ? 'DMY' : 'MDY', ambiguous: false, mixed: true };
+  return { order: 'MDY', ambiguous: values.some(v => /^\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}/.test(v.trim())), mixed: false };
 }
 
 const BOOL = new Set(['true', 'false', 'yes', 'no', 'y', 'n', 't', 'f']);
@@ -142,21 +144,27 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   const { rows: raw, truncated } = parseDelimited(text, delimiter);
   if (!raw.length) throw new Error('The file is empty.');
   // header: names, de-duplicated; blanks get a name
-  const seen = new Map<string, number>();
-  const header = raw[0].map((h, i) => {
-    let n = h.trim() || `Column ${i + 1}`;
-    const k = n.toLowerCase(); const c = seen.get(k) ?? 0; seen.set(k, c + 1); if (c) n = `${n} (${c + 1})`;
+  const used = new Set<string>();
+  const colsTruncated = Math.max(0, raw[0].length - LIMITS.cols);
+  const header = raw[0].slice(0, LIMITS.cols).map((h, i) => {
+    const base = h.trim() || `Column ${i + 1}`;
+    let n = base, k = 2;
+    while (used.has(n.toLowerCase())) n = `${base} (${k++})`;
+    used.add(n.toLowerCase());
     return n;
   });
   const data = raw.slice(1);
   if (!data.length) throw new Error('The file has a header row but no data rows.');
   const width = header.length;
   const ragged: number[] = [];
-  const cells = data.map((r, i) => { if (r.length !== width) ragged.push(i + 2); const x = r.slice(0, width); while (x.length < width) x.push(''); return x; });
+  const fullWidth = raw[0].length;
+  const cells = data.map((r, i) => { if (r.length !== fullWidth) ragged.push(i + 2); const x = r.slice(0, width); while (x.length < width) x.push(''); return x; });
   const N = cells.length;
-  const decimalComma = delimiter === ';';
+  const today = Date.now();
+  const okDate = (t: number) => t <= today + 2 * DAY && t >= Date.UTC(1900, 0, 1);
 
   // ── columns
+  const mixedOrder: number[] = [];
   const columns: OwnColumn[] = header.map((h, ci) => {
     const vals = cells.map(r => r[ci]);
     const nonEmpty = vals.filter(v => v.trim() !== '');
@@ -168,11 +176,16 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     const lname = h.toLowerCase();
     if (!filled) return { index: ci, name: h, type: 'text', role: 'empty', filled, empty, distinct, examples, reasons: ['every cell is empty'] };
 
-    const nums = nonEmpty.map(v => parseNumber(v, decimalComma));
-    const numOk = nums.filter(v => v !== null).length;
-    const { order, ambiguous } = dateOrder(nonEmpty.slice(0, 2000));
+    // decimal style is decided per column: try both and keep the one that reads more values
+    const dotN = nonEmpty.map(v => parseNumber(v, false)), comN = nonEmpty.map(v => parseNumber(v, true));
+    const dotOk = dotN.filter(v => v !== null).length, comOk = comN.filter(v => v !== null).length;
+    const decimalComma = comOk > dotOk || (comOk === dotOk && delimiter === ';' && nonEmpty.some(v => /,\d/.test(v)));
+    const nums = decimalComma ? comN : dotN;
+    const numOk = decimalComma ? comOk : dotOk;
+    const { order, ambiguous, mixed } = dateOrder(nonEmpty);
     const dts = nonEmpty.map(v => parseDate(v, order));
-    const dateOk = dts.filter(v => v !== null).length;
+    // with mixed day/month orders, a value counts as date-like if it reads either way (the mix is flagged below)
+    const dateOk = mixed ? nonEmpty.filter(v => parseDate(v, 'DMY') !== null || parseDate(v, 'MDY') !== null).length : dts.filter(v => v !== null).length;
     const lower = new Set(nonEmpty.map(v => v.trim().toLowerCase()));
     const isBool = [...lower].every(v => BOOL.has(v)) && lower.size <= 2;
 
@@ -185,15 +198,18 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     const counts = new Map<string, number>(); nonEmpty.forEach(v => counts.set(v.trim(), (counts.get(v.trim()) ?? 0) + 1));
     const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([value, count]) => ({ value, count }));
 
-    const col: OwnColumn = { index: ci, name: h, type, role: 'dimension', filled, empty, distinct, examples, reasons };
+    const col: OwnColumn = { index: ci, name: h, type, role: 'dimension', filled, empty, distinct, examples, reasons, decimalComma };
+    if (mixed) mixedOrder.push(ci);
     const idName = /(^|[^a-z])(id|ids|key|code|uuid|guid|sku|zip|postal|phone|account|acct)([^a-z]|$)|number$|no\.?$|#$/.test(lname);
 
     if (type === 'date') {
-      const ok = dts.filter((v): v is number => v !== null);
+      const all = dts.filter((v): v is number => v !== null);
+      const ok = all.filter(okDate).length ? all.filter(okDate) : all;
       col.dates = { min: minOf(ok), max: maxOf(ok), order };
       col.role = 'date';
       reasons.push(`${Math.round((dateOk / filled) * 100)}% of values read as dates`);
       if (ambiguous) reasons.push('day and month are ambiguous; read as month/day');
+      else if (mixed) reasons.push('both day/month and month/day forms appear');
       else if (order === 'DMY') reasons.push('read as day/month/year');
     } else if (type === 'number') {
       const ok = nums.filter((v): v is number => v !== null);
@@ -219,7 +235,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   const checks: OwnCheck[] = [];
   const add = (c: Omit<OwnCheck, 'rows'> & { rows?: number[] }) => checks.push({ ...c, rows: (c.rows ?? []).slice(0, 500) });
 
-  if (ragged.length) add({ id: 'ragged', severity: 'MEDIUM', title: `${ragged.length.toLocaleString('en-US')} rows have the wrong number of fields`, detail: `The header has ${width} columns. These rows were padded or cut to fit, so values may have shifted.`, method: 'count delimiters per row (quotes respected) vs the header', affected: ragged.length, rows: ragged });
+  if (ragged.length) add({ id: 'ragged', severity: 'MEDIUM', title: `${ragged.length.toLocaleString('en-US')} rows have the wrong number of fields`, detail: `The header has ${fullWidth} columns. These rows were padded or cut to fit, so values may have shifted.`, method: 'count delimiters per row (quotes respected) vs the header', affected: ragged.length, rows: ragged });
 
   const emptyCols = columns.filter(c => c.role === 'empty');
   if (emptyCols.length) add({ id: 'empty-cols', severity: 'LOW', title: `${emptyCols.length} column${emptyCols.length > 1 ? 's are' : ' is'} completely empty`, detail: emptyCols.map(c => c.name).slice(0, 6).join(', '), method: 'no non-blank cell in the column', affected: emptyCols.length });
@@ -240,7 +256,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   // mixed types
   for (const c of columns) {
     if (c.type !== 'number' && c.type !== 'date') continue;
-    const bad = cells.map((r, i) => { const v = r[c.index]; if (!v.trim()) return 0; const ok = c.type === 'number' ? parseNumber(v, decimalComma) !== null : parseDate(v, c.dates?.order) !== null; return ok ? 0 : i + 2; }).filter(Boolean);
+    const bad = cells.map((r, i) => { const v = r[c.index]; if (!v.trim()) return 0; const ok = c.type === 'number' ? parseNumber(v, c.decimalComma) !== null : parseDate(v, c.dates?.order) !== null; return ok ? 0 : i + 2; }).filter(Boolean);
     if (bad.length) {
       const ex = cells[bad[0] - 2][c.index];
       add({ id: `mixed-${c.index}`, severity: 'MEDIUM', title: `${bad.length.toLocaleString('en-US')} values in “${c.name}” aren’t ${c.type === 'number' ? 'numbers' : 'dates'}`, detail: `For example “${ex.slice(0, 40)}”. They are left out of totals and trends.`, method: `try to read each non-blank cell as a ${c.type}`, affected: bad.length, rows: bad });
@@ -265,7 +281,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   const outlierRows = new Map<number, Set<number>>();
   for (const c of columns) {
     if (c.role !== 'measure' || !c.num) continue;
-    const vals = cells.map((r, i) => ({ v: parseNumber(r[c.index], decimalComma), row: i + 2 })).filter((x): x is { v: number; row: number } => x.v !== null);
+    const vals = cells.map((r, i) => ({ v: parseNumber(r[c.index], c.decimalComma), row: i + 2 })).filter((x): x is { v: number; row: number } => x.v !== null);
     if (vals.length < 30) continue;
     const med = median(vals.map(x => x.v));
     const mad = median(vals.map(x => Math.abs(x.v - med)));
@@ -278,26 +294,32 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     }
   }
 
-  // duplicate identifiers
+  // repeated values in a column that is otherwise unique (a likely key); full duplicate rows are already counted above
+  const dupSet = new Set(dupRows);
   for (const c of columns) {
-    if (c.role !== 'identifier' || c.distinct === c.filled) continue;
+    if (c.role !== 'identifier' || c.distinct === c.filled || c.distinct / c.filled < 0.95) continue;
     const firstSeen = new Set<string>(); const rows: number[] = [];
-    cells.forEach((r, i) => { const v = r[c.index].trim(); if (!v) return; if (firstSeen.has(v)) rows.push(i + 2); else firstSeen.add(v); });
-    if (rows.length && rows.length < c.filled * 0.5) add({ id: `dupid-${c.index}`, severity: 'MEDIUM', title: `${rows.length.toLocaleString('en-US')} repeated values in “${c.name}”`, detail: 'This looks like an ID column, but some IDs appear more than once.', method: 'count non-blank values seen before in the same column', affected: rows.length, rows });
+    cells.forEach((r, i) => { if (dupSet.has(i + 2)) return; const v = r[c.index].trim(); if (!v) return; if (firstSeen.has(v)) rows.push(i + 2); else firstSeen.add(v); });
+    if (rows.length) add({ id: `dupid-${c.index}`, severity: 'LOW', title: `${rows.length.toLocaleString('en-US')} repeated values in “${c.name}”`, detail: 'Almost every value in this column is unique, but these repeat. If it is meant to be a key, they need checking.', method: 'values seen earlier in the same column, ignoring rows that are full duplicates', affected: rows.length, rows });
+  }
+  for (const ci of mixedOrder) {
+    const c = columns[ci]; if (c.role !== 'date') continue;
+    add({ id: `order-${ci}`, severity: 'MEDIUM', title: `“${c.name}” mixes day/month and month/day dates`, detail: `Some values only make sense as day-first and others as month-first. They were read as ${c.dates?.order === 'DMY' ? 'day/month/year' : 'month/day/year'}, so some dates may be wrong.`, method: 'look for a first or second number above 12 in each date', affected: c.filled, rows: [] });
   }
 
-  // dates in the future / far past
-  const today = Date.now();
+  // dates in the future / far past (also kept out of the trend and the comparison)
+  const badDateRows = new Map<number, Set<number>>();
   for (const c of columns) {
     if (c.role !== 'date' || !c.dates) continue;
-    const rows = cells.map((r, i) => { const t = parseDate(r[c.index], c.dates!.order); return t !== null && (t > today + 2 * DAY || t < Date.UTC(1900, 0, 1)) ? i + 2 : 0; }).filter(Boolean);
+    const rows = cells.map((r, i) => { const t = parseDate(r[c.index], c.dates!.order); return t !== null && !okDate(t) ? i + 2 : 0; }).filter(Boolean);
+    badDateRows.set(c.index, new Set(rows));
     if (rows.length) add({ id: `dates-${c.index}`, severity: 'LOW', title: `${rows.length.toLocaleString('en-US')} dates in “${c.name}” are in the future or before 1900`, detail: 'Possibly placeholders or typos.', method: 'dates after today or before 1 Jan 1900', affected: rows.length, rows });
   }
 
   const sevRank = { HIGH: 0, MEDIUM: 1, LOW: 2, OK: 3 } as const;
   checks.sort((a, b) => sevRank[a.severity] - sevRank[b.severity] || b.affected - a.affected);
   if (!dupRows.length) checks.push({ id: 'ok-dups', severity: 'OK', title: 'No duplicate rows', detail: 'Every row differs from the others in at least one column.', method: 'compare every column of every row', affected: 0, rows: [] });
-  if (!ragged.length) checks.push({ id: 'ok-shape', severity: 'OK', title: 'Every row has the same shape', detail: `All rows have ${width} fields, like the header.`, method: 'count fields per row vs the header', affected: 0, rows: [] });
+  if (!ragged.length) checks.push({ id: 'ok-shape', severity: 'OK', title: 'Every row has the same shape', detail: `All rows have ${fullWidth} fields, like the header.`, method: 'count fields per row vs the header', affected: 0, rows: [] });
 
   // ── trend: first well-filled date column × best measure (or row count)
   const dateCol = columns.find(c => c.role === 'date' && c.filled >= N * 0.8 && c.dates && c.dates.max > c.dates.min);
@@ -305,8 +327,10 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   const pref = /amount|revenue|sales|value|total|price|cost|profit|qty|quantity|volume|spend|balance/;
   const measure = measures.find(c => pref.test(c.name.toLowerCase())) ?? measures[0];
   let trend: OwnTrend | undefined;
-  const skip = (measure && outlierRows.get(measure.index)) || new Set<number>();
-  const skipNote = skip.size ? ` ${skip.size.toLocaleString('en-US')} extreme value${skip.size > 1 ? 's are' : ' is'} left out (see the checks).` : '';
+  const skip = new Set<number>([...((measure && outlierRows.get(measure.index)) || []), ...((dateCol && badDateRows.get(dateCol.index)) || [])]);
+  const nOut = (measure && outlierRows.get(measure.index)?.size) || 0, nBad = (dateCol && badDateRows.get(dateCol.index)?.size) || 0;
+  const leftOut = [nOut ? `${nOut.toLocaleString('en-US')} extreme value${nOut > 1 ? 's' : ''}` : '', nBad ? `${nBad.toLocaleString('en-US')} out-of-range date${nBad > 1 ? 's' : ''}` : ''].filter(Boolean).join(' and ');
+  const skipNote = leftOut ? ` ${leftOut} left out (see the checks).` : '';
   if (dateCol && dateCol.dates) {
     const span = (dateCol.dates.max - dateCol.dates.min) / DAY;
     const grain: OwnTrend['grain'] = span <= 45 ? 'day' : span <= 400 ? 'week' : 'month';
@@ -315,12 +339,12 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
       if (grain === 'week') { const d = new Date(t); const dow = (d.getUTCDay() + 6) % 7; return t - dow * DAY; }
       const d = new Date(t); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
     };
-    const sums = new Map<number, number>();
+    const sums = new Map<number, number>(), counts = new Map<number, number>();
     cells.forEach((r, i) => {
       if (skip.has(i + 2)) return;
       const t = parseDate(r[dateCol.index], dateCol.dates!.order); if (t === null) return;
-      const v = measure ? parseNumber(r[measure.index], decimalComma) : 1; if (v === null) return;
-      const b = bucket(t); sums.set(b, (sums.get(b) ?? 0) + v);
+      const v = measure ? parseNumber(r[measure.index], measure.decimalComma) : 1; if (v === null) return;
+      const b = bucket(t); sums.set(b, (sums.get(b) ?? 0) + v); counts.set(b, (counts.get(b) ?? 0) + 1);
     });
     const keys = [...sums.keys()].sort((a, b) => a - b);
     if (keys.length >= 3) {
@@ -342,7 +366,8 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
       if (cmp.length >= 2) {
         const a = cmp[cmp.length - 2], b = cmp[cmp.length - 1];
         const per = grain === 'day' ? 'day' : grain === 'week' ? 'week' : 'month';
-        if (a.v !== 0) { change = (b.v - a.v) / Math.abs(a.v); statement = `${what} in the latest full ${per} (${b.label}): ${fmt(b.v)}, ${pct(change)} vs the ${per} before.`; }
+        if (!counts.get(b.t)) statement = `The latest full ${per} (${b.label}) has no rows.`;
+        else if (a.v !== 0 && counts.get(a.t)) { change = (b.v - a.v) / Math.abs(a.v); statement = `${what} in the latest full ${per} (${b.label}): ${fmt(b.v)}, ${pct(change)} vs the ${per} before.`; }
         else statement = `${what} in the latest full ${per} (${b.label}): ${fmt(b.v)}.`;
         if (partialLast) statement += ` The last ${per} is partial, so it is left out of the comparison.`;
         statement += skipNote;
@@ -360,12 +385,13 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     const what = measure ? measure.name : 'Rows';
     const agg: OwnMovers['agg'] = measure ? 'sum' : 'count';
     if (dateCol && dateCol.dates && trend) {
-      const mid = dateCol.dates.min + (dateCol.dates.max - dateCol.dates.min) / 2;
+      // split on a whole day: the first half is every day before `mid`
+      const mid = Math.floor((dateCol.dates.min + (dateCol.dates.max - dateCol.dates.min) / 2) / DAY) * DAY + DAY;
       const A = new Map<string, number>(), B = new Map<string, number>();
       cells.forEach((r, i) => {
         if (skip.has(i + 2)) return;
         const t = parseDate(r[dateCol.index], dateCol.dates!.order); const k = r[dim.index].trim(); if (t === null || !k) return;
-        const v = measure ? parseNumber(r[measure.index], decimalComma) : 1; if (v === null) return;
+        const v = measure ? parseNumber(r[measure.index], measure.decimalComma) : 1; if (v === null) return;
         const m = t < mid ? A : B; m.set(k, (m.get(k) ?? 0) + v);
       });
       const items = [...new Set([...A.keys(), ...B.keys()])].map(value => { const a = r2(A.get(value) ?? 0), b = r2(B.get(value) ?? 0); return { value, a, b, delta: r2(b - a) }; })
@@ -373,12 +399,12 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
       if (items.length && items[0].delta !== 0) {
         const t = items[0];
         const rel = t.a ? ` (${pct(t.delta / Math.abs(t.a))})` : '';
-        movers = { dimension: dim.name, measure: what, agg, mode: 'halves', items, statement: `By ${dim.name}, “${t.value}” moved most: ${t.delta >= 0 ? '+' : '−'}${fmt(Math.abs(t.delta))}${rel} from the first half of the period (to ${dayLabel(mid)}) to the second.${skipNote}` };
+        movers = { dimension: dim.name, measure: what, agg, mode: 'halves', items, statement: `By ${dim.name}, “${t.value}” moved most: ${t.delta >= 0 ? '+' : '−'}${fmt(Math.abs(t.delta))}${rel} from the first half of the period (to ${dayLabel(mid - DAY)}) to the second.${skipNote}` };
       }
     } else {
       const S = new Map<string, number>();
-      cells.forEach((r, i) => { if (skip.has(i + 2)) return; const k = r[dim.index].trim(); if (!k) return; const v = measure ? parseNumber(r[measure.index], decimalComma) : 1; if (v === null) return; S.set(k, (S.get(k) ?? 0) + v); });
-      const total = [...S.values()].reduce((a, b) => a + b, 0);
+      let total = 0;
+      cells.forEach((r, i) => { if (skip.has(i + 2)) return; const v = measure ? parseNumber(r[measure.index], measure.decimalComma) : 1; if (v === null) return; total += v; const k = r[dim.index].trim(); if (!k) return; S.set(k, (S.get(k) ?? 0) + v); });
       const items = [...S.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([value, b]) => ({ value, a: 0, b: r2(b), delta: r2(b) }));
       if (items.length && total) movers = { dimension: dim.name, measure: what, agg, mode: 'share', items, statement: `By ${dim.name}, “${items[0].value}” is the largest: ${fmt(items[0].b)} (${Math.round((items[0].b / total) * 100)}% of ${measure ? 'the total' : 'rows'}).` };
     }
@@ -387,7 +413,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   // ── plain facts
   const byRole = (r: ColRole) => columns.filter(c => c.role === r).length;
   const facts = [
-    `${N.toLocaleString('en-US')} row${N === 1 ? '' : 's'} and ${width} column${width === 1 ? '' : 's'}${truncated ? ` (only the first ${LIMITS.rows.toLocaleString('en-US')} rows were read)` : ''}.`,
+    `${N.toLocaleString('en-US')} row${N === 1 ? '' : 's'} and ${width} column${width === 1 ? '' : 's'}${truncated ? ` (only the first ${LIMITS.rows.toLocaleString('en-US')} rows were read)` : ''}${colsTruncated ? ` (only the first ${LIMITS.cols} of ${fullWidth} columns were analysed)` : ''}.`,
     `${byRole('measure')} measure${byRole('measure') === 1 ? '' : 's'}, ${byRole('dimension')} dimension${byRole('dimension') === 1 ? '' : 's'}, ${byRole('date')} date column${byRole('date') === 1 ? '' : 's'}, ${byRole('identifier')} identifier${byRole('identifier') === 1 ? '' : 's'}.`,
   ];
   const issues = checks.filter(c => c.severity !== 'OK');
@@ -395,7 +421,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   if (trend?.statement) facts.push(trend.statement);
   if (movers) facts.push(movers.statement);
 
-  return { file: { name, bytes, rows: N, cols: width, delimiter, truncated }, columns, checks, trend, movers, facts, header, cells };
+  return { file: { name, bytes, rows: N, cols: width, delimiter, truncated, colsTruncated }, columns, checks, trend, movers, facts, header, cells };
 }
 
 /** A small, deliberately messy CSV so visitors without a file can try it. Deterministic. */

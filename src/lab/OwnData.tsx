@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { analyseAsync, sampleCsv, fmt, LIMITS, type OwnAnalysis, type OwnCheck, type OwnColumn, type Point } from './own';
 
 /**
@@ -11,15 +11,22 @@ export default function OwnData({ onBack }: { onBack: () => void }) {
   const [a, setA] = useState<OwnAnalysis | null>(null);
   const [drag, setDrag] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const title = useRef<HTMLHeadingElement>(null);
+  const runId = useRef(0);
+  // keyboard and screen-reader users land on the heading when the screen opens or a report is ready
+  // (one frame later, so a click that opened the screen doesn't immediately take focus back)
+  useEffect(() => { if (state !== 'idle' && state !== 'done') return; const f = requestAnimationFrame(() => title.current?.focus({ preventScroll: state === 'idle' })); return () => cancelAnimationFrame(f); }, [state]);
+  useEffect(() => () => { runId.current++; }, []);
 
   const run = async (name: string, bytes: number, text: () => Promise<string>) => {
     if (bytes > LIMITS.bytes) { setError(`That file is ${(bytes / 1048576).toFixed(1)} MB. The limit here is ${LIMITS.bytes / 1048576} MB.`); setState('error'); return; }
+    const id = ++runId.current;
     setState('reading'); setError('');
-    try { setA(await analyseAsync(name, bytes, await text())); setState('done'); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Could not read the file.'); setState('error'); }
+    try { const r = await analyseAsync(name, bytes, await text()); if (id !== runId.current) return; setA(r); setState('done'); }
+    catch (e) { if (id !== runId.current) return; setError(e instanceof Error ? e.message : 'Could not read the file.'); setState('error'); }
   };
   const onFile = (f?: File | null) => {
-    if (!f) return;
+    if (!f || state === 'reading') return;
     if (!/\.(csv|tsv|txt)$/i.test(f.name) && !/text\/|csv/.test(f.type)) { setError('Please choose a CSV or TSV file. From Excel: File → Save As → CSV.'); setState('error'); return; }
     run(f.name, f.size, () => f.text());
   };
@@ -32,7 +39,7 @@ export default function OwnData({ onBack }: { onBack: () => void }) {
       <div className="own-head">
         <div>
           <span className="eyebrow">Your own file</span>
-          <h3>{a ? a.file.name : 'Try it on your own CSV.'}</h3>
+          <h3 ref={title} tabIndex={-1}>{a ? a.file.name : 'Try it on your own CSV.'}</h3>
           <p className="muted own-privacy"><span aria-hidden="true">🔒</span> Read by your browser only. Nothing is uploaded or saved; leave the page and it’s gone.</p>
         </div>
         <div className="own-head-btns">
@@ -63,6 +70,7 @@ export default function OwnData({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
+      {a && state === 'done' && <p className="sr-only" role="status">Analysis complete: {a.file.rows.toLocaleString('en-US')} rows, {a.checks.filter(c => c.severity !== 'OK').length} issues to review.</p>}
       {a && state === 'done' && <Report a={a} />}
     </div>
   );
@@ -154,7 +162,7 @@ function Check({ c, a }: { c: OwnCheck; a: OwnAnalysis }) {
         {open && (
           <div className="tbl-wrap own-rows">
             <table className="tbl">
-              <thead><tr><th className="n">Line</th>{a.header.map(h => <th key={h}>{h}</th>)}</tr></thead>
+              <thead><tr><th className="n">Line</th>{a.header.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
               <tbody>{rows.map(n => <tr key={n}><td className="n">{n}</td>{a.cells[n - 2].map((v, i) => <td key={i}>{v === '' ? <span className="muted">·blank·</span> : v}</td>)}</tr>)}</tbody>
             </table>
           </div>
