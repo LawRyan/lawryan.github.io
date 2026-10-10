@@ -313,7 +313,7 @@ function LabSection() {
         <div className="sec-head rv">
           <Eyebrow>Intelligence Lab</Eyebrow>
           <h2 id="lab-h" className="h-section">Beyond the dashboard, <span className="serif">in miniature</span>.</h2>
-          <p className="lede">A hands-on version of L//IOS Analyst. Give it three files, or press “Watch it run”, and see it work out the data, check it, build the dashboard and investigate what changed. Every number goes back to a row.</p>
+          <p className="lede">A hands-on version of L//IOS Analyst. Give it three files, press “Watch it run”, or try your own CSV, and see it work out the data, check it, build the dashboard and investigate what changed. Every number goes back to a row.</p>
         </div>
         <LazyLab />
       </div>

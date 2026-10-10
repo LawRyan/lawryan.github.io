@@ -119,6 +119,8 @@ export function dateOrder(values: string[]): { order: 'DMY' | 'MDY'; ambiguous: 
 
 const BOOL = new Set(['true', 'false', 'yes', 'no', 'y', 'n', 't', 'f']);
 const median = (xs: number[]) => { if (!xs.length) return NaN; const s = [...xs].sort((a, b) => a - b); const h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+/** "1 row" / "3 rows" */
+const plural = (k: number, one: string, many = one + 's') => `${k.toLocaleString('en-US')} ${k === 1 ? one : many}`;
 const r2 = (x: number) => Math.round(x * 100) / 100;
 /** min/max without spreading (large files would overflow the call stack) */
 const minOf = (xs: number[]) => { let m = Infinity; for (const x of xs) if (x < m) m = x; return m; };
@@ -235,7 +237,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
   const checks: OwnCheck[] = [];
   const add = (c: Omit<OwnCheck, 'rows'> & { rows?: number[] }) => checks.push({ ...c, rows: (c.rows ?? []).slice(0, 500) });
 
-  if (ragged.length) add({ id: 'ragged', severity: 'MEDIUM', title: `${ragged.length.toLocaleString('en-US')} rows have the wrong number of fields`, detail: `The header has ${fullWidth} columns. These rows were padded or cut to fit, so values may have shifted.`, method: 'count delimiters per row (quotes respected) vs the header', affected: ragged.length, rows: ragged });
+  if (ragged.length) add({ id: 'ragged', severity: 'MEDIUM', title: `${plural(ragged.length, 'row')} ${ragged.length === 1 ? 'has' : 'have'} the wrong number of fields`, detail: `The header has ${fullWidth} columns. These rows were padded or cut to fit, so values may have shifted.`, method: 'count delimiters per row (quotes respected) vs the header', affected: ragged.length, rows: ragged });
 
   const emptyCols = columns.filter(c => c.role === 'empty');
   if (emptyCols.length) add({ id: 'empty-cols', severity: 'LOW', title: `${emptyCols.length} column${emptyCols.length > 1 ? 's are' : ' is'} completely empty`, detail: emptyCols.map(c => c.name).slice(0, 6).join(', '), method: 'no non-blank cell in the column', affected: emptyCols.length });
@@ -244,14 +246,14 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     if (c.role === 'empty' || !c.empty) continue;
     const share = c.empty / N;
     const rows = cells.map((r, i) => (r[c.index].trim() === '' ? i + 2 : 0)).filter(Boolean);
-    add({ id: `blank-${c.index}`, severity: share > 0.2 ? 'MEDIUM' : 'LOW', title: `${c.empty.toLocaleString('en-US')} blank values in “${c.name}”`, detail: `${(share * 100).toFixed(share < 0.01 ? 2 : 1)}% of rows have no value here.`, method: 'cells that are empty after trimming spaces', affected: c.empty, rows });
+    add({ id: `blank-${c.index}`, severity: share > 0.2 ? 'MEDIUM' : 'LOW', title: `${plural(c.empty, 'blank value')} in “${c.name}”`, detail: `${(share * 100).toFixed(share < 0.01 ? 2 : 1)}% of rows have no value here.`, method: 'cells that are empty after trimming spaces', affected: c.empty, rows });
   }
 
   // duplicates
   const keyRows = new Map<string, number[]>();
   cells.forEach((r, i) => { const k = r.join('\u0001'); const a = keyRows.get(k); if (a) a.push(i + 2); else keyRows.set(k, [i + 2]); });
   const dupRows = [...keyRows.values()].filter(a => a.length > 1).flatMap(a => a.slice(1));
-  if (dupRows.length) add({ id: 'dups', severity: 'MEDIUM', title: `${dupRows.length.toLocaleString('en-US')} duplicate rows`, detail: 'Rows identical to an earlier row in every column. If they are not real repeats, totals are overstated.', method: 'compare every column of every row', affected: dupRows.length, rows: dupRows });
+  if (dupRows.length) add({ id: 'dups', severity: 'MEDIUM', title: `${plural(dupRows.length, 'duplicate row')}`, detail: 'Rows identical to an earlier row in every column. If they are not real repeats, totals are overstated.', method: 'compare every column of every row', affected: dupRows.length, rows: dupRows });
 
   // mixed types
   for (const c of columns) {
@@ -259,7 +261,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     const bad = cells.map((r, i) => { const v = r[c.index]; if (!v.trim()) return 0; const ok = c.type === 'number' ? parseNumber(v, c.decimalComma) !== null : parseDate(v, c.dates?.order) !== null; return ok ? 0 : i + 2; }).filter(Boolean);
     if (bad.length) {
       const ex = cells[bad[0] - 2][c.index];
-      add({ id: `mixed-${c.index}`, severity: 'MEDIUM', title: `${bad.length.toLocaleString('en-US')} values in “${c.name}” aren’t ${c.type === 'number' ? 'numbers' : 'dates'}`, detail: `For example “${ex.slice(0, 40)}”. They are left out of totals and trends.`, method: `try to read each non-blank cell as a ${c.type}`, affected: bad.length, rows: bad });
+      add({ id: `mixed-${c.index}`, severity: 'MEDIUM', title: `${plural(bad.length, 'value')} in “${c.name}” ${bad.length === 1 ? 'isn’t a' : 'aren’t'} ${c.type === 'number' ? (bad.length === 1 ? 'number' : 'numbers') : (bad.length === 1 ? 'date' : 'dates')}`, detail: `For example “${ex.slice(0, 40)}”. They are left out of totals and trends.`, method: `try to read each non-blank cell as a ${c.type}`, affected: bad.length, rows: bad });
     }
   }
 
@@ -290,7 +292,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     if (out.length && out.length <= vals.length * 0.02) {
       outlierRows.set(c.index, new Set(out.map(x => x.row)));
       const top = [...out].sort((a, b) => Math.abs(b.v - med) - Math.abs(a.v - med))[0];
-      add({ id: `outliers-${c.index}`, severity: 'LOW', title: `${out.length.toLocaleString('en-US')} extreme values in “${c.name}”`, detail: `Far from the typical value of ${fmt(r2(med))}; the largest is ${fmt(top.v)} (row ${top.row}). Worth checking before using totals.`, method: 'more than 10 robust standard deviations (median absolute deviation) from the median', affected: out.length, rows: out.map(x => x.row) });
+      add({ id: `outliers-${c.index}`, severity: 'LOW', title: `${plural(out.length, 'extreme value')} in “${c.name}”`, detail: `Far from the typical value of ${fmt(r2(med))}; the largest is ${fmt(top.v)} (row ${top.row}). Worth checking before using totals.`, method: 'more than 10 robust standard deviations (median absolute deviation) from the median', affected: out.length, rows: out.map(x => x.row) });
     }
   }
 
@@ -300,7 +302,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     if (c.role !== 'identifier' || c.distinct === c.filled || c.distinct / c.filled < 0.95) continue;
     const firstSeen = new Set<string>(); const rows: number[] = [];
     cells.forEach((r, i) => { if (dupSet.has(i + 2)) return; const v = r[c.index].trim(); if (!v) return; if (firstSeen.has(v)) rows.push(i + 2); else firstSeen.add(v); });
-    if (rows.length) add({ id: `dupid-${c.index}`, severity: 'LOW', title: `${rows.length.toLocaleString('en-US')} repeated values in “${c.name}”`, detail: 'Almost every value in this column is unique, but these repeat. If it is meant to be a key, they need checking.', method: 'values seen earlier in the same column, ignoring rows that are full duplicates', affected: rows.length, rows });
+    if (rows.length) add({ id: `dupid-${c.index}`, severity: 'LOW', title: `${plural(rows.length, 'repeated value')} in “${c.name}”`, detail: 'Almost every value in this column is unique, but these repeat. If it is meant to be a key, they need checking.', method: 'values seen earlier in the same column, ignoring rows that are full duplicates', affected: rows.length, rows });
   }
   for (const ci of mixedOrder) {
     const c = columns[ci]; if (c.role !== 'date') continue;
@@ -313,7 +315,7 @@ export function analyse(name: string, bytes: number, text: string): OwnAnalysis 
     if (c.role !== 'date' || !c.dates) continue;
     const rows = cells.map((r, i) => { const t = parseDate(r[c.index], c.dates!.order); return t !== null && !okDate(t) ? i + 2 : 0; }).filter(Boolean);
     badDateRows.set(c.index, new Set(rows));
-    if (rows.length) add({ id: `dates-${c.index}`, severity: 'LOW', title: `${rows.length.toLocaleString('en-US')} dates in “${c.name}” are in the future or before 1900`, detail: 'Possibly placeholders or typos.', method: 'dates after today or before 1 Jan 1900', affected: rows.length, rows });
+    if (rows.length) add({ id: `dates-${c.index}`, severity: 'LOW', title: `${plural(rows.length, 'date')} in “${c.name}” ${rows.length === 1 ? 'is' : 'are'} in the future or before 1900`, detail: 'Possibly placeholders or typos.', method: 'dates after today or before 1 Jan 1900', affected: rows.length, rows });
   }
 
   const sevRank = { HIGH: 0, MEDIUM: 1, LOW: 2, OK: 3 } as const;
