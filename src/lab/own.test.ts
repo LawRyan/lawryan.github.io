@@ -1,6 +1,6 @@
 // Independent checks for the "own file" profiler. Figures are recomputed from the raw text
 // with simple string handling, not the engine's helpers.
-import { analyse, parseDelimited, parseNumber, parseDate, dateOrder, sniffDelimiter, sampleCsv } from './own';
+import { analyse, decode, parseDelimited, parseNumber, parseDate, dateOrder, sniffDelimiter, sampleCsv } from './own';
 
 let checks = 0, failures = 0;
 const ok = (c: boolean, m: string) => { checks++; if (!c) { failures++; console.error('FAIL', m); } };
@@ -45,8 +45,8 @@ threw = false; try { analyse('x.csv', 3, 'a,b\n'); } catch { threw = true; } ok(
 {
   const a = analyse('r.csv', 0, 'id,v,v\n1,2,3\n2,3\n3,4,5,6\n');
   eq(a.header, ['id', 'v', 'v (2)'], 'duplicate header names made unique');
-  const r = a.checks.find(c => c.id === 'ragged');
-  eq(r?.rows, [3, 4], 'ragged rows reported with file line numbers');
+  eq(a.checks.find(c => c.id === 'ragged')?.rows, [4], 'long rows reported with line numbers');
+  eq(a.checks.find(c => c.id === 'short')?.rows, [3], 'short rows reported separately');
 }
 
 // ── day-first file with a semicolon delimiter and decimal commas
@@ -171,6 +171,31 @@ const DAYMS = 86_400_000;
   eq([r.columns.length, r.file.colsTruncated], [200, 200], 'columns capped at 200');
   ok(/first 200 of 400 columns/.test(r.facts[0]), 'cap is stated');
 }
+
+// ── real-world file shapes
+{ const t = 'Trade Blotter Extract\nGenerated 2026-09-25\n\nDate,Desk,Revenue\n2026-01-01,A,10\n2026-01-02,B,12\n2026-01-03,A,9\n';
+  const r = analyse('t.csv', t.length, t); eq([r.header, r.file.skippedTop], [['Date', 'Desk', 'Revenue'], 2], 'title lines above the header skipped (blank lines aside)'); }
+{ const t = '# source: somewhere\nDate,X\n2026-01-01,1\n2026-01-02,2\n'; eq(analyse('c.csv', t.length, t).header, ['Date', 'X'], '# comment line skipped'); }
+{ const t = '1.5,2,3\n4.5,5,6\n7.5,8,9\n'; const r = analyse('h.csv', t.length, t); eq([r.file.headerless, r.header, r.file.rows], [true, ['Column 1', 'Column 2', 'Column 3'], 3], 'headerless file'); }
+{ const t = 'Item,Amount\na,1\nb,2\nc,3\nd,4\nTotal,10\n'; const r = analyse('tot.csv', t.length, t); ok(!r.file.totalRowDropped && r.file.rows === 5, 'Total row with no blanks is kept (could be a real row)'); }
+{ const t = 'Item,Cat,Amount\na,x,1\nb,y,2\nc,x,3\nd,y,4\n,Total,10\n'; const r = analyse('tot2.csv', t.length, t); eq([r.file.totalRowDropped, r.file.rows], [true, 4], 'trailing Total row dropped'); }
+{ const t = 'a b c\n1 2 3\n4  5 6\n7 8   9\n'; const r = analyse('sp.txt', t.length, t); eq([r.file.cols, r.file.rows], [3, 3], 'space-separated columns'); }
+{ const enc = new TextEncoder();
+  const u16 = new Uint8Array([0xff, 0xfe, ...[...'a\tb\n1\t2\n'].flatMap(ch => [ch.charCodeAt(0), 0])]);
+  eq(decode(u16), { text: 'a\tb\n1\t2\n', encoding: 'UTF-16' }, 'UTF-16 LE decoded by BOM');
+  eq(decode(new Uint8Array([0x4d, 0xfc, 0x6e])).text, 'Mün', 'Windows-1252 fallback for invalid UTF-8');
+  eq(decode(enc.encode('Zürich')).encoding, 'UTF-8', 'valid UTF-8 kept'); }
+eq(parseDate('19-Sep-03'), Date.UTC(2003, 8, 19), 'd-Mon-yy dates');
+{ const t = 'Date,Close\n' + Array.from({ length: 40 }, (_, i) => `2026-01-${String(i % 28 + 1).padStart(2, '0')}`).map((d, i) => `${d.slice(0, 7)}-${String(i + 1).padStart(2, '0').slice(-2)}`).slice(0, 28).map((d, i) => `${d},${100 + i}`).join('\n');
+  const r = analyse('px.csv', t.length, t); eq(r.trend?.agg, 'avg', 'prices are averaged, not summed'); }
+{ const lines = ['Date,Amount']; let s = 9; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 2000; i++) lines.push(`2026-01-${String(i % 28 + 1).padStart(2, '0')},${Math.exp(5 + 1.2 * Math.sqrt(-2 * Math.log(rnd())) * Math.cos(2 * Math.PI * rnd())).toFixed(2)}`);
+  lines.push('2026-01-15,9999999999');
+  const t = lines.join('\n'); const r = analyse('skew.csv', t.length, t);
+  const o = r.checks.find(c => c.id.startsWith('outliers-'));
+  eq(o?.affected, 1, 'skewed amounts: only the ×1,000,000 typo is extreme'); }
+{ const t = 'x\n' + Array.from({ length: 30 }, (_, i) => `${i},NA`).join('\n'); }
+{ const t = 'id,v\n1,NA\n2,5\n3,n/a\n4,7\n'; const r = analyse('na.csv', t.length, t); const v = r.columns.find(c => c.name === 'v')!; eq([v.type, v.empty], ['number', 2], 'NA markers count as blank, not text'); }
 
 console.log(`own-file: ${checks} checks, ${failures} failures`);
 if (failures) process.exitCode = 1;
