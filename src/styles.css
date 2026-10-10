@@ -1114,3 +1114,21 @@ main, footer { position: relative; z-index: 1; }
   .tech-matrix thead th { font-size: 0.6rem; letter-spacing: 0.04em; }
 }
 @media (prefers-reduced-motion: reduce) { .aurora i:nth-child(n) { animation: none; } }
+
+/* Print: a clean, ink-friendly profile */
+@media print {
+  :root { --bg: #fff; --bg-2: #fff; --surface: #fff; --surface-2: #fff; --ink: #111; --ink-2: #333; --ink-3: #555; --line: #ddd; --line-2: #ccc; --signal: #0b6e8c; --lios: #5b4bb5; --silver: #666; }
+  html, body { background: #fff !important; color: #111; }
+  .shot, .feature-shot, .app-stage, .lp-showcase, .loop, .loop-fig, .proj .thumb, .aurora, .hero-canvas, .thread, .nav, .skip, .intro, .pal, .sigp, .hero-viz, #lab, .lab, .alab, .hero-ctas, .more-btn, .filters, .eco-pager, .gallery-thumbs, .contact .hero-canvas, .hero::before, .hero::after { display: none !important; }
+  .reveal-on .rv[data-pending] { opacity: 1 !important; transform: none !important; }
+  .section, .hero, .contact { padding-block: 18pt !important; border: 0 !important; background: none !important; }
+  .fold-4 > li, .fold-3 > li { display: revert !important; }
+  .philo, .why, .xp-panel, .cs-panel, .kit, .feature, .pillar, .app, .chart-card { background: none !important; box-shadow: none !important; }
+  .wordmark, .lmark { color: #111 !important; }
+  h1, h2, h3 { break-after: avoid; }
+  .cs-panel, .xp-panel, .pillar, .proj, .kit-col, .principles li, .roadmap li { break-inside: avoid; }
+  .contact-links, .contact-links > * { background: none !important; }
+  a { color: inherit; text-decoration: none; }
+  .contact-links a::after { content: ' (' attr(href) ')'; font-size: 9pt; color: #555; }
+  @page { margin: 14mm; }
+}
