@@ -1104,3 +1104,12 @@ main, footer { position: relative; z-index: 1; }
   .thread a:hover .thread-lbl, .thread a:focus-visible .thread-lbl { opacity: 1; color: var(--ink); }
 }
 @media (prefers-reduced-motion: reduce) { .thread, .thread-dot, .thread-lbl { transition: none; } }
+
+/* L//IOS page polish */
+.roadmap li > .status { justify-self: start; }
+@media (max-width: 560px) {
+  .tech-matrix table { min-width: 0; table-layout: fixed; }
+  .tech-matrix th, .tech-matrix td { padding: 12px 6px; }
+  .tech-matrix tbody th, .tech-matrix thead th:first-child { padding-left: 14px; width: 42%; font-size: 0.9rem; }
+  .tech-matrix thead th { font-size: 0.6rem; letter-spacing: 0.04em; }
+}
