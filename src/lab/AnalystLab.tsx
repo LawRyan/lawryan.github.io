@@ -5,7 +5,8 @@ import {
   type Files, type Finding, type Trade, type Node, type Answer,
 } from './analyst';
 import { reducedMotion } from '../components/common';
-import OwnData from './OwnData';
+import { useOwnFile, OwnFilesStep, OwnUnderstandStep, OwnDashboardStep, OwnAskStep, OwnInvestigateStep, askOwn, answerFinding } from './OwnData';
+import type { OwnAnswer, OwnFinding } from './ownflow';
 
 type Step = 'files' | 'understand' | 'dashboard' | 'ask' | 'investigate';
 const STEPS: [Step, string][] = [['files', 'Files'], ['understand', 'Understand'], ['dashboard', 'Dashboard'], ['ask', 'Ask'], ['investigate', 'Investigate']];
@@ -27,6 +28,12 @@ export default function AnalystLab() {
   const [focus, setFocus] = useState<Finding | null>(null);
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [records, setRecords] = useState<{ label: string; rows: (t: Trade) => boolean } | null>(null);
+  // your own file runs through the same five steps
+  const [ownFocus, setOwnFocus] = useState<OwnFinding | null>(null);
+  const [ownAnswer, setOwnAnswer] = useState<OwnAnswer | null>(null);
+  const ownFile = useOwnFile(() => { setOwnFocus(null); setOwnAnswer(null); setStep('understand'); });
+  const openOwn = () => { setOwn(true); setStep(ownFile.a ? 'dashboard' : 'files'); };
+  const closeOwn = () => { setOwn(false); setStep('files'); };
   const top = useRef<HTMLDivElement>(null);
   const bar = useRef<HTMLOListElement>(null);
   // keep the current step visible when the step bar scrolls sideways on small screens
@@ -38,13 +45,13 @@ export default function AnalystLab() {
   const analysis = useMemo(() => (ran ? { prof: profile(files), rels: relationships(files), q: quality(files), k: kpis(files), F: findings(files) } : null), [ran, files]);
 
   const go = (s: Step) => {
-    setOwn(false);
     setStep(s);
     const el = top.current;
     if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
   };
   const investigate = (f: Finding) => { setFocus(f); setRecords({ label: f.title, rows: f.rows }); go('investigate'); };
-  const can = (s: Step) => s === 'files' || s === 'understand' || ran;
+  const can = (s: Step) => (own ? s === 'files' || !!ownFile.a : s === 'files' || s === 'understand' || ran);
+  const ownInvestigate = (f: OwnFinding) => { setOwnFocus(f); go('investigate'); };
 
   const [tour, setTour] = useState<number | null>(null);
   const stopBtn = useRef<HTMLButtonElement>(null);
@@ -80,7 +87,7 @@ export default function AnalystLab() {
     if (tour === null || t?.closest?.('.tour-bar')) return;
     setTour(null);
     // the own-file link vanishes as the tour stops, so open it here rather than lose the click
-    if (t?.closest?.('.own-link')) setOwn(true);
+    if (t?.closest?.('.own-link')) openOwn();
   };
 
   return (
@@ -90,7 +97,7 @@ export default function AnalystLab() {
         <ol className="alab-steps" aria-label="Demo steps" ref={bar}>
           {STEPS.map(([s, l], i) => (
             <li key={s}>
-              <button aria-current={step === s && !own ? 'step' : undefined} disabled={!can(s)} onClick={() => (s === 'understand' && !ran ? (setRan(true), go('understand')) : go(s))}>
+              <button aria-current={step === s ? 'step' : undefined} disabled={!can(s)} onClick={() => (own ? (s === 'investigate' && setOwnFocus(null), go(s)) : s === 'understand' && !ran ? (setRan(true), go('understand')) : go(s))}>
                 <span className="n">{String(i + 1).padStart(2, '0')}</span>{l}
               </button>
             </li>
@@ -107,8 +114,12 @@ export default function AnalystLab() {
         </div>
       )}
       <div className="alab-body" aria-live={own ? 'off' : 'polite'}>
-        {own && <OwnData onBack={() => setOwn(false)} />}
-        {!own && step === 'files' && <FilesStep files={files} onRun={() => { setRan(true); go('understand'); }} onTour={() => setTour(0)} onOwn={() => setOwn(true)} />}
+        {own && step === 'files' && <OwnFilesStep f={ownFile} onBack={closeOwn} onContinue={() => go('understand')} />}
+        {own && ownFile.a && step === 'understand' && <OwnUnderstandStep a={ownFile.a} onNext={() => go('dashboard')} />}
+        {own && ownFile.a && step === 'dashboard' && <OwnDashboardStep a={ownFile.a} onInvestigate={ownInvestigate} onAsk={() => go('ask')} />}
+        {own && ownFile.a && step === 'ask' && <OwnAskStep a={ownFile.a} answer={ownAnswer} onAsk={q => setOwnAnswer(askOwn(ownFile.a!, q.id))} onRecords={x => ownInvestigate(answerFinding(x))} />}
+        {own && ownFile.a && step === 'investigate' && <OwnInvestigateStep a={ownFile.a} finding={ownFocus} onPick={ownInvestigate} />}
+        {!own && step === 'files' && <FilesStep files={files} onRun={() => { setRan(true); go('understand'); }} onTour={() => setTour(0)} onOwn={openOwn} />}
         {!own && step === 'understand' && analysis && <UnderstandStep files={files} a={analysis} onNext={() => go('dashboard')} />}
         {!own && step === 'dashboard' && analysis && <DashboardStep files={files} a={analysis} onInvestigate={investigate} onAsk={() => go('ask')} />}
         {!own && step === 'ask' && analysis && (

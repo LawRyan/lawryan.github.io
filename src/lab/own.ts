@@ -24,7 +24,9 @@ export interface OwnBreakdown { dimension: string; col: number; agg: 'sum' | 'av
 export interface OwnKpi { label: string; value: string; sub: string; change?: number; watch?: boolean }
 export type InsightKind = 'TREND' | 'MOVER' | 'SHARE' | 'ISSUE';
 export interface OwnInsight { kind: InsightKind; title: string; text: string; severity?: Severity; check?: string; filter?: { col: number; value: string } }
-export interface OwnDash { kpis: OwnKpi[]; breakdowns: OwnBreakdown[]; insights: OwnInsight[]; quality: number; flaggedRows: number }
+export interface OwnDash { kpis: OwnKpi[]; breakdowns: OwnBreakdown[]; insights: OwnInsight[]; quality: number; flaggedRows: number;
+  /** what the trend and totals were built from, so later steps (Ask, Investigate) compute the same way */
+  ctx: { measure?: number; measureName: string; decimalComma?: boolean; agg: 'sum' | 'avg' | 'count'; date?: number; order?: 'DMY' | 'MDY'; excluded: number[] } }
 export interface OwnAnalysis {
   file: { name: string; bytes: number; rows: number; cols: number; delimiter: string; truncated: boolean; colsTruncated: number; encoding: string;
     /** add to an internal row number (data row index + 2) to get the line in the file */ lineOffset: number; skippedTop: number; headerless: boolean; totalRowDropped: boolean };
@@ -549,7 +551,7 @@ export function analyse(name: string, bytes: number, text: string, encoding = 'U
   }
 
   for (const c of checks.filter(c => c.severity !== 'OK').sort((x, y) => sevRank[x.severity] - sevRank[y.severity]).slice(0, 4)) insights.push({ kind: 'ISSUE', title: c.title, text: c.detail, severity: c.severity, check: c.id });
-  const dash: OwnDash = { kpis, breakdowns, insights, quality, flaggedRows: flagged.size };
+  const dash: OwnDash = { kpis, breakdowns, insights, quality, flaggedRows: flagged.size, ctx: { measure: measure?.index, measureName: bWhat, decimalComma: measure?.decimalComma, agg: bAgg, date: dateCol?.dates ? dateCol.index : undefined, order: dateCol?.dates?.order, excluded: [...skip].sort((x, y) => x - y) } };
 
   // ── plain facts
   const byRole = (r: ColRole) => columns.filter(c => c.role === r).length;
