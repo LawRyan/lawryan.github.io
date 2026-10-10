@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { analyseAsync, sampleCsv, fmt, LIMITS, type OwnAnalysis, type OwnCheck, type OwnColumn, type Point } from './own';
+import { analyseAsync, decode, sampleCsv, fmt, LIMITS, type OwnAnalysis, type OwnCheck, type OwnColumn, type Point } from './own';
 
 /**
  * "Try it on your own file". The file is read by the browser (File API) and analysed in a
@@ -18,19 +18,19 @@ export default function OwnData({ onBack }: { onBack: () => void }) {
   useEffect(() => { if (state !== 'idle' && state !== 'done') return; const f = requestAnimationFrame(() => title.current?.focus({ preventScroll: state === 'idle' })); return () => cancelAnimationFrame(f); }, [state]);
   useEffect(() => () => { runId.current++; }, []);
 
-  const run = async (name: string, bytes: number, text: () => Promise<string>) => {
+  const run = async (name: string, bytes: number, read: () => Promise<{ text: string; encoding: string }>) => {
     if (bytes > LIMITS.bytes) { setError(`That file is ${(bytes / 1048576).toFixed(1)} MB. The limit here is ${LIMITS.bytes / 1048576} MB.`); setState('error'); return; }
     const id = ++runId.current;
     setState('reading'); setError('');
-    try { const r = await analyseAsync(name, bytes, await text()); if (id !== runId.current) return; setA(r); setState('done'); }
+    try { const { text, encoding } = await read(); const r = await analyseAsync(name, bytes, text, encoding); if (id !== runId.current) return; setA(r); setState('done'); }
     catch (e) { if (id !== runId.current) return; setError(e instanceof Error ? e.message : 'Could not read the file.'); setState('error'); }
   };
   const onFile = (f?: File | null) => {
     if (!f || state === 'reading') return;
     if (!/\.(csv|tsv|txt)$/i.test(f.name) && !/text\/|csv/.test(f.type)) { setError('Please choose a CSV or TSV file. From Excel: File → Save As → CSV.'); setState('error'); return; }
-    run(f.name, f.size, () => f.text());
+    run(f.name, f.size, async () => decode(await f.arrayBuffer()));
   };
-  const sample = () => { const t = sampleCsv(); run('messy-sample.csv', t.length, async () => t); };
+  const sample = () => { const t = sampleCsv(); run('messy-sample.csv', t.length, async () => ({ text: t, encoding: 'UTF-8' })); };
   const download = () => { const url = URL.createObjectURL(new Blob([sampleCsv()], { type: 'text/csv' })); const l = document.createElement('a'); l.href = url; l.download = 'messy-sample.csv'; l.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
   const reset = () => { setA(null); setState('idle'); setError(''); if (input.current) input.current.value = ''; };
 
@@ -99,7 +99,7 @@ function Report({ a }: { a: OwnAnalysis }) {
         <div className="own-charts">
           {a.trend && (
             <div className="chart-card">
-              <div className="chart-head"><span className="eyebrow">{a.trend.measure} by {a.trend.grain} · {a.trend.agg === 'sum' ? 'total' : 'count'}</span><span className="mono muted small">from “{a.trend.date}”</span></div>
+              <div className="chart-head"><span className="eyebrow">{a.trend.measure} by {a.trend.grain} · {a.trend.agg === 'sum' ? 'total' : a.trend.agg === 'avg' ? 'average' : 'count'}</span><span className="mono muted small">from “{a.trend.date}”</span></div>
               <Line points={a.trend.points} partial={a.trend.partialLast} />
             </div>
           )}
@@ -163,7 +163,7 @@ function Check({ c, a }: { c: OwnCheck; a: OwnAnalysis }) {
           <div className="tbl-wrap own-rows">
             <table className="tbl">
               <thead><tr><th className="n">Line</th>{a.header.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
-              <tbody>{rows.map(n => <tr key={n}><td className="n">{n}</td>{a.cells[n - 2].map((v, i) => <td key={i}>{v === '' ? <span className="muted">·blank·</span> : v}</td>)}</tr>)}</tbody>
+              <tbody>{rows.map(n => <tr key={n}><td className="n">{n + a.file.lineOffset}</td>{a.cells[n - 2].map((v, i) => <td key={i}>{v === '' ? <span className="muted">·blank·</span> : v}</td>)}</tr>)}</tbody>
             </table>
           </div>
         )}
