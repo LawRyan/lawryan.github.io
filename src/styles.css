@@ -1085,3 +1085,22 @@ main, footer { position: relative; z-index: 1; }
 @keyframes tourProg { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (max-width: 640px) { .tour-bar { grid-template-columns: minmax(0, 1fr) auto; } .tour-bar p { grid-column: 1 / -1; grid-row: 2; } }
 @media (prefers-reduced-motion: reduce) { .tour-prog { animation: none; transform: scaleX(1); opacity: 0.4; } }
+
+/* Scroll thread: section rail in the left margin, wide screens only */
+.thread { display: none; }
+@media (min-width: 1380px) {
+  .thread { display: block; position: fixed; z-index: 40; top: 22vh; bottom: 22vh; left: calc(50vw - 620px + 6px); width: 2px; opacity: 0; transform: translateX(-6px); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); pointer-events: none; }
+  .thread.on { opacity: 1; transform: none; pointer-events: auto; }
+  .thread-track { position: absolute; inset: 0; background: var(--line-2); border-radius: 2px; overflow: hidden; }
+  .thread-track i { position: absolute; inset: 0; background: linear-gradient(180deg, var(--signal), var(--lios)); transform-origin: top; }
+  .thread ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+  .thread li { position: absolute; left: 1px; transform: translate(-50%, -50%); }
+  .thread a { position: relative; display: grid; place-items: center; width: 24px; height: 24px; }
+  .thread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bg); border: 1px solid var(--ink-3); transition: all 0.3s var(--ease); }
+  .thread li.past .thread-dot { background: var(--signal); border-color: var(--signal); }
+  .thread li.now .thread-dot { width: 11px; height: 11px; background: var(--signal); border-color: var(--signal); box-shadow: 0 0 0 5px rgba(111,211,242,0.16), 0 0 16px rgba(111,211,242,0.5); }
+  .thread-lbl { position: absolute; right: 26px; top: 50%; transform: translateY(-50%); font-family: var(--f-mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; opacity: 0; transition: opacity 0.25s; }
+  .thread li.now .thread-lbl { opacity: 1; color: var(--signal); }
+  .thread a:hover .thread-lbl, .thread a:focus-visible .thread-lbl { opacity: 1; color: var(--ink); }
+}
+@media (prefers-reduced-motion: reduce) { .thread, .thread-dot, .thread-lbl { transition: none; } }

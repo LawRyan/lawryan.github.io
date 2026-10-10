@@ -3,6 +3,9 @@ import {
   REVIEW_MODE, site, contact, story, experience, metrics, cases, expertise, principles, lios, projects, type Level, type Project,
 } from '../content';
 import HeroSignals from '../components/HeroSignals';
+import ScrollThread from '../components/ScrollThread';
+
+const THREAD: [string, string][] = [['about', 'About'], ['experience', 'Experience'], ['impact', 'Impact'], ['expertise', 'Expertise'], ['lios', 'L//IOS'], ['lab', 'Lab'], ['philosophy', 'Principles'], ['projects', 'Projects'], ['contact', 'Contact']];
 import { Nav, Footer, Intro, SignalField, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
 import SignalPanel from '../components/SignalPanel';
 import LoopDiagram from '../components/LoopDiagram';
@@ -28,6 +31,7 @@ export default function Home() {
       <a className="skip" href="#main">Skip to content</a>
       <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
       <Nav items={HOME_NAV} home="#home" />
+      <ScrollThread sections={THREAD} />
       <main id="main">
         <Hero />
         <Story />
