@@ -318,7 +318,7 @@ function LabSection() {
 /** Load the Lab's code only when its section comes near, or when someone arrives at #lab. */
 function LazyLab() {
   const ref = useRef<HTMLDivElement>(null);
-  const [show, setShow] = useState(() => location.hash === '#lab');
+  const [show, setShow] = useState(false);
   useEffect(() => {
     if (show || !ref.current) return;
     if (!('IntersectionObserver' in window)) { setShow(true); return; }

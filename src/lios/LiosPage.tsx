@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { lios } from '../content';
-import { Nav, Footer, SignalField, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
+import HeroSignals from '../components/HeroSignals';
+import { Nav, Footer, Review, Status, useReveal, Eyebrow, Brand, type NavItem } from '../components/common';
 import { Shot, ShotGallery } from '../components/Shot';
 import LoopDiagram from '../components/LoopDiagram';
 
@@ -21,7 +22,7 @@ export default function LiosPage() {
   useReveal();
   const ids = lios.pillars.map(p => p.id);
   const fromHash = () => { const h = location.hash.slice(1); const id = ALIAS[h] || h; return ids.includes(id) ? id : null; };
-  const [sel, setSel] = useState(() => fromHash() || ids[0]);
+  const [sel, setSel] = useState(ids[0]);
   useEffect(() => {
     const jump = () => {
       const id = fromHash();
@@ -42,10 +43,11 @@ export default function LiosPage() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
+      <div className="aurora aurora-lios" aria-hidden="true"><i /><i /><i /></div>
       <Nav items={NAV} home="/" />
       <main id="main" className="lp">
         <section className="lp-hero lios-sec" aria-labelledby="lp-h">
-          <SignalField tint="lios" density={26} />
+          <HeroSignals tint="lios" />
           <div className="wrap">
             <Eyebrow tone="lios">An independent project by Ryan Law</Eyebrow>
             <h1 id="lp-h" className="lp-word"><span className="wordmark">L<span className="sl">//</span>IOS</span><span className="sr-only">: {lios.tagline}</span></h1>
