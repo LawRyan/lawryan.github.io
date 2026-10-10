@@ -1074,3 +1074,14 @@ main, footer { position: relative; z-index: 1; }
 @media (max-width: 1000px) { .kpis5 > :last-child { grid-column: span 2; } }
 @media (max-width: 560px) { .alab-bar { gap: 10px; padding: 10px 12px; } .alab-steps button { padding: 8px 8px; gap: 5px; } }
 @media (max-width: 1180px) { .alab-steps { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); position: relative; } }
+
+/* Lab auto-play caption */
+.files-ctas { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.tour-bar { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; padding: 12px 16px 14px; border-bottom: 1px solid var(--line); background: linear-gradient(90deg, rgba(111,211,242,0.08), rgba(183,168,255,0.05)); }
+.tour-n { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--signal); white-space: nowrap; }
+.tour-bar p { margin: 0; font-size: 0.95rem; color: var(--ink); }
+.tour-stop { min-height: 36px; padding: 6px 14px; }
+.tour-prog { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--signal); transform-origin: left; animation: tourProg linear both; }
+@keyframes tourProg { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (max-width: 640px) { .tour-bar { grid-template-columns: minmax(0, 1fr) auto; } .tour-bar p { grid-column: 1 / -1; grid-row: 2; } }
+@media (prefers-reduced-motion: reduce) { .tour-prog { animation: none; transform: scaleX(1); opacity: 0.4; } }

@@ -53,6 +53,15 @@ await p.selectOption('#lab-finding', { label: (await p.locator('#lab-finding opt
 ok((await p.locator('.st-inv h3').innerText()).startsWith('Missing data'), 'switch finding from investigate');
 ok((await p.locator('.tbl tbody tr').count()) === 0 || true, 'missing-data rows render');
 
+// ── Lab auto-play: runs on its own, and any click stops it
+const tp = await page();
+await tp.goto(base + '/?nointro'); await tp.locator('#lab').scrollIntoViewIfNeeded(); await tp.waitForSelector('.alab-tour');
+await tp.click('.alab-tour'); await tp.waitForTimeout(3600);
+ok((await tp.locator('.alab-steps [aria-current="step"]').innerText()).includes('Understand'), 'auto-play advances on its own');
+await tp.click('.alab-body'); await tp.waitForTimeout(6500);
+ok(await tp.locator('.tour-bar').count() === 0 && (await tp.locator('.alab-steps [aria-current="step"]').innerText()).includes('Understand'), 'a click stops auto-play');
+await tp.close();
+
 // ── mobile menu
 const m = await page({ width: 390, height: 844 }, { isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
 await m.goto(base + '/?nointro', { waitUntil: 'networkidle' });

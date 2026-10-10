@@ -9,6 +9,14 @@ import { reducedMotion } from '../components/common';
 type Step = 'files' | 'understand' | 'dashboard' | 'ask' | 'investigate';
 const STEPS: [Step, string][] = [['files', 'Files'], ['understand', 'Understand'], ['dashboard', 'Dashboard'], ['ask', 'Ask'], ['investigate', 'Investigate']];
 const PAGE = 8;
+/** Auto-play: walks the five steps on its own, with a caption for each. Any click or key in the Lab stops it. */
+const TOUR: { step: Step; ms: number; cap: string }[] = [
+  { step: 'files', ms: 3000, cap: 'Three synthetic files it has never seen: trades, clients and revenue targets.' },
+  { step: 'understand', ms: 5500, cap: 'First it works out the data: what each column means, how the files connect, and what looks wrong.' },
+  { step: 'dashboard', ms: 6000, cap: 'Then it builds the dashboard and ranks what changed. Each finding has had its data checked.' },
+  { step: 'ask', ms: 6000, cap: 'Ask a plain question. Deterministic tools compute the answer, so nothing is made up.' },
+  { step: 'investigate', ms: 7500, cap: 'Investigate a finding: the numbers, when it started, what drove it, the data checks and the rows behind it.' },
+];
 
 export default function AnalystLab() {
   const files = useMemo(() => generateFiles(), []);
@@ -35,8 +43,25 @@ export default function AnalystLab() {
   const investigate = (f: Finding) => { setFocus(f); setRecords({ label: f.title, rows: f.rows }); go('investigate'); };
   const can = (s: Step) => s === 'files' || s === 'understand' || ran;
 
+  const [tour, setTour] = useState<number | null>(null);
+  useEffect(() => {
+    if (tour === null) return;
+    const t = TOUR[tour];
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    if (tour === 0) top.current?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+    if (t.step === 'understand') setRan(true);
+    if (t.step === 'ask') { setAnswer(null); timers.push(setTimeout(() => setAnswer(ask(files, QUESTIONS[0])), 1400)); }
+    if (t.step === 'investigate') { const f = findings(files)[0]; setFocus(f); setRecords({ label: f.title, rows: f.rows }); }
+    setStep(t.step);
+    timers.push(setTimeout(() => setTour(i => (i === null || i + 1 >= TOUR.length ? null : i + 1)), t.ms));
+    return () => timers.forEach(clearTimeout);
+  }, [tour, files]);
+  const stopTour = (e: { target: EventTarget | null }) => {
+    if (tour !== null && !(e.target as HTMLElement | null)?.closest?.('.tour-bar')) setTour(null);
+  };
+
   return (
-    <div className="alab rv" ref={top}>
+    <div className="alab rv" ref={top} onPointerDownCapture={stopTour} onKeyDownCapture={stopTour}>
       <div className="alab-bar">
         <div className="alab-brand"><b>L<span>//</span>IOS</b> <span>Analyst · in miniature</span></div>
         <ol className="alab-steps" aria-label="Demo steps" ref={bar}>
@@ -50,8 +75,16 @@ export default function AnalystLab() {
         </ol>
         <span className="alab-badge">Synthetic data · no AI</span>
       </div>
+      {tour !== null && (
+        <div className="tour-bar" role="status">
+          <span className="mono tour-n">Auto-play · {tour + 1} / {TOUR.length}</span>
+          <p>{TOUR[tour].cap}</p>
+          <button className="btn tour-stop" onClick={() => setTour(null)}>Stop</button>
+          <i key={tour} className="tour-prog" style={{ animationDuration: `${TOUR[tour].ms}ms` }} />
+        </div>
+      )}
       <div className="alab-body" aria-live="polite">
-        {step === 'files' && <FilesStep files={files} onRun={() => { setRan(true); go('understand'); }} />}
+        {step === 'files' && <FilesStep files={files} onRun={() => { setRan(true); go('understand'); }} onTour={() => setTour(0)} />}
         {step === 'understand' && analysis && <UnderstandStep files={files} a={analysis} onNext={() => go('dashboard')} />}
         {step === 'dashboard' && analysis && <DashboardStep files={files} a={analysis} onInvestigate={investigate} onAsk={() => go('ask')} />}
         {step === 'ask' && analysis && (
@@ -65,7 +98,7 @@ export default function AnalystLab() {
 }
 
 /* ───────── 01 Files ───────── */
-function FilesStep({ files, onRun }: { files: Files; onRun: () => void }) {
+function FilesStep({ files, onRun, onTour }: { files: Files; onRun: () => void; onTour: () => void }) {
   const cards = [
     { name: 'Trades.csv', rows: files.trades.length, cols: 9, kb: Math.round(files.trades.length * 0.092), note: 'one row per trade, two years' },
     { name: 'Clients.csv', rows: files.clients.length, cols: 4, kb: 3, note: 'client master' },
@@ -77,7 +110,10 @@ function FilesStep({ files, onRun }: { files: Files; onRun: () => void }) {
         <h3>Three files it has never seen.</h3>
         <p>No schema, no mapping, no instructions. The same pipeline as L//IOS Analyst works out what the data is, how it connects, whether it can be trusted, and what changed.</p>
         <p className="mono muted small">Synthetic and fictional, generated in your browser. Two stories and five data problems are planted; the engine isn’t told where.</p>
-        <button className="btn btn-primary alab-run" onClick={onRun}>Analyse 3 files <span className="arr" aria-hidden="true">→</span></button>
+        <div className="files-ctas">
+          <button className="btn btn-primary alab-run" onClick={onRun}>Analyse 3 files <span className="arr" aria-hidden="true">→</span></button>
+          <button className="btn alab-tour" onClick={onTour}><span aria-hidden="true">▶</span> Watch it run · 30 s</button>
+        </div>
       </div>
       <ul className="filecards">
         {cards.map(c => (
