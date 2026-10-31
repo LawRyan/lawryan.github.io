@@ -5,10 +5,7 @@
  *   2  95%                 the records form 100 blocks of reporting effort; 95 fall away, 5 remain
  * Only real, approved figures are shown (300+ rules, ~100–150K records, 95%). The motion is illustrative.
  */
-import {
-  BoxGeometry, BufferAttribute, BufferGeometry, Color, InstancedBufferAttribute, InstancedBufferGeometry,
-  LineBasicMaterial, LineSegments, Mesh, PerspectiveCamera, PlaneGeometry, Scene, ShaderMaterial, Vector2, Vector3, WebGLRenderer,
-} from 'three';
+import { GL, V2, V3, boxGeometry, lookAt, perspective, project } from './gl.js';
 
 const root = document.documentElement;
 const reduce = root.classList.contains('rm');
@@ -17,7 +14,7 @@ const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const smooth = t => { t = clamp(t); return t * t * (3 - 2 * t); };
 const ease = t => { t = clamp(t); return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
-const V = (x, y, z) => new Vector3(x, y, z);
+const V = (x, y, z) => new V3(x, y, z);
 
 const G = MOB ? { C: 25, R: 40, L: 5, sx: .15, sy: .08, sz: .95 } : { C: 60, R: 40, L: 5, sx: .17, sy: .08, sz: .95 };
 const N = G.C * G.R * G.L;
@@ -81,6 +78,9 @@ function records() {
 }
 
 const VERT = /* glsl */`
+precision highp float;
+uniform mat4 projectionMatrix, viewMatrix;
+attribute vec3 position, normal;
 attribute vec3 aArch; attribute vec3 aXfer; attribute vec4 aSeed; attribute vec3 aMat; attribute vec3 aQ; attribute vec3 aWaf; attribute vec4 aInfo; attribute vec4 aMeta;
 uniform float uP, uTime, uWave, uRes, uCut, uIntro, uLens;
 uniform vec2 uPointer;
@@ -159,6 +159,7 @@ void main(){
   gl_Position = projectionMatrix * viewMatrix * vec4(w, 1.);
 }`;
 const FRAG = /* glsl */`
+precision mediump float;
 uniform vec3 uCam, uFog; uniform float uFogNear, uFogFar;
 varying vec3 vN; varying vec3 vCol; varying float vEm; varying vec3 vW;
 void main(){
@@ -208,37 +209,60 @@ function boot() {
     root.classList.toggle('in-resume', track.getBoundingClientRect().bottom < innerHeight * .6);
   };
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
-  if (!webgl()) { root.classList.add('no-gl'); return; }
+  if (!webgl()) { root.classList.add('no-gl'); requestAnimationFrame(() => root.classList.add('ready')); return; }
 
   const R = records(), W2 = MW / 2;
   const canvas = $('engine');
-  const renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  let dpr = Math.min(devicePixelRatio || 1, MOB ? 1.6 : 1.75); renderer.setPixelRatio(dpr);
-  const scene = new Scene(), camera = new PerspectiveCamera(MOB ? 52 : 40, 1, .1, 80);
-  const skyU = { uA: { value: 1 } };
-  const sky = new Mesh(new PlaneGeometry(2, 2), new ShaderMaterial({ depthTest: false, depthWrite: false, uniforms: skyU,
-    vertexShader: 'varying vec2 v; void main(){ v = uv; gl_Position = vec4(position.xy, 0., 1.); }',
-    fragmentShader: `varying vec2 v; uniform float uA; void main(){ vec2 p = (v - vec2(.62, 1.05))*vec2(uA, 1.); vec3 c = mix(vec3(.055,.09,.16), vec3(.031,.043,.063), smoothstep(.0, 1.25, length(p)));
-      c += vec3(.05,.08,.11)*smoothstep(.55, 0., abs((v.x - .58) + (v.y - 1.)*.42))*smoothstep(.0, .9, v.y)*.7; gl_FragColor = vec4(c, 1.); }` }));
-  sky.frustumCulled = false; sky.renderOrder = -1; scene.add(sky);
-  const box = new BoxGeometry(1, 1, 1), geo = new InstancedBufferGeometry();
-  geo.index = box.index; geo.setAttribute('position', box.getAttribute('position')); geo.setAttribute('normal', box.getAttribute('normal'));
-  for (const [k, n] of [['aArch', 3], ['aXfer', 3], ['aSeed', 4], ['aMat', 3], ['aQ', 3], ['aWaf', 3], ['aInfo', 4], ['aMeta', 4]]) geo.setAttribute(k, new InstancedBufferAttribute(R[k], n));
-  geo.instanceCount = N;
-  const U = { uP: { value: 0 }, uTime: { value: 0 }, uWave: { value: -99 }, uRes: { value: 0 }, uCut: { value: 0 }, uIntro: { value: reduce ? 1 : 0 }, uLens: { value: 0 },
-    uPointer: { value: new Vector2(9, 9) }, uCam: { value: new Vector3() }, uFog: { value: new Color(.035, .05, .075) }, uFogNear: { value: 10 }, uFogFar: { value: 28 } };
-  const mesh = new Mesh(geo, new ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms: U })); mesh.frustumCulled = false; scene.add(mesh);
-  const lineMat = c => new LineBasicMaterial({ color: c, transparent: true, opacity: 0, depthWrite: false });
-  const seg = arr => { const g = new BufferGeometry(); g.setAttribute('position', new BufferAttribute(new Float32Array(arr), 3)); return g; };
+  let G3; try { G3 = new GL(canvas); } catch { root.classList.add('no-gl'); requestAnimationFrame(() => root.classList.add('ready')); return; }
+  const gl = G3.gl;
+  let dpr = Math.min(devicePixelRatio || 1, MOB ? 1.6 : 1.75);
+  const FOV = MOB ? 52 : 40; let proj = perspective(FOV, 1, .1, 80); const view = new Float32Array(16);
+  // sky
+  const skyP = G3.program('attribute vec2 p; varying vec2 v; void main(){ v = p*.5 + .5; gl_Position = vec4(p, 0., 1.); }',
+    `precision mediump float; varying vec2 v; uniform float uA; void main(){ vec2 p = (v - vec2(.62, 1.05))*vec2(uA, 1.); vec3 c = mix(vec3(.055,.09,.16), vec3(.031,.043,.063), smoothstep(.0, 1.25, length(p)));
+      c += vec3(.05,.08,.11)*smoothstep(.55, 0., abs((v.x - .58) + (v.y - 1.)*.42))*smoothstep(.0, .9, v.y)*.7; gl_FragColor = vec4(c, 1.); }`);
+  const quad = G3.buffer(new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]));
+  // the records
+  const box = boxGeometry(), recP = G3.program(VERT, FRAG);
+  const bufs = { position: G3.buffer(box.position), normal: G3.buffer(box.normal) };
+  const idx = G3.buffer(box.index, gl.ELEMENT_ARRAY_BUFFER);
+  const inst = [['aArch', 3], ['aXfer', 3], ['aSeed', 4], ['aMat', 3], ['aQ', 3], ['aWaf', 3], ['aInfo', 4], ['aMeta', 4]].map(([k, n]) => [recP.attr(k), G3.buffer(R[k]), n]);
+  const U = { uP: 0, uTime: 0, uWave: -99, uRes: 0, uCut: 0, uIntro: reduce ? 1 : 0, uLens: 0, uPointer: new V2(9, 9), uCam: new V3(), uFog: [.035, .05, .075], uFogNear: 10, uFogFar: 28 };
+  const bindRecords = () => {
+    gl.useProgram(recP.p);
+    G3.attrib(recP.attr('position'), bufs.position, 3); G3.attrib(recP.attr('normal'), bufs.normal, 3);
+    for (const [loc, b, n] of inst) G3.attrib(loc, b, n, 1);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idx);
+  };
+  // lines
+  const lineP = G3.program('precision highp float; uniform mat4 projectionMatrix, viewMatrix; attribute vec3 position; void main(){ gl_Position = projectionMatrix*viewMatrix*vec4(position, 1.); }',
+    'precision mediump float; uniform vec4 uColor; void main(){ gl_FragColor = uColor; }');
+  const lineSet = (arr, color) => ({ buf: G3.buffer(new Float32Array(arr)), n: arr.length / 3, color, opacity: 0 });
   const ar = [];
   SLABS.forEach((t, si) => { const hx = (t.cols - 1) / 2 * AP.x + .12, hz = (t.rows - 1) / 2 * AP.z + .08, y = t.y - .02, c = [[t.x - hx, t.z - hz], [t.x + hx, t.z - hz], [t.x + hx, t.z + hz], [t.x - hx, t.z + hz]];
     c.forEach((q, k) => { const n = c[(k + 1) % 4]; ar.push(q[0], y, q[1], n[0], y, n[1]); }); if (si) { const b = SLABS[0]; ar.push(t.x - hx, y, t.z - hz, t.x - hx, b.y, t.z - hz, t.x + hx, y, t.z + hz, t.x + hx, b.y, t.z + hz); } });
-  const arch = new LineSegments(seg(ar), lineMat(0x9fb3c8)); scene.add(arch);
+  const arch = lineSet(ar, [.62, .70, .78]);
   const fr = []; for (let l = 0; l < G.L; l++) { const z = (l - (G.L - 1) / 2) * G.sz, x0 = -W2 - .14, x1 = W2 + .14, y0 = -MH / 2 - .08, y1 = MH / 2 + .08; fr.push(x0, y0, z, x1, y0, z, x1, y0, z, x1, y1, z, x1, y1, z, x0, y1, z, x0, y1, z, x0, y0, z); }
-  const mframe = new LineSegments(seg(fr), lineMat(0x9fb3c8)); scene.add(mframe);
-  const qrows = Math.ceil(R.aQ.length / 3 * .024 / QC) || 48;
-  const qb = [Q0 - .12, MH / 2 + .1, Q0 + (QC - 1) * QX + .12, MH / 2 - (Math.ceil(N * .024 / QC) - 1) * QY - .1]; void qrows;
-  const qframe = new LineSegments(seg([qb[0], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[3], 0, qb[2], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[1], 0]), lineMat(0xffb547)); scene.add(qframe);
+  const mframe = lineSet(fr, [.62, .70, .78]);
+  const qb = [Q0 - .12, MH / 2 + .1, Q0 + (QC - 1) * QX + .12, MH / 2 - (Math.ceil(N * .024 / QC) - 1) * QY - .1];
+  const qframe = lineSet([qb[0], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[3], 0, qb[2], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[1], 0], [1, .71, .28]);
+  const lines = [arch, mframe, qframe];
+  function render() {
+    gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
+    gl.useProgram(skyP.p); gl.uniform1f(skyP.u.uA, innerWidth / innerHeight); G3.attrib(skyP.attr('p'), quad, 2); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.enable(gl.DEPTH_TEST); gl.clear(gl.DEPTH_BUFFER_BIT);
+    bindRecords();
+    gl.uniformMatrix4fv(recP.u.projectionMatrix, false, proj); gl.uniformMatrix4fv(recP.u.viewMatrix, false, view);
+    for (const k of ['uP', 'uTime', 'uWave', 'uRes', 'uCut', 'uIntro', 'uLens', 'uFogNear', 'uFogFar']) gl.uniform1f(recP.u[k], U[k]);
+    gl.uniform2f(recP.u.uPointer, U.uPointer.x, U.uPointer.y); gl.uniform3f(recP.u.uCam, U.uCam.x, U.uCam.y, U.uCam.z); gl.uniform3fv(recP.u.uFog, U.uFog);
+    G3.drawInstanced(36, N);
+    for (const [loc] of inst) if (loc >= 0) { if (G3.gl2) gl.vertexAttribDivisor(loc, 0); else G3.ext.vertexAttribDivisorANGLE(loc, 0); }
+    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+    gl.useProgram(lineP.p); gl.uniformMatrix4fv(lineP.u.projectionMatrix, false, proj); gl.uniformMatrix4fv(lineP.u.viewMatrix, false, view);
+    const posLoc = lineP.attr('position');
+    for (const L of lines) { if (L.opacity < .003) continue; gl.uniform4f(lineP.u.uColor, L.color[0], L.color[1], L.color[2], L.opacity); G3.attrib(posLoc, L.buf, 3); gl.drawArrays(gl.LINES, 0, L.n); }
+    gl.depthMask(true);
+  }
   const labelLayer = $('labels'), mkLab = (t, cls) => { const el = document.createElement('div'); el.className = 'lab ' + cls; el.textContent = t; labelLayer.appendChild(el); return el; };
   const qLab = mkLab('Breaks, held for review', 'tray'), wLab = mkLab('100 blocks = reporting effort before automation', 'layer'), wLab2 = mkLab('What remains: 5%', 'seg');
 
@@ -250,13 +274,13 @@ function boot() {
     waffle: s => MOB ? [V(.1, .3, 10.6 - s * .5), V(0, -.4, 0)] : [V(1.2 + s * .3, .5, 9.6 - s * .5), V(1.6, .05, 0)],
   };
   const keyFor = (i, sub) => i === 0 ? cam.raw : i === 1 ? cam.matrix(sub[1]) : cam.waffle(sub[2]);
-  const resize = () => { renderer.setPixelRatio(dpr); renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); skyU.uA.value = innerWidth / innerHeight; };
+  const resize = () => { G3.size(innerWidth, innerHeight, dpr); proj = perspective(FOV, innerWidth / innerHeight, .1, 80); };
   resize(); addEventListener('resize', resize);
-  const pointer = new Vector2(9, 9), pointerT = new Vector2(9, 9); let lastMove = -1e9;
+  const pointer = new V2(9, 9), pointerT = new V2(9, 9); let lastMove = -1e9;
   addEventListener('pointermove', e => { pointerT.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); lastMove = performance.now(); }, { passive: true });
   addEventListener('touchmove', e => { const t = e.touches[0]; if (t) { pointerT.set(t.clientX / innerWidth * 2 - 1, -(t.clientY / innerHeight) * 2 + 1); lastMove = performance.now(); } }, { passive: true });
-  const tmp = new Vector3();
-  const place = (el, v, o, al = '-50%') => { tmp.copy(v).project(camera); el.style.opacity = (tmp.z < 1 ? o : 0).toFixed(3); if (o > .01) el.style.transform = `translate3d(${((tmp.x + 1) / 2 * innerWidth).toFixed(1)}px, ${((1 - tmp.y) / 2 * innerHeight).toFixed(1)}px, 0) translate(${al}, -50%)`; };
+  const tmp = new V3();
+  const place = (el, v, o, al = '-50%') => { project(v, view, proj, tmp); el.style.opacity = (tmp.z < 1 ? o : 0).toFixed(3); if (o > .01) el.style.transform = `translate3d(${((tmp.x + 1) / 2 * innerWidth).toFixed(1)}px, ${((1 - tmp.y) / 2 * innerHeight).toFixed(1)}px, 0) translate(${al}, -50%)`; };
   const near = (p, k, w = 2.4) => clamp(1 - Math.abs(p - k) * w);
   let g = gOf(), clock = 0, visible = true, last = performance.now(), frames = 0, ft = 0;
   document.addEventListener('visibilitychange', () => { visible = !document.hidden; if (visible && !window.__manual) { last = performance.now(); requestAnimationFrame(loop); } });
@@ -271,26 +295,25 @@ function boot() {
     copies.forEach((el, k) => { const o = near(p, k, 3) * vis; el.style.setProperty('--o', o.toFixed(3)); el.style.visibility = o > .01 ? 'visible' : 'hidden'; });
     root.style.setProperty('--so', (clamp(p * 2) * vis).toFixed(3)); root.style.setProperty('--cue', String(clamp(1 - g * 30)));
     if (vis <= 0) return;
-    U.uP.value = p; U.uTime.value = t; U.uIntro.value = reduce ? 1 : ease(clamp((clock - .1) / 2.6));
+    U.uP = p; U.uTime = t; U.uIntro = reduce ? 1 : ease(clamp((clock - .1) / 2.6));
     const s1 = p < 1 ? 0 : p > 1.001 ? 1 : sub[1];
-    U.uWave.value = p < 1 ? -W2 - 1 : lerp(-W2 - .5, W2 + .5, smooth((s1 - .05) / .55));
-    U.uRes.value = smooth((s1 - .66) / .26);
-    U.uCut.value = p < 2 ? 0 : smooth((sub[2] - .05) / .55);
+    U.uWave = p < 1 ? -W2 - 1 : lerp(-W2 - .5, W2 + .5, smooth((s1 - .05) / .55));
+    U.uRes = smooth((s1 - .66) / .26);
+    U.uCut = p < 2 ? 0 : smooth((sub[2] - .05) / .55);
     if (!reduce && performance.now() - lastMove > 4000) pointerT.set(Math.sin(t * .31) * .5 + .2, Math.sin(t * .43 + 1) * .3 - .1);
-    pointer.lerp(pointerT, .08); U.uPointer.value.copy(pointer);
-    U.uLens.value = (reduce ? 0 : 1) * clamp(1 - p * 2.5) * clamp((clock - 2.4) / 1.2);
+    pointer.lerp(pointerT, .08); U.uPointer.copy(pointer);
+    U.uLens = (reduce ? 0 : 1) * clamp(1 - p * 2.5) * clamp((clock - 2.4) / 1.2);
     const i = Math.min(1, Math.floor(p)), f = ease(p - i), A = keyFor(i, sub), B = keyFor(i + 1, sub);
     const cp = A[0].clone().lerp(B[0], f), cl = A[1].clone().lerp(B[1], f);
-    if (!reduce) { const raw = clamp(1 - p); cp.sub(cl).applyAxisAngle(V(0, 1, 0), (Math.sin(t * .05) * .1 + sub[0] * .28) * raw).add(cl); cp.x += pointer.x * .3; cp.y += pointer.y * .16; }
-    camera.position.copy(cp); camera.lookAt(cl); U.uCam.value.copy(cp);
-    arch.material.opacity = .16 * near(p, 0, 1.6); arch.visible = arch.material.opacity > .003;
-    mframe.material.opacity = .2 * near(p, 1, 2); mframe.visible = mframe.material.opacity > .003;
-    qframe.material.opacity = .45 * near(p, 1, 2) * smooth((s1 - .08) / .1) * (1 - U.uRes.value); qframe.visible = qframe.material.opacity > .003;
+    if (!reduce) { const raw = clamp(1 - p); cp.sub(cl).rotateY((Math.sin(t * .05) * .1 + sub[0] * .28) * raw).add(cl); cp.x += pointer.x * .3; cp.y += pointer.y * .16; }
+    lookAt(cp, cl, view); U.uCam.copy(cp);
+    arch.opacity = .16 * near(p, 0, 1.6); mframe.opacity = .2 * near(p, 1, 2);
+    qframe.opacity = .45 * near(p, 1, 2) * smooth((s1 - .08) / .1) * (1 - U.uRes);
     if (draw) {
-      place(qLab, V(Q0 + (QC - 1) * QX / 2, MH / 2 + .3, 0), near(p, 1, 3) * smooth((s1 - .1) / .1) * (1 - U.uRes.value) * vis);
+      place(qLab, V(Q0 + (QC - 1) * QX / 2, MH / 2 + .3, 0), near(p, 1, 3) * smooth((s1 - .1) / .1) * (1 - U.uRes) * vis);
       place(wLab, V(WX, WY + 5 * (WCELL + WGAP) + .05, 0), near(p, 2, 3) * vis);
-      place(wLab2, V(WX + 5 * (WCELL + WGAP) + .1, WY + 4.5 * (WCELL + WGAP), 0), near(p, 2, 3) * U.uCut.value * vis * (MOB ? 0 : 1), '0');
-      renderer.render(scene, camera);
+      place(wLab2, V(WX + 5 * (WCELL + WGAP) + .1, WY + 4.5 * (WCELL + WGAP), 0), near(p, 2, 3) * U.uCut * vis * (MOB ? 0 : 1), '0');
+      render();
     }
   }
   function adapt(dt) { frames++; ft += dt; if (frames < 60) return; const avg = ft / frames; frames = 0; ft = 0; if (avg > 26 && dpr > 1) { dpr = Math.max(1, dpr - .25); resize(); } }

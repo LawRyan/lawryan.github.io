@@ -29,3 +29,10 @@ The canvas then fades out and the resume takes over on solid graphite.
 - Print: a two-page A4 resume with a header line (name, title, email, LinkedIn, GitHub, site). Case studies, L//IOS feature lists and the current-role box are left out of print because they repeat the experience section.
 - L//IOS: image thumbnails replace numbered buttons; they wrap on phones.
 - Phone: the L//IOS panel no longer overflows the right edge.
+
+## Review pass (31 Oct, late)
+- **three.js removed.** The intro only needs one instanced shader, a sky quad and three line sets, so `gl.js` (a 90-line WebGL layer with the camera math) replaces it. The script went from 552 KB to 20 KB (8.6 KB gzipped). The shaders and choreography are unchanged; the render is identical.
+- **No-WebGL fallback fixed.** The header never appeared (the `ready` class was only added on the WebGL path) and the intro copy blocks overlapped. It is now a still hero followed by the resume, with no entrance delays.
+- **One `h1`.** The print header's name is no longer a second heading.
+- **Phone intro** shortened from 4.6 to 3.8 screens of scrolling.
+- Audit at 1440, 390 and 360: no horizontal overflow, no console errors, every image has alt text, every button and link has a name, no text under 12 px in the resume.

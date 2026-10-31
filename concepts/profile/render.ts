@@ -48,6 +48,6 @@ export default function render(): Record<string, string> {
     <p class="lios-links"><a href="https://lawryan.github.io/#lab">Try the Intelligence Lab</a><a href="https://lawryan.github.io/lios/">Read about L//IOS</a></p>`;
   const contactHtml = `<p class="ct-mail"><a href="mailto:${contact.email}">${contact.email}</a></p>
     <p class="ct-links"><a href="${contact.linkedin}" rel="noopener">LinkedIn</a><a href="${contact.github}" rel="noopener">GitHub</a><button type="button" id="print">Save as PDF</button></p>`;
-  const printHead = `<header class="print-head"><h1>${esc(site.name)}</h1><p>${esc(vp.title)}, ${esc(vp.org)}</p><p>${contact.email} | <a href="${contact.linkedin}">${contact.linkedin.replace('https://www.', '')}</a> | <a href="${contact.github}">${contact.github.replace('https://', '')}</a> | ${site.url.replace('https://', '').replace(/\/$/, '')}</p></header>`;
+  const printHead = `<div class="print-head" aria-hidden="true"><p class="ph-name">${esc(site.name)}</p><p>${esc(vp.title)}, ${esc(vp.org)}</p><p>${contact.email} | <a href="${contact.linkedin}">${contact.linkedin.replace('https://www.', '')}</a> | <a href="${contact.github}">${contact.github.replace('https://', '')}</a> | ${site.url.replace('https://', '').replace(/\/$/, '')}</p></div>`;
   return { '%PRINTHEAD%': printHead, '%SUMMARY%': summary, '%RESULTS%': results, '%WORK%': work, '%EXPERIENCE%': exp, '%SKILLS%': skills, '%EDUCATION%': edu, '%LIOS%': liosHtml, '%CONTACT%': contactHtml, '%TITLE%': esc(site.title.replace(' · ', ', ')) };
 }

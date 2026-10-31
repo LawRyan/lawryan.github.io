@@ -120,7 +120,7 @@
   .results, .skills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
-  .track.intro { height: 460vh; }
+  .track.intro { height: 380vh; }
   .rnav { max-width: 62vw; mask-image: linear-gradient(90deg, #000 85%, transparent); }
   .rnav a { white-space: nowrap; }
   .k2 { top: auto; bottom: 34px; transform: none; left: var(--pad); right: var(--pad); width: auto; }
@@ -133,6 +133,15 @@
   .lp-caps li { grid-template-columns: 1fr; gap: 0; }
 }
 
+/* no WebGL: a still hero, then the resume */
+.no-gl .track.intro { height: auto; }
+.no-gl .stage-pin { position: static; height: auto; overflow: visible; display: grid; gap: 48px; padding: 120px var(--pad) 40px; max-width: 1180px; margin: 0 auto; }
+.no-gl .copy, .no-gl .k2 { position: static; transform: none; width: auto; max-width: 760px; opacity: 1; visibility: visible; }
+.no-gl .k0 h1, .no-gl .k0 .role, .no-gl .top, .no-gl .name span { opacity: 1 !important; filter: none !important; transform: none !important; transition: none !important; }
+.no-gl .cue, .no-gl #engine, .no-gl #labels { display: none; }
+.no-gl .synthetic { position: static; opacity: 1; }
+.no-gl .resume { padding-top: 40px; }
+
 /* print: a two-page resume */
 .print-head { display: none; }
 @media print {
@@ -140,7 +149,7 @@
   html, body { background: #fff !important; color: #1a1d22 !important; font-size: 9.4pt; line-height: 1.38; }
   #engine, #labels, .intro, .skip, .top, .lp-fig, .ltabs, .lios-links, .cue, .synthetic, #work, #contact, .sum-role, .lp-caps, .lp-copy > p:not(.lp-st), .lp-copy h3, .lios-st, .sum-lead p:not(:first-child), .res-extra, .statement, .sk i { display: none !important; }
   .print-head { display: block; margin: 0 0 8pt; padding-bottom: 7pt; border-bottom: 1.2pt solid #1a1d22; }
-  .print-head h1 { margin: 0; font-size: 20pt; font-weight: 640; letter-spacing: -.01em; color: #111; }
+  .print-head .ph-name { margin: 0; font-size: 20pt; font-weight: 640; letter-spacing: -.01em; color: #111 !important; }
   .print-head p { margin: 2pt 0 0; font-size: 9.6pt; color: #333; }
   .print-head a { color: #333; text-decoration: none; }
   .resume { background: none; padding: 0; }
