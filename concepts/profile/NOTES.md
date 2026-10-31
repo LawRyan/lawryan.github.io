@@ -23,3 +23,9 @@ The canvas then fades out and the resume takes over on solid graphite.
 ## Limitations
 - Headless software GL runs at about 7 fps, so frame rate must be checked on real devices.
 - The PDF comes from the browser's print dialog rather than a pre-made file.
+
+## Polish pass (31 Oct, evening)
+- Section headings no longer span 20 grid rows, which had added about 600 px of blank space under every section.
+- Print: a two-page A4 resume with a header line (name, title, email, LinkedIn, GitHub, site). Case studies, L//IOS feature lists and the current-role box are left out of print because they repeat the experience section.
+- L//IOS: image thumbnails replace numbered buttons; they wrap on phones.
+- Phone: the L//IOS panel no longer overflows the right edge.

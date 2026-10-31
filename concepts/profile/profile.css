@@ -92,9 +92,12 @@
 .lp-shots img[hidden] { display: none; }
 .lp.phone .lp-shots img { width: auto; max-height: 560px; margin: 0 auto; border-radius: 22px; }
 .lp-fig figcaption { margin-top: 10px; font-size: 12.5px; color: #6E7B8C; }
-.lp-thumbs { display: flex; gap: 6px; margin-top: 10px; }
-.lp-thumbs button { appearance: none; font: inherit; font-size: 13px; width: 34px; height: 30px; border-radius: 6px; border: 1px solid rgba(238,243,248,.14); background: none; color: var(--text-2); cursor: pointer; }
-.lp-thumbs button[aria-pressed="true"] { color: var(--white); border-color: var(--silver); }
+.lp-thumbs { display: flex; gap: 8px; margin-top: 12px; }
+.lp-thumbs button { appearance: none; padding: 0; width: 96px; aspect-ratio: 16 / 10; border-radius: 6px; border: 1px solid rgba(238,243,248,.14); background: #0b0e16; cursor: pointer; overflow: hidden; opacity: .55; transition: opacity .25s, border-color .25s; }
+.lp-thumbs.phone button { width: 44px; aspect-ratio: 540 / 1170; border-radius: 8px; }
+.lp-thumbs img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lp-thumbs button:hover { opacity: 1; }
+.lp-thumbs button[aria-pressed="true"] { opacity: 1; border-color: var(--silver); }
 .disc { font-size: 13px; }
 .lios-links { display: flex; gap: 22px; font-size: 15px; }
 .lios-links a, .ct-links a { color: var(--white); text-underline-offset: 4px; text-decoration-color: rgba(238,243,248,.3); }
@@ -111,7 +114,9 @@
   .rs { grid-template-columns: 1fr; gap: 20px; }
   .rs > *:not(.rs-h) { grid-column: 1; }
   .rs-h { position: static; grid-row: auto; }
-  .sum-grid, .cases, .lp { grid-template-columns: 1fr; }
+  .sum-grid, .cases, .lp { grid-template-columns: minmax(0, 1fr); }
+  .lp-thumbs { flex-wrap: wrap; }
+  .lp-thumbs button { width: 72px; }
   .results, .skills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
@@ -128,34 +133,46 @@
   .lp-caps li { grid-template-columns: 1fr; gap: 0; }
 }
 
-/* print: a clean one-column resume */
+/* print: a two-page resume */
+.print-head { display: none; }
 @media print {
-  @page { margin: 16mm 14mm; }
-  html, body { background: #fff !important; color: #111 !important; font-size: 11pt; }
-  #engine, #labels, .intro, .skip, .top, .lp-fig, .ltabs, .lios-links, .ct-links button, .cue, .synthetic { display: none !important; }
+  @page { size: A4; margin: 12mm 13mm 12mm; }
+  html, body { background: #fff !important; color: #1a1d22 !important; font-size: 9.4pt; line-height: 1.38; }
+  #engine, #labels, .intro, .skip, .top, .lp-fig, .ltabs, .lios-links, .cue, .synthetic, #work, #contact, .sum-role, .lp-caps, .lp-copy > p:not(.lp-st), .lp-copy h3, .lios-st, .sum-lead p:not(:first-child), .res-extra, .statement, .sk i { display: none !important; }
+  .print-head { display: block; margin: 0 0 8pt; padding-bottom: 7pt; border-bottom: 1.2pt solid #1a1d22; }
+  .print-head h1 { margin: 0; font-size: 20pt; font-weight: 640; letter-spacing: -.01em; color: #111; }
+  .print-head p { margin: 2pt 0 0; font-size: 9.6pt; color: #333; }
+  .print-head a { color: #333; text-decoration: none; }
   .resume { background: none; padding: 0; }
-  .resume::before { content: 'Ryan Law · Vice President, Client Intelligence, RBC Capital Markets · ryanlaw@live.com'; display: block; font-size: 10pt; color: #444; margin-bottom: 8pt; }
-  .rs { grid-template-columns: 1fr; padding: 10pt 0; gap: 6pt; border-color: #ddd; break-inside: auto; }
-  .rs > *:not(.rs-h) { grid-column: 1; }
-  .rs-h { position: static; color: #111; font-size: 12pt; }
-  .rs p, .rs dd, .rs dt, .rs li, .rs h3, .statement, .sum-lead p, .results dd, .ct-mail a { color: #111 !important; }
-  .statement { font-size: 18pt !important; }
-  .sum-grid, .cases { grid-template-columns: 1fr; gap: 6pt; }
-  .sum-lead p { font-size: 11pt; }
-  .sum-role, .case { background: none; border: 0; padding: 0; }
-  .results { grid-template-columns: repeat(4, 1fr); }
-  .results dd { font-size: 22pt; }
+  .rs { display: block; max-width: none; padding: 6pt 0 2pt; border: 0; }
+  .rs-h { display: block; margin: 0 0 4pt; padding-bottom: 2pt; font-size: 10.5pt; font-weight: 680; color: #111; border-bottom: .6pt solid #c9ced6; }
+  .rs p, .rs dd, .rs dt, .rs li, .rs h3, .sum-lead p, .results dd { color: #1a1d22 !important; }
+  .sum-grid { display: block; }
+  .sum-lead p { font-family: 'Mona Sans', system-ui, sans-serif; font-size: 9.6pt; line-height: 1.45; max-width: none; }
+  .results { grid-template-columns: repeat(4, 1fr); gap: 10pt; }
+  .results dd { font-size: 15pt; font-stretch: 100%; }
+  .results dt { margin-top: 2pt; font-size: 8.4pt; line-height: 1.3; color: #444 !important; }
+  .results dt b { font-size: 8.8pt; color: #111; }
   .roles::before, .role::after, .edu li::after { display: none; }
-  .role, .edu li { grid-template-columns: 110pt 1fr; padding-bottom: 8pt; break-inside: avoid; }
-  .case { break-inside: avoid; }
-  .lp[hidden] { display: grid !important; }
-  .lp { grid-template-columns: 1fr; }
-  .skills { grid-template-columns: repeat(4, 1fr); gap: 8pt; }
-  .sk i { display: none; }
-  .sk ul { gap: 2pt; } .sk li { border: 0; padding: 0; }
-  #work, .sum-role, .lp-caps, .lp-copy > p:not(.lp-st), .lios-st, .sum-lead p:not(:first-child), .res-extra { display: none !important; }
-  .lp { gap: 2pt; } .lp h3 { font-size: 11pt; }
-  .lios-tag { font-size: 13pt !important; }
-  .statement { display: none; }
-  .role ul { gap: 1pt; margin-top: 3pt; }
+  .role, .edu li { grid-template-columns: 96pt 1fr; gap: 8pt; padding: 0 0 6pt; break-inside: avoid; }
+  .r-when { white-space: nowrap; }
+  .r-when { font-size: 8.6pt; color: #444 !important; padding-top: 1pt; }
+  .role h3, .edu h3 { font-size: 10.2pt; font-weight: 640; }
+  .r-org { margin: 0 0 2pt !important; font-size: 8.6pt; color: #555 !important; }
+  .role > div > p:not(.r-org) { font-size: 9.2pt; }
+  .role ul { margin-top: 2pt; gap: 0; font-size: 9pt; }
+  .role li::before { background: #888; }
+  .skills { grid-template-columns: repeat(4, 1fr); gap: 10pt; }
+  .sk h3 { font-size: 9.4pt; margin-bottom: 2pt; }
+  .sk ul { display: block; font-size: 8.8pt; color: #333; }
+  .sk li { display: inline; border: 0; padding: 0; }
+  .sk li:not(:last-child)::after { content: ', '; }
+  .lios-tag { font-family: 'Mona Sans', system-ui, sans-serif; font-size: 9.6pt !important; font-weight: 600; color: #111 !important; display: inline; }
+  .lp[hidden] { display: block !important; }
+  .lp { display: block; margin: 1pt 0 0; }
+  .lp-st { font-size: 9pt !important; color: #333 !important; margin: 0 !important; }
+  .disc { font-size: 8.2pt; color: #666 !important; margin-top: 3pt !important; }
+  .edu { margin-top: 0; }
+  #experience { break-before: auto; }
+  #skills, #lios, #education { break-inside: avoid; }
 }

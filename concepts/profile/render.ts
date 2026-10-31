@@ -40,7 +40,7 @@ export default function render(): Record<string, string> {
         <ul class="lp-caps">${p.capabilities.slice(0, 6).map(c => `<li><i class="st-${c.status.toLowerCase().replace(/\s+/g, '-')}">${esc(c.status)}</i>${esc(c.name)}</li>`).join('')}</ul></div>
       <figure class="lp-fig"><div class="lp-shots">${shots.map((s, k) => `<img src="${s.src}${phone ? '' : '-720'}.webp" alt="${esc(s.alt)}" loading="lazy" decoding="async"${k ? ' hidden' : ''}>`).join('')}</div>
         <figcaption>${esc(shots[0].caption)}</figcaption>
-        <div class="lp-thumbs" role="group" aria-label="${esc(p.name)} screens">${shots.map((s, k) => `<button type="button" aria-pressed="${k === 0}" aria-label="Screen ${k + 1}: ${esc(s.alt)}">${k + 1}</button>`).join('')}</div></figure></div>`;
+        <div class="lp-thumbs${phone ? ' phone' : ''}" role="group" aria-label="${esc(p.name)} screens">${shots.map((s, k) => `<button type="button" aria-pressed="${k === 0}" aria-label="Screen ${k + 1}: ${esc(s.alt)}"><img src="${s.src}${phone ? '' : '-720'}.webp" alt="" loading="lazy" decoding="async"></button>`).join('')}</div></figure></div>`;
   }).join('');
   const liosHtml = `<p class="lios-tag">${esc(lios.tagline)}</p><p class="lios-st">${esc(lios.statement)}</p>
     <div class="ltabs" role="tablist" aria-label="L//IOS applications">${tabs}</div>${panels}
@@ -48,5 +48,6 @@ export default function render(): Record<string, string> {
     <p class="lios-links"><a href="https://lawryan.github.io/#lab">Try the Intelligence Lab</a><a href="https://lawryan.github.io/lios/">Read about L//IOS</a></p>`;
   const contactHtml = `<p class="ct-mail"><a href="mailto:${contact.email}">${contact.email}</a></p>
     <p class="ct-links"><a href="${contact.linkedin}" rel="noopener">LinkedIn</a><a href="${contact.github}" rel="noopener">GitHub</a><button type="button" id="print">Save as PDF</button></p>`;
-  return { '%SUMMARY%': summary, '%RESULTS%': results, '%WORK%': work, '%EXPERIENCE%': exp, '%SKILLS%': skills, '%EDUCATION%': edu, '%LIOS%': liosHtml, '%CONTACT%': contactHtml, '%TITLE%': esc(site.title.replace(' · ', ', ')) };
+  const printHead = `<header class="print-head"><h1>${esc(site.name)}</h1><p>${esc(vp.title)}, ${esc(vp.org)}</p><p>${contact.email} | <a href="${contact.linkedin}">${contact.linkedin.replace('https://www.', '')}</a> | <a href="${contact.github}">${contact.github.replace('https://', '')}</a> | ${site.url.replace('https://', '').replace(/\/$/, '')}</p></header>`;
+  return { '%PRINTHEAD%': printHead, '%SUMMARY%': summary, '%RESULTS%': results, '%WORK%': work, '%EXPERIENCE%': exp, '%SKILLS%': skills, '%EDUCATION%': edu, '%LIOS%': liosHtml, '%CONTACT%': contactHtml, '%TITLE%': esc(site.title.replace(' · ', ', ')) };
 }
