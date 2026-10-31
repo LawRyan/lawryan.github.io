@@ -15,3 +15,7 @@ The constellation and particle direction (branch `immersive`) was rejected on 31
   - B and C were handed to parallel builders; A was built directly.
 - 31 Oct, concept A: two critique rounds (see its NOTES.md).
   - Frame-accurate recording: the page exposes `window.__step(ms)` when `window.__manual` is set, and `scripts/concepts/a-capture.mjs` scripts the scroll path.
+- 31 Oct: concept C is finished (four refine rounds; see its NOTES.md). A, B and C were delivered as packed HTML files with recordings.
+- 31 Oct: new direction, **The Intelligence Engine** (branch `engine`, `concepts/engine`).
+  - Keep the constellation's continuous scroll-linked motion; replace the visuals with lit, instanced record tiles that keep their identity through four layouts: raw streams → validation matrix → revenue surface → time series.
+  - First three scenes only, as briefed. Two critique rounds; see `concepts/engine/NOTES.md`.
