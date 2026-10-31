@@ -50,8 +50,15 @@
 3. **Third pass.**
    - The space spring had a long settle tail, and the L//IOS reveal waited for it. On slow machines the space looked empty for seconds. The reveal now fires as p crosses 0.88, and the spring is a little stiffer.
 
+4. **Fourth pass (after watching the recording).**
+   - In software rendering the lock lift crawled for about 30 s, and the first desktop video ran to 96 s. The causes were full-screen repaints: the mask-image dusk edge, `filter: brightness` on the wallpaper, blend-mode grain and an animated border-radius on the lock.
+   - Dusk is now a tall gradient sheet moved with `transform`. Dimming is an opacity overlay, the grain uses no blend mode, and the lock sheet has a fixed radius hidden below the fold. The recording dropped to 36 s with the same script.
+   - Opening Health or Markets from Work let the first-visit auto-open of Analyst land on top of them. Auto-open now happens only when the visitor switched spaces on purpose.
+   - The focused-window shadow was drawing around the transparent Health box.
+   - At 360 px the phone app sheets overflowed sideways because the grid track grew to fit the tab strip.
+
 ## Limitations
-- Windows cannot be resized. Overview only shows the current space, with buttons to switch spaces.
+- Windows cannot be resized. The Health window is a phone frame even on a phone, so it reads as a device inside a device. Overview only shows the current space, with buttons to switch spaces.
 - Crossing the 760px breakpoint reloads the page, because desktop and phone are different shells over the same window DOM.
 - Ctrl+←/→ and Ctrl+↑ collide with macOS Mission Control shortcuts. The menu-bar controls, F3 and the command bar are the dependable paths.
 - The wallpaper uses `color-mix()` with `calc()` percentages and CSS masks. These need current Chromium, Safari 16.2+ or Firefox 113+; older browsers get a static day theme.

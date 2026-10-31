@@ -8,6 +8,7 @@ import { serve } from '../serve.mjs';
 
 const out = process.argv[2] || '/tmp/c-rec';
 const base = 'http://127.0.0.1:4302/concepts/c-os/?still';
+const which = process.argv[3] || 'all';
 mkdirSync(out, { recursive: true });
 const server = await serve(4302);
 const browser = await chromium.launch();
@@ -43,7 +44,7 @@ async function record(name, viewport, script) {
   console.log(mp4);
 }
 
-await record('c-motion', { width: 1440, height: 900 }, async p => {
+if (which !== 'mobile') await record('c-motion', { width: 1440, height: 900 }, async p => {
   await p.mouse.move(720, 700);
   await sleep(2200);
   await glide(p, 720, 820, 720, 380, 22, 380);           // drag the lock screen up
@@ -80,34 +81,34 @@ await record('c-motion', { width: 1440, height: 900 }, async p => {
   await sleep(2600);
 });
 
-await record('c-mobile', { width: 390, height: 844 }, async p => {
-  await sleep(1600);
+if (which !== 'desktop') await record('c-mobile', { width: 390, height: 844 }, async p => {
+  await sleep(1100);
   await glide(p, 195, 780, 195, 300, 18, 330);
   await sleep(500);
   if (await p.evaluate(() => __os.state.locked && !document.body.classList.contains('is-unlocking'))) { console.log('mobile drag did not unlock'); await p.click('#unlockBtn'); }
   await p.waitForFunction(() => !__os.state.locked);
-  await sleep(900);
+  await sleep(600);
   await clickSel(p, '.m-icon[data-app=about]', 300);
-  await sleep(1500);
-  await glide(p, 195, 30, 195, 420, 14, 300);             // swipe down to close
   await sleep(1100);
+  await glide(p, 195, 30, 195, 420, 14, 300);             // swipe down to close
+  await sleep(800);
   await clickSel(p, '.dots button[data-page="1"]', 300);
-  await sleep(1700);
-  await clickSel(p, '.m-icon[data-app=analyst]', 300);
-  await sleep(1300);
-  await clickSel(p, '#w-analyst [role=tab]:nth-child(4)', 300);
   await sleep(1200);
+  await clickSel(p, '.m-icon[data-app=analyst]', 300);
+  await sleep(750);
+  await clickSel(p, '#w-analyst [role=tab]:nth-child(4)', 300);
+  await sleep(900);
   await clickSel(p, '#w-analyst .win-back', 300);
-  await sleep(1000);
+  await sleep(750);
   await clickSel(p, '.m-icon[data-app=health]', 300);
-  await sleep(1300);
+  await sleep(750);
   const scr = await p.locator('#w-health .track').boundingBox();
   await glide(p, scr.x + scr.width * 0.85, scr.y + scr.height / 2, scr.x + scr.width * 0.1, scr.y + scr.height / 2, 12, 240);
   await sleep(1100);
   await clickSel(p, '#w-health .win-back', 300);
-  await sleep(1000);
+  await sleep(750);
   await clickSel(p, '.dots button[data-page="0"]', 300);
-  await sleep(1500);
+  await sleep(1100);
 });
 
 await browser.close();

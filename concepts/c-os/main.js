@@ -510,7 +510,7 @@ async function openApp(id, opts = {}) {
   if (S.cmd) closeCmd(false);
   if (S.locked) await unlock();
   if (S.overview) await exitOverview();
-  if (w.app.space !== S.space) await goSpace(w.app.space);
+  if (w.app.space !== S.space) await goSpace(w.app.space, 0, true);
   if (w.state === 'open') {
     focusWin(w);
     // a short nudge so the user sees which window answered
@@ -655,7 +655,7 @@ function settleSpace(i) {
   $('meta[name=theme-color]').content = i ? '#1B1640' : '#C9D2D7';
   setAppName();
 }
-async function goSpace(i, v = 0) {
+async function goSpace(i, v = 0, noAuto = false) {
   i = clamp(i, 0, 1);
   if (isMobile) { mPage(i); return; }
   if (S.overview) await exitOverview();
@@ -667,7 +667,7 @@ async function goSpace(i, v = 0) {
     S.liosVisited = true;
     $('.lios-card').classList.add('is-in');
     setTimeout(() => {
-      if (WIN.analyst.state === 'closed' && S.space === 1 && !S.overview) openApp('analyst', { from: $('.lios-launch [data-open=analyst]'), focus: false });
+      if (!noAuto && WIN.analyst.state === 'closed' && S.space === 1 && !S.overview) openApp('analyst', { from: $('.lios-launch [data-open=analyst]'), focus: false });
     }, reduced() ? 0 : 160);
   };
   const ok = await spring('space', {
