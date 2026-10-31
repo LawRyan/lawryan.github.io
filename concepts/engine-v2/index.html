@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ryan Law · Intelligence Engine 2.0</title>
+<meta name="description" content="Ryan Law, Vice President, Client Intelligence at RBC Capital Markets. Proof of concept: raw data, validation, analytics.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#080B10">
+<link rel="preload" href="/fonts/MonaSans-var.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="./style.css">
+<script>document.documentElement.classList.add('js');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rm')}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#s-validation">Skip to content</a>
+<canvas id="engine" aria-hidden="true"></canvas>
+<div id="labels" aria-hidden="true"></div>
+<div id="tip" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="#top">Ryan Law</a>
+  <ol class="stages" aria-label="Scenes">
+    <li><a href="#top" data-g="0"><i></i><span>Data architecture</span></a></li>
+    <li><a href="#s-validation" data-g="1"><i></i><span>Validation</span></a></li>
+    <li><a href="#s-analytics" data-g="2"><i></i><span>Analytics</span></a></li>
+  </ol>
+</header>
+
+<main id="top">
+  <div class="track" id="track">
+    <div class="stage-pin">
+      <!-- 0 · raw information -->
+      <section class="copy k0" aria-labelledby="h1">
+        <p class="name" id="h1"><span>R</span><span>Y</span><span>A</span><span>N</span><span class="sp"> </span><span>L</span><span>A</span><span>W</span></p>
+        <h1>Turning complex data into intelligent decisions.</h1>
+        <p class="role">Vice President, Client Intelligence<br>RBC Capital Markets</p>
+      </section>
+
+      <!-- 1 · validation -->
+      <section class="copy k1" id="s-validation" aria-labelledby="h-val">
+        <h2 id="h-val">Every record checked before it reaches a report.</h2>
+        <p>I build validation frameworks: rules that run across every record, pass what is clean, and separate what isn't before anyone reports on it.</p>
+      </section>
+      <dl class="hud k1h" aria-label="Validation">
+        <div><dt>Validation rules in the real framework</dt><dd>300+</dd></div>
+        <div><dt>Trade records it covers</dt><dd>100–150K</dd></div>
+        <div class="exc"><dt>Exceptions separated in this model</dt><dd><span id="exc">0</span><small> of <span id="tot">0</span></small></dd></div>
+      </dl>
+
+      <!-- 2 · analytics: surface -->
+      <section class="copy k2" id="s-analytics" aria-labelledby="h-an">
+        <h2 id="h-an">Validated records become revenue, by segment and month.</h2>
+        <p>The same records, aggregated. Each plate is a slice of revenue; each stack is one client segment in one month. Exceptions stay out until they are resolved.</p>
+      </section>
+
+      <!-- 3 · analytics: time series -->
+      <section class="copy k3" aria-labelledby="h-ts">
+        <h2 id="h-ts">Then it unfolds into a trend you can read.</h2>
+        <p id="anom-copy">Monthly revenue stacked by segment. One month breaks the pattern, and it is flagged for investigation, not averaged away. Point at a month to read it.</p>
+      </section>
+
+      <ul class="legend" aria-label="Client segments (synthetic)">
+        <li style="--c:#E6EDF7">Hedge funds</li><li style="--c:#9EADC4">Asset managers</li><li style="--c:#3DCCC2">Banks</li>
+        <li style="--c:#5C85C7">Corporates</li><li style="--c:#75829A">Pensions</li><li style="--c:#267A8A">Insurers</li>
+      </ul>
+      <p class="synthetic" id="synthetic">Illustrative model on synthetic data. Approved figures: 300+ validation rules, roughly 100–150K trade records.</p>
+      <p class="cue" aria-hidden="true">Scroll</p>
+    </div>
+  </div>
+
+  <section class="next" aria-labelledby="h-next">
+    <h2 id="h-next">Next in the full build: automation, leadership and career, then L//IOS.</h2>
+    <p>This proof of concept covers the first three scenes only.</p>
+  </section>
+</main>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
