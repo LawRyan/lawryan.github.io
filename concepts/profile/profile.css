@@ -19,7 +19,7 @@
 .resume { position: relative; z-index: 4; background: linear-gradient(rgba(8,11,16,0), #080B10 18vh); padding: 18vh var(--pad) 12vh; }
 .rs { max-width: 1180px; margin: 0 auto; padding: clamp(56px, 9vh, 110px) 0; border-top: 1px solid rgba(238,243,248,.1); display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px clamp(24px, 4vw, 64px); }
 .rs > *:not(.rs-h) { grid-column: 2; }
-.rs-h { grid-column: 1; grid-row: 1 / span 20; font-size: 15px; font-weight: 600; color: var(--silver); letter-spacing: .01em; position: sticky; top: 90px; align-self: start; margin: 6px 0 0; }
+.rs-h { grid-column: 1; grid-row: 1; font-size: 15px; font-weight: 600; color: var(--silver); letter-spacing: .01em; align-self: start; margin: 6px 0 0; }
 .rs h3 { margin: 0; font-weight: 560; font-size: 19px; font-stretch: 102%; color: var(--white); }
 .rs p { margin: 0; color: var(--text-2); }
 .rs ul { margin: 0; padding: 0; list-style: none; }
@@ -150,5 +150,12 @@
   .case { break-inside: avoid; }
   .lp[hidden] { display: grid !important; }
   .lp { grid-template-columns: 1fr; }
-  .skills { grid-template-columns: repeat(4, 1fr); }
+  .skills { grid-template-columns: repeat(4, 1fr); gap: 8pt; }
+  .sk i { display: none; }
+  .sk ul { gap: 2pt; } .sk li { border: 0; padding: 0; }
+  #work, .sum-role, .lp-caps, .lp-copy > p:not(.lp-st), .lios-st, .sum-lead p:not(:first-child), .res-extra { display: none !important; }
+  .lp { gap: 2pt; } .lp h3 { font-size: 11pt; }
+  .lios-tag { font-size: 13pt !important; }
+  .statement { display: none; }
+  .role ul { gap: 1pt; margin-top: 3pt; }
 }
