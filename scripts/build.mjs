@@ -4,6 +4,7 @@ import * as esbuild from 'esbuild';
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { buildNext } from './build-next.mjs';
 
 const watch = process.argv.includes('--watch');
 const OUT = 'dist';
@@ -126,7 +127,8 @@ if (watch) {
 } else {
   const r = await esbuild.build(options);
   writeHtml(r.metafile, await prerender());
+  const nextSizes = await buildNext(OUT);
   const size = Object.entries(r.metafile.outputs).filter(([f]) => !f.endsWith('.map')).map(([f, o]) => `${f}  ${(o.bytes / 1024).toFixed(1)} kB`);
-  console.log(size.join('\n'));
+  console.log(size.concat(nextSizes).join('\n'));
   if (!existsSync(join(OUT, 'starter/index.html'))) throw new Error('legacy apps missing');
 }
