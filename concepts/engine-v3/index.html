@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ryan Law · Intelligence Engine v3</title>
+<meta name="description" content="Ryan Law, Vice President, Client Intelligence at RBC Capital Markets. Raw information, validated data, actionable intelligence.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#080B10">
+<link rel="preload" href="/fonts/MonaSans-var.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="./style.css">
+<script>document.documentElement.classList.add('js');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rm')}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#s-validation">Skip to content</a>
+<canvas id="engine" aria-hidden="true"></canvas>
+<div id="labels" aria-hidden="true"></div>
+<div id="tip" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="#top">Ryan Law</a>
+  <ol class="stages" aria-label="Scenes">
+    <li><a href="#top" data-g="0"><i></i><span>Raw information</span></a></li>
+    <li><a href="#s-validation" data-g="1"><i></i><span>Validated data</span></a></li>
+    <li><a href="#s-analytics" data-g="2"><i></i><span>Actionable intelligence</span></a></li>
+  </ol>
+</header>
+
+<main id="top">
+  <div class="track" id="track">
+    <div class="stage-pin">
+      <!-- 0 · raw information -->
+      <section class="copy k0" aria-labelledby="h1">
+        <p class="name" id="h1"><span>R</span><span>Y</span><span>A</span><span>N</span><span class="sp"> </span><span>L</span><span>A</span><span>W</span></p>
+        <h1>Turning complex data into intelligent decisions.</h1>
+        <p class="role">Vice President, Client Intelligence<br>RBC Capital Markets</p>
+      </section>
+
+      <!-- 1 · validation -->
+      <section class="copy k1" id="s-validation" aria-labelledby="h-val">
+        <h2 id="h-val"><span class="ph" data-ph="0">Every record is checked before it reaches a report.</span><span class="ph" data-ph="1">Records that fail are pulled into an exception queue.</span><span class="ph" data-ph="2">Each exception is inspected: corrected, or flagged for review.</span><span class="ph" data-ph="3">The dataset that reaches reporting is clean.</span></h2>
+        <p class="real">The real framework I built runs <b>300+ validation rules</b> across roughly <b>100–150K trade records</b>.</p>
+      </section>
+      <div class="status" aria-live="polite" aria-label="Validation run (synthetic)">
+        <p class="st-k">Validation run <span>synthetic</span></p>
+        <dl>
+          <div><dt>Checked</dt><dd id="v-checked">0</dd></div>
+          <div class="a"><dt>Exceptions</dt><dd id="v-exc">0</dd></div>
+          <div><dt>Corrected</dt><dd id="v-cor">–</dd></div>
+          <div class="r"><dt>Flagged for review</dt><dd id="v-flag">–</dd></div>
+        </dl>
+        <p class="st-done" id="v-done"></p>
+      </div>
+      <div class="xpanel" id="xpanel" role="dialog" aria-modal="false" aria-labelledby="x-id" hidden>
+        <p class="x-k">Exception record <span>synthetic</span></p>
+        <h3 id="x-id">TRD-000000</h3>
+        <dl>
+          <div><dt>Product</dt><dd id="x-prod"></dd></div>
+          <div><dt>Validation rule</dt><dd id="x-rule"></dd></div>
+          <div><dt>Expected</dt><dd id="x-exp"></dd></div>
+          <div><dt>Observed</dt><dd id="x-obs"></dd></div>
+          <div><dt>Status</dt><dd id="x-st"></dd></div>
+        </dl>
+        <div class="x-nav"><button type="button" id="x-prev">Previous</button><button type="button" id="x-next">Next exception</button><button type="button" id="x-close" aria-label="Close">Close</button></div>
+      </div>
+      <button type="button" class="inspect" id="inspect">Inspect an exception</button>
+
+      <!-- 2 · segment towers -->
+      <section class="copy k2" aria-labelledby="h-seg">
+        <h2 id="h-seg">Validated records group by client segment.</h2>
+        <p>Each tower is one segment's revenue over two years. Flagged records stay out until they are resolved.</p>
+      </section>
+
+      <!-- 3 · revenue surface -->
+      <section class="copy k3" id="s-analytics" aria-labelledby="h-an">
+        <h2 id="h-an">Spread across 24 months, the towers become a revenue surface.</h2>
+      </section>
+
+      <!-- 4 · time series -->
+      <section class="copy k4" aria-labelledby="h-ts">
+        <h2 id="h-ts">Then it resolves into a trend you can read, and question.</h2>
+        <p>Monthly revenue stacked by client segment. Point at a month or a segment to read it. One month breaks its pattern.</p>
+      </section>
+      <ul class="legend" id="legend" aria-label="Client segments (synthetic): highlight one">
+        <li><button type="button" data-s="0" style="--c:#E6EDF7">Hedge funds</button></li><li><button type="button" data-s="1" style="--c:#9EADC4">Asset managers</button></li><li><button type="button" data-s="2" style="--c:#3DCCC2">Banks</button></li>
+        <li><button type="button" data-s="3" style="--c:#5C85C7">Corporates</button></li><li><button type="button" data-s="4" style="--c:#75829A">Pensions</button></li><li><button type="button" data-s="5" style="--c:#267A8A">Insurers</button></li>
+      </ul>
+      <button type="button" class="anom-btn" id="anom-btn" aria-expanded="false" aria-controls="apanel"><i></i><span id="anom-label">Anomaly</span></button>
+      <div class="apanel" id="apanel" hidden>
+        <p class="x-k">Observation <span>synthetic data</span></p>
+        <h3 id="a-head"></h3>
+        <dl>
+          <div><dt>What changed</dt><dd id="a-what"></dd></div>
+          <div><dt>Segment</dt><dd id="a-seg"></dd></div>
+          <div><dt>Size</dt><dd id="a-size"></dd></div>
+          <div><dt>Why investigate</dt><dd id="a-why"></dd></div>
+        </dl>
+        <p class="a-note">An observation, not a cause. Worth checking next: client activity in the segment, booking and allocation changes, and whether the month's data is complete.</p>
+      </div>
+
+      <p class="synthetic" id="synthetic">Illustrative model on synthetic data. Only the 300+ rules and roughly 100–150K records describe real work.</p>
+      <p class="cue" aria-hidden="true">Scroll</p>
+    </div>
+  </div>
+
+  <section class="next" aria-labelledby="h-next">
+    <h2 id="h-next">Next in the full build: automation, leadership and career, then L//IOS.</h2>
+    <p>This prototype covers the first three scenes only.</p>
+  </section>
+</main>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

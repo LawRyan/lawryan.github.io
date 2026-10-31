@@ -19,3 +19,10 @@ The constellation and particle direction (branch `immersive`) was rejected on 31
 - 31 Oct: new direction, **The Intelligence Engine** (branch `engine`, `concepts/engine`).
   - Keep the constellation's continuous scroll-linked motion; replace the visuals with lit, instanced record tiles that keep their identity through four layouts: raw streams → validation matrix → revenue surface → time series.
   - First three scenes only, as briefed. Two critique rounds; see `concepts/engine/NOTES.md`.
+- 31 Oct: Intelligence Engine v2 (`concepts/engine-v2`) replaces the ribbon with a data-architecture hero.
+- 31 Oct: Intelligence Engine v3 (`concepts/engine-v3`):
+  - The validation run has five phases: alignment, grouped rule runs, an exception queue, resolution, completion.
+  - Exceptions can be inspected.
+  - Records reach the chart through segment towers.
+  - The chart has month and segment interactions, plus an anomaly observation panel.
+  - Two refinement passes; see its NOTES.md.
