@@ -46,3 +46,10 @@ Branch `immersive`. Experimental build at `/next/` (noindex, not linked). The li
   - Round 2 added depth of field, halo points, a lens ring, the rule gate, ordered lanes after the gate and an exceptions tray, and reframed every scene.
   - Round 3 found dark discs over the gradient. Cause: opaque fragments over a transparent canvas. Fix: draw the sky inside WebGL so particle light is purely additive.
   - Headless software GL runs at about 7 fps, so frame rate must be measured on real devices.
+- 31 Oct: full experience, nine scenes: complexity, structure, validation, manual, automated, leadership network, career flight, L//IOS, horizon.
+  - Career and the L//IOS showcase are rendered at build time from `src/content.ts` (`src/next/static.ts`), so nothing is retyped and they work without JavaScript.
+  - L//IOS sits just beyond the end of the career path (`LIOS_C`): the camera flies through each move (a ring per role) and arrives at the mark. Then the product stage scrolls over it while the mark falls out of focus.
+  - Showcase: three tabs (arrow-key navigation), real screenshots with a depth crossfade (desktop) or a fanned deck (phone), thumbnails, swipe on phones, a pointer tilt. Status chips come from the content file (Working, Prototype, In development, Planned).
+  - Chapter rail (≥1100px), a top progress bar, `?debug` shows fps, DPR and point count.
+  - Critique, round 1: the rail labels collided with right-hand copy; the pipeline was a hot blob across the text; the leadership graph overlapped the headline; the career camera passed through the final ring; the horizon line cut the contact links. All reframed.
+  - Standalone build now inlines the screenshots too (`node scripts/standalone-next.mjs <out>`).
