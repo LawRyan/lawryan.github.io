@@ -25,9 +25,15 @@ const QC = MOB ? 4 : 6, QX = MOB ? .13 : .15, QY = .066, Q0 = MW / 2 + (MOB ? .4
 const PER = N / 100, CX = MOB ? 25 : 40, CZ = PER / CX;              // records per row: CX across, CZ deep
 const CP = MOB ? .05 : .046, RH = MOB ? .036 : .043, CDZ = .07;        // pitch across, row height, depth pitch
 const CW = CX * CP, CH = 100 * RH;                                     // column width and height
-const GAPX = MOB ? .55 : .8;                                           // gap between the two columns
-const WX = MOB ? -(CW + GAPX) / 2 : 2.4 - (CW + GAPX) / 2, WY = MOB ? 1.1 - CH / 2 : -CH / 2;   // reporting column (centre x, bottom y)
-const FX = WX + CW + GAPX;                                              // freed-capacity column
+const WX = MOB ? -.95 : 2.9, WY = MOB ? 1.1 - CH / 2 : -CH / 2;        // reporting column (centre x, bottom y)
+// the freed 95% spreads into four workstreams: smaller stacks fanning out across the scene (illustrative split)
+const KS = 4, KROWS = [5, 29, 53, 77, 100];                             // row ranges per workstream
+const KX = MOB ? 10 : 20, KZ = PER / KX;                                // records per row in a workstream stack
+const KW = KX * CP;
+const KPOS = MOB
+  ? [[.35, WY + CH * .62, -.3], [1.05, WY + CH * .62, -.9], [.35, WY + CH * .12, -.6], [1.05, WY + CH * .12, -1.2]]
+  : [[4.75, WY + .2, .2], [5.95, WY + 1.25, -.7], [7.15, WY + .55, -1.6], [8.35, WY + 1.7, -2.5]];
+const FX = KPOS[1][0];
 
 const AP = MOB ? { x: .15, z: .09 } : { x: .165, z: .09 };
 const SLABS = (MOB ? [
@@ -42,7 +48,7 @@ let seed = 11;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 function records() {
   const A = k => new Float32Array(N * k);
-  const aArch = A(3), aXfer = A(3), aSeed = A(4), aMat = A(3), aQ = A(3), aWaf = A(3), aInfo = A(4), aMeta = A(4);
+  const aArch = A(3), aXfer = A(3), aSeed = A(4), aMat = A(3), aQ = A(3), aWaf = A(3), aDest = A(3), aInfo = A(4), aMeta = A(4);
   for (let i = 0; i < N * 4; i++) aSeed[i] = rnd();
   const slot = i => ({ c: i % G.C, r: Math.floor(i / G.C) % G.R, l: Math.floor(i / (G.C * G.R)) });
   for (let i = 0; i < N; i++) { const { c, r, l } = slot(i); aMat.set([c * G.sx - MW / 2, r * G.sy - MH / 2, (l - (G.L - 1) / 2) * G.sz], i * 3); }
@@ -76,15 +82,19 @@ function records() {
     const row = Math.floor(k / PER), j = k % PER;
     const x = WX + ((j % CX) - (CX - 1) / 2) * CP, z = (Math.floor(j / CX) - (CZ - 1) / 2) * CDZ;
     aWaf.set([x, WY + row * RH + RH / 2, z], i * 3); aMeta[i * 4] = row;
+    // where this record's capacity goes: one of four workstream stacks
+    const ks = Math.max(0, KROWS.findIndex((r, q) => row >= r && row < KROWS[q + 1]));
+    const lr = row - KROWS[ks], [bx, by, bz] = KPOS[ks];
+    aDest.set([bx + ((j % KX) - (KX - 1) / 2) * CP, by + lr * RH + RH / 2, bz + (Math.floor(j / KX) - (KZ - 1) / 2) * CDZ], i * 3);
   });
-  return { aArch, aXfer, aSeed, aMat, aQ, aWaf, aInfo, aMeta };
+  return { aArch, aXfer, aSeed, aMat, aQ, aWaf, aDest, aInfo, aMeta };
 }
 
 const VERT = /* glsl */`
 precision highp float;
 uniform mat4 projectionMatrix, viewMatrix;
 attribute vec3 position, normal;
-attribute vec3 aArch; attribute vec3 aXfer; attribute vec4 aSeed; attribute vec3 aMat; attribute vec3 aQ; attribute vec3 aWaf; attribute vec4 aInfo; attribute vec4 aMeta;
+attribute vec3 aArch; attribute vec3 aXfer; attribute vec4 aSeed; attribute vec3 aMat; attribute vec3 aQ; attribute vec3 aWaf; attribute vec3 aDest; attribute vec4 aInfo; attribute vec4 aMeta;
 uniform float uP, uTime, uWave, uRes, uCut, uIntro, uLens;
 uniform vec2 uPointer;
 varying vec3 vN; varying vec3 vCol; varying float vEm; varying vec3 vW;
@@ -129,8 +139,8 @@ void state(float i, out vec3 p, out vec3 T, out vec3 Nn, out vec3 sc, out vec3 c
     p = aWaf;
     float kept = 1. - step(4.5, aMeta.x);
     float mv = (1. - kept) * smoothstep(0., 1., clamp(uCut*1.6 - (99. - aMeta.x)/95.*.6, 0., 1.));
-    vec3 dest = p + vec3(${(FX - WX).toFixed(4)}, -5.*${RH.toFixed(4)}, 0.);
-    vec3 mid = mix(p, dest, .5) + vec3(0., .35 + aSeed.z*.25, .5);
+    vec3 dest = aDest;
+    vec3 mid = mix(p, dest, .5) + vec3(0., .6 + aSeed.z*.35, .4);
     p = mix(mix(p, mid, mv), mix(mid, dest, mv), mv);
     sc = vec3(${(CP * .82).toFixed(4)}, ${(RH * .78).toFixed(4)}, ${(CDZ * .8).toFixed(4)});
     col = mix(vec3(.66,.74,.82), vec3(.30,.66,.66), mv);
@@ -231,7 +241,7 @@ function boot() {
   const box = boxGeometry(), recP = G3.program(VERT, FRAG);
   const bufs = { position: G3.buffer(box.position), normal: G3.buffer(box.normal) };
   const idx = G3.buffer(box.index, gl.ELEMENT_ARRAY_BUFFER);
-  const inst = [['aArch', 3], ['aXfer', 3], ['aSeed', 4], ['aMat', 3], ['aQ', 3], ['aWaf', 3], ['aInfo', 4], ['aMeta', 4]].map(([k, n]) => [recP.attr(k), G3.buffer(R[k]), n]);
+  const inst = [['aArch', 3], ['aXfer', 3], ['aSeed', 4], ['aMat', 3], ['aQ', 3], ['aWaf', 3], ['aDest', 3], ['aInfo', 4], ['aMeta', 4]].map(([k, n]) => [recP.attr(k), G3.buffer(R[k]), n]);
   const U = { uP: 0, uTime: 0, uWave: -99, uRes: 0, uCut: 0, uIntro: reduce ? 1 : 0, uLens: 0, uPointer: new V2(9, 9), uCam: new V3(), uFog: [.035, .05, .075], uFogNear: 10, uFogFar: 28 };
   const bindRecords = () => {
     gl.useProgram(recP.p);
@@ -253,8 +263,16 @@ function boot() {
   const qframe = lineSet([qb[0], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[3], 0, qb[2], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[1], 0], [1, .71, .28]);
   const fx0 = WX - CW / 2 - .06, fx1 = WX + CW / 2 + .06, fy0 = WY - .04, fy1 = WY + CH + .04, fz = CZ * CDZ / 2 + .06;
   const cframe = lineSet([fx0, fy0, fz, fx1, fy0, fz, fx1, fy0, fz, fx1, fy1, fz, fx1, fy1, fz, fx0, fy1, fz, fx0, fy1, fz, fx0, fy0, fz,
-    fx0, fy0, fz, FX + CW / 2 + .06, fy0, fz], [.62, .70, .78]);
-  const lines = [arch, mframe, qframe, cframe];
+  ], [.62, .70, .78]);
+  // flow lines: from the top of the reporting column out to each workstream
+  const fl = [];
+  KPOS.forEach(([bx, by, bz], k) => {
+    const h = (KROWS[k + 1] - KROWS[k]) * RH, a = [WX + CW / 2, WY + CH * .8, 0], b = [bx - KW / 2, by + h, bz];
+    const c = [(a[0] + b[0]) / 2, Math.max(a[1], b[1]) + .5, (a[2] + b[2]) / 2];
+    let prev = a; for (let t = 1; t <= 24; t++) { const u = t / 24, q = [0, 1, 2].map(d => (1 - u) * (1 - u) * a[d] + 2 * (1 - u) * u * c[d] + u * u * b[d]); fl.push(...prev, ...q); prev = q; }
+  });
+  const flows = lineSet(fl, [.30, .66, .66]);
+  const lines = [arch, mframe, qframe, cframe, flows];
   function render() {
     gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
     gl.useProgram(skyP.p); gl.uniform1f(skyP.u.uA, innerWidth / innerHeight); G3.attrib(skyP.attr('p'), quad, 2); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -272,14 +290,14 @@ function boot() {
     gl.depthMask(true);
   }
   const labelLayer = $('labels'), mkLab = (t, cls) => { const el = document.createElement('div'); el.className = 'lab ' + cls; el.textContent = t; labelLayer.appendChild(el); return el; };
-  const qLab = mkLab(MOB ? 'Exceptions' : 'Exceptions, held for review', 'tray'), wLab = mkLab(MOB ? 'Manual reporting, before' : 'Manual reporting effort, before', 'seg'), wLab2 = mkLab(MOB ? '95% freed' : '95% freed for other initiatives', 'free95'), wLab3 = mkLab(MOB ? '5% manual' : '5% still manual', 'keep');
+  const qLab = mkLab(MOB ? 'Exceptions' : 'Exceptions, held for review', 'tray'), wLab = mkLab(MOB ? 'Manual reporting, before' : 'Manual reporting effort, before', 'seg'), wLab2 = mkLab(MOB ? '95% to other workstreams' : '95% redeployed to other workstreams', 'free95'), wLab3 = mkLab(MOB ? '5% manual' : '5% still manual', 'keep');
 
   const cam = {
     raw: MOB ? [V(-3.4, 5.0, 12.6), V(0, -1.5, -.8)] : [V(-9.4, 4.2, 10.0), V(-2.6, -1.6, -.9)],
     matrix: s => { const K = MOB ? [[0, V(-2.2, .7, 11.2), V(.3, .4, 0)], [.6, V(.6, .5, 11.4), V(.8, .3, 0)], [1, V(.6, .6, 12.6), V(.6, .3, 0)]]
       : [[0, V(-6.4, 1.6, 8.6), V(-.6, -.3, 0)], [.35, V(-1.4, 1.0, 8.6), V(1.4, -.2, 0)], [.7, V(3.4, .8, 8.4), V(3.4, -.1, 0)], [1, V(1.6, 1.2, 11.6), V(1.6, -.2, 0)]];
       let j = 0; while (j < K.length - 2 && s > K[j + 1][0]) j++; const t = ease((s - K[j][0]) / (K[j + 1][0] - K[j][0])); return [K[j][1].clone().lerp(K[j + 1][1], t), K[j][2].clone().lerp(K[j + 1][2], t)]; },
-    waffle: s => MOB ? [V(-.9, 1.3, 9.4 - s * .4), V(0, .45, 0)] : [V(.4 + s * .3, 1.0, 9.4 - s * .5), V(1.7, .05, 0)],
+    waffle: s => MOB ? [V(-.6, 1.6, 9.6 - s * .4), V(.05, .5, -.4)] : [V(2.4 + s * .4, 1.6, 11.6 - s * .5), V(4.0, .2, -.8)],
   };
   const keyFor = (i, sub) => i === 0 ? cam.raw : i === 1 ? cam.matrix(sub[1]) : cam.waffle(sub[2]);
   const resize = () => { G3.size(innerWidth, innerHeight, dpr); proj = perspective(FOV, innerWidth / innerHeight, .1, 80); };
@@ -318,11 +336,12 @@ function boot() {
     arch.opacity = .16 * near(p, 0, 1.6); mframe.opacity = .2 * near(p, 1, 2);
     qframe.opacity = .45 * near(p, 1, 2) * smooth((s1 - .08) / .1) * (1 - U.uRes);
     cframe.opacity = .35 * near(p, 2, 2) * smooth(U.uCut * 2);
+    flows.opacity = .5 * near(p, 2, 2) * smooth(U.uCut * 2.2 - .6);
     if (draw) {
       place(qLab, V(Q0 + (QC - 1) * QX / 2, MH / 2 + .3, 0), near(p, 1, 3) * smooth((s1 - .1) / .1) * (1 - U.uRes) * vis);
       const fzz = CZ * CDZ / 2 + .06;
       place(wLab, V(WX, WY + CH + .22, fzz), near(p, 2, 3) * vis);
-      place(wLab2, V(FX, WY + 95 * RH + .22, fzz), near(p, 2, 3) * smooth(U.uCut * 1.4 - .4) * vis);
+      place(wLab2, MOB ? V(.7, WY + CH * .62 + 24 * RH + .3, -.6) : V(6.55, WY + 1.7 + 24 * RH + .45, -1.1), near(p, 2, 3) * smooth(U.uCut * 1.4 - .4) * vis);
       place(wLab3, V(WX, WY - .22, fzz), near(p, 2, 3) * smooth(U.uCut * 1.6 - .5) * vis);
       render();
     }
