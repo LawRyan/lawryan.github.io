@@ -126,7 +126,8 @@
   .k2 { top: auto; bottom: 34px; transform: none; left: var(--pad); right: var(--pad); width: auto; }
   .k2 .big { font-size: 92px; }
   .k1 { top: auto; bottom: 34px; }
-  .k1 .real { display: block; font-size: 14px; }
+  .k1 .real, .k2 .real { display: block; font-size: 14px; }
+  .k2 .real { margin-top: 6px; }
   .roles::before, .role::after, .edu li::after { display: none; }
   .role, .edu li { grid-template-columns: 1fr; gap: 4px; padding-bottom: 28px; }
   .sum-lead p { font-size: 18px; }
@@ -134,9 +135,9 @@
 }
 
 /* labels on the 95% column */
-.lab.big95 { color: var(--white); font-size: 15px; font-weight: 560; }
+.lab.free95 { color: #7FE6DC; font-size: 15px; font-weight: 560; }
 .lab.keep { color: #F5D9A8; font-size: 14px; font-weight: 560; }
-@media (max-width: 760px) { .lab.big95 { font-size: 13px; } .lab.keep { font-size: 12px; } }
+@media (max-width: 760px) { .lab.free95 { font-size: 13px; } .lab.keep { font-size: 12px; } }
 
 /* section leads and the content restored from the live site */
 .rs-lead { font-family: 'Newsreader', Georgia, serif; font-size: clamp(24px, 2.4vw, 34px) !important; line-height: 1.15; color: var(--white) !important; max-width: 26ch; }

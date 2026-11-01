@@ -25,7 +25,9 @@ const QC = MOB ? 4 : 6, QX = MOB ? .13 : .15, QY = .066, Q0 = MW / 2 + (MOB ? .4
 const PER = N / 100, CX = MOB ? 25 : 40, CZ = PER / CX;              // records per row: CX across, CZ deep
 const CP = MOB ? .05 : .046, RH = MOB ? .036 : .043, CDZ = .07;        // pitch across, row height, depth pitch
 const CW = CX * CP, CH = 100 * RH;                                     // column width and height
-const WX = MOB ? 0 : 2.4, WY = MOB ? 1.1 - CH / 2 : -CH / 2;           // column base (centre x, bottom y)
+const GAPX = MOB ? .55 : .8;                                           // gap between the two columns
+const WX = MOB ? -(CW + GAPX) / 2 : 2.4 - (CW + GAPX) / 2, WY = MOB ? 1.1 - CH / 2 : -CH / 2;   // reporting column (centre x, bottom y)
+const FX = WX + CW + GAPX;                                              // freed-capacity column
 
 const AP = MOB ? { x: .15, z: .09 } : { x: .165, z: .09 };
 const SLABS = (MOB ? [
@@ -122,15 +124,18 @@ void state(float i, out vec3 p, out vec3 T, out vec3 Nn, out vec3 sc, out vec3 c
       sc *= mix(1. + passed*.2, .72, detach*(1. - back));
     }
   } else {
-    // one column, 100 rows = the manual effort before automation; the top 95 drain away, top down; 5 remain
+    // one column, 100 rows = the manual reporting effort before automation. The top 95 rows move across, top first,
+    // and re-stack as capacity for other initiatives; the bottom 5 stay as the manual reporting that remains.
     p = aWaf;
     float kept = 1. - step(4.5, aMeta.x);
-    float gone = (1. - kept) * smoothstep(0., 1., clamp(uCut*1.6 - (99. - aMeta.x)/95.*.6, 0., 1.));
-    sc = vec3(${(CP * .82).toFixed(4)}, ${(RH * .78).toFixed(4)}, ${(CDZ * .8).toFixed(4)}) * mix(1., .38, gone);
-    p.z -= gone*.12;
-    col = mix(vec3(.66,.74,.82), vec3(.22,.27,.34), gone);
+    float mv = (1. - kept) * smoothstep(0., 1., clamp(uCut*1.6 - (99. - aMeta.x)/95.*.6, 0., 1.));
+    vec3 dest = p + vec3(${(FX - WX).toFixed(4)}, -5.*${RH.toFixed(4)}, 0.);
+    vec3 mid = mix(p, dest, .5) + vec3(0., .35 + aSeed.z*.25, .5);
+    p = mix(mix(p, mid, mv), mix(mid, dest, mv), mv);
+    sc = vec3(${(CP * .82).toFixed(4)}, ${(RH * .78).toFixed(4)}, ${(CDZ * .8).toFixed(4)});
+    col = mix(vec3(.66,.74,.82), vec3(.30,.66,.66), mv);
     col = mix(col, vec3(.96,.82,.58), kept*uCut);
-    em = kept*uCut*.3 + (1. - gone)*.03;
+    em = kept*uCut*.3 + mv*.05 + .03;
   }
 }
 void main(){
@@ -248,7 +253,7 @@ function boot() {
   const qframe = lineSet([qb[0], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[3], 0, qb[2], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[1], 0], [1, .71, .28]);
   const fx0 = WX - CW / 2 - .06, fx1 = WX + CW / 2 + .06, fy0 = WY - .04, fy1 = WY + CH + .04, fz = CZ * CDZ / 2 + .06;
   const cframe = lineSet([fx0, fy0, fz, fx1, fy0, fz, fx1, fy0, fz, fx1, fy1, fz, fx1, fy1, fz, fx0, fy1, fz, fx0, fy1, fz, fx0, fy0, fz,
-    fx1 + .12, fy1, fz, fx1 + .22, fy1, fz, fx1 + .22, fy1, fz, fx1 + .22, WY + 5 * RH, fz, fx1 + .22, WY + 5 * RH, fz, fx1 + .12, WY + 5 * RH, fz], [.62, .70, .78]);
+    fx0, fy0, fz, FX + CW / 2 + .06, fy0, fz], [.62, .70, .78]);
   const lines = [arch, mframe, qframe, cframe];
   function render() {
     gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
@@ -267,14 +272,14 @@ function boot() {
     gl.depthMask(true);
   }
   const labelLayer = $('labels'), mkLab = (t, cls) => { const el = document.createElement('div'); el.className = 'lab ' + cls; el.textContent = t; labelLayer.appendChild(el); return el; };
-  const qLab = mkLab(MOB ? 'Exceptions' : 'Exceptions, held for review', 'tray'), wLab = mkLab('Before: 100% manual', 'seg'), wLab2 = mkLab('95% less', 'big95'), wLab3 = mkLab('5% remains', 'keep');
+  const qLab = mkLab(MOB ? 'Exceptions' : 'Exceptions, held for review', 'tray'), wLab = mkLab(MOB ? 'Manual reporting, before' : 'Manual reporting effort, before', 'seg'), wLab2 = mkLab(MOB ? '95% freed' : '95% freed for other initiatives', 'free95'), wLab3 = mkLab(MOB ? '5% manual' : '5% still manual', 'keep');
 
   const cam = {
     raw: MOB ? [V(-3.4, 5.0, 12.6), V(0, -1.5, -.8)] : [V(-9.4, 4.2, 10.0), V(-2.6, -1.6, -.9)],
     matrix: s => { const K = MOB ? [[0, V(-2.2, .7, 11.2), V(.3, .4, 0)], [.6, V(.6, .5, 11.4), V(.8, .3, 0)], [1, V(.6, .6, 12.6), V(.6, .3, 0)]]
       : [[0, V(-6.4, 1.6, 8.6), V(-.6, -.3, 0)], [.35, V(-1.4, 1.0, 8.6), V(1.4, -.2, 0)], [.7, V(3.4, .8, 8.4), V(3.4, -.1, 0)], [1, V(1.6, 1.2, 11.6), V(1.6, -.2, 0)]];
       let j = 0; while (j < K.length - 2 && s > K[j + 1][0]) j++; const t = ease((s - K[j][0]) / (K[j + 1][0] - K[j][0])); return [K[j][1].clone().lerp(K[j + 1][1], t), K[j][2].clone().lerp(K[j + 1][2], t)]; },
-    waffle: s => MOB ? [V(-1.2, 1.4, 8.6 - s * .4), V(0, .4, 0)] : [V(.2 + s * .3, 1.0, 8.8 - s * .5), V(1.5, .05, 0)],
+    waffle: s => MOB ? [V(-.9, 1.3, 9.4 - s * .4), V(0, .45, 0)] : [V(.4 + s * .3, 1.0, 9.4 - s * .5), V(1.7, .05, 0)],
   };
   const keyFor = (i, sub) => i === 0 ? cam.raw : i === 1 ? cam.matrix(sub[1]) : cam.waffle(sub[2]);
   const resize = () => { G3.size(innerWidth, innerHeight, dpr); proj = perspective(FOV, innerWidth / innerHeight, .1, 80); };
@@ -317,8 +322,8 @@ function boot() {
       place(qLab, V(Q0 + (QC - 1) * QX / 2, MH / 2 + .3, 0), near(p, 1, 3) * smooth((s1 - .1) / .1) * (1 - U.uRes) * vis);
       const fzz = CZ * CDZ / 2 + .06;
       place(wLab, V(WX, WY + CH + .22, fzz), near(p, 2, 3) * vis);
-      place(wLab2, V(WX + CW / 2 + .32, WY + CH * .55, fzz), near(p, 2, 3) * smooth(U.uCut * 1.4 - .3) * vis, '0');
-      place(wLab3, V(WX + CW / 2 + .32, WY + 2.5 * RH, fzz), near(p, 2, 3) * smooth(U.uCut * 1.6 - .5) * vis, '0');
+      place(wLab2, V(FX, WY + 95 * RH + .22, fzz), near(p, 2, 3) * smooth(U.uCut * 1.4 - .4) * vis);
+      place(wLab3, V(WX, WY - .22, fzz), near(p, 2, 3) * smooth(U.uCut * 1.6 - .5) * vis);
       render();
     }
   }
