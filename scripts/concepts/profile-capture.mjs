@@ -46,7 +46,7 @@ if (mode === 'shots') {
   const dir = out + '.frames'; rmSync(dir, { recursive: true, force: true }); mkdirSync(dir, { recursive: true });
   const { p, errs, w, h } = await open(t);
   // the scroll path [seconds, track progress] with the hero idling first, the validation run slowed down, a hover on the chart
-  const PATH = [[0, 0], [4, .03], [7, .3], [13, .62], [16, .78], [19, .95], [21, 1.0], [24, 1.25], [28, 1.6]];
+  const PATH = process.env.PATHJSON ? JSON.parse(process.env.PATHJSON) : [[0, 0], [4, .03], [7, .3], [13, .62], [16, .78], [19, .95], [21, 1.0], [24, 1.25], [28, 1.6]];
   const trackEnd = await yFor(p, 1); const ys = []; for (const [, f] of PATH) ys.push(f <= 1 ? await yFor(p, f) : trackEnd + (f - 1) * h * 6);
   const scale = n / fps / PATH[PATH.length - 1][0];
   for (let i = 0; i < n; i++) {
