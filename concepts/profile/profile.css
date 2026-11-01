@@ -133,6 +133,11 @@
   .lp-caps li { grid-template-columns: 1fr; gap: 0; }
 }
 
+/* labels on the 95% column */
+.lab.big95 { color: var(--white); font-size: 15px; font-weight: 560; }
+.lab.keep { color: #F5D9A8; font-size: 14px; font-weight: 560; }
+@media (max-width: 760px) { .lab.big95 { font-size: 13px; } .lab.keep { font-size: 12px; } }
+
 /* section leads and the content restored from the live site */
 .rs-lead { font-family: 'Newsreader', Georgia, serif; font-size: clamp(24px, 2.4vw, 34px) !important; line-height: 1.15; color: var(--white) !important; max-width: 26ch; }
 .rs-note { max-width: 62ch; font-size: 15px; }

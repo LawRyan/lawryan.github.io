@@ -53,3 +53,4 @@ Compared the page's text against the live site, line by line.
   - The five principles.
   - The contact line, and the "Views are my own" footer.
 - **Open:** the validation case study in `src/content.ts` still describes catching errors before reporting. It needs Ryan's wording.
+- **95% scene redrawn (1 Nov):** the 10×10 waffle read poorly on phones; its faded blocks almost disappeared. It is now one column of 100 rows (one row = 1% of the manual effort before automation). As you scroll, the top 95 rows drain top-down to faint outlines inside a frame, the bottom 5 stay lit, and labels mark "Before: 100% manual", "95% less" and "5% remains".

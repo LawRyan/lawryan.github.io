@@ -21,9 +21,11 @@ const N = G.C * G.R * G.L;
 const MW = (G.C - 1) * G.sx, MH = (G.R - 1) * G.sy;
 const BLOCK = MOB ? 5 : 6;
 const QC = MOB ? 4 : 6, QX = MOB ? .13 : .15, QY = .066, Q0 = MW / 2 + (MOB ? .45 : .75);
-// the 95% waffle: 100 blocks, each made of N/100 records
-const WCELL = MOB ? .3 : .44, WGAP = MOB ? .04 : .07, WX = MOB ? 0 : 2.6, WY = MOB ? 1.5 : 0;
-const PER = N / 100, PC = MOB ? 10 : 12, PR = PER / PC;
+// the 95% column: 100 rows of records, one row = 1% of the manual reporting effort before automation
+const PER = N / 100, CX = MOB ? 25 : 40, CZ = PER / CX;              // records per row: CX across, CZ deep
+const CP = MOB ? .05 : .046, RH = MOB ? .036 : .043, CDZ = .07;        // pitch across, row height, depth pitch
+const CW = CX * CP, CH = 100 * RH;                                     // column width and height
+const WX = MOB ? 0 : 2.4, WY = MOB ? 1.1 - CH / 2 : -CH / 2;           // column base (centre x, bottom y)
 
 const AP = MOB ? { x: .15, z: .09 } : { x: .165, z: .09 };
 const SLABS = (MOB ? [
@@ -66,13 +68,12 @@ function records() {
   [...excSet].sort((a, b) => slot(a).c - slot(b).c || slot(b).r - slot(a).r).forEach((i, q) => {
     aInfo[i * 4] = 1; aQ.set([Q0 + (q % QC) * QX, MH / 2 - Math.floor(q / QC) * QY, 0], i * 3); aMeta[i * 4 + 3] = q / (E - 1);
   });
-  // the waffle: records, swept left to right through the matrix, fill the 100 blocks in order
+  // the column: records, swept left to right through the matrix, stack up one row (1%) at a time
   const byCol = [...Array(N).keys()].sort((a, b) => slot(a).c - slot(b).c || slot(a).r - slot(b).r || slot(a).l - slot(b).l);
   byCol.forEach((i, k) => {
-    const b = Math.floor(k / PER), j = k % PER, bc = b % 10, br = Math.floor(b / 10);
-    const x = WX + (bc - 4.5) * (WCELL + WGAP) + ((j % PC) - (PC - 1) / 2) * (WCELL / PC);
-    const y = WY + (br - 4.5) * (WCELL + WGAP) + (Math.floor(j / PC) - (PR - 1) / 2) * (WCELL / PR);
-    aWaf.set([x, y, 0], i * 3); aMeta[i * 4] = b; aMeta[i * 4 + 2] = j / PER;
+    const row = Math.floor(k / PER), j = k % PER;
+    const x = WX + ((j % CX) - (CX - 1) / 2) * CP, z = (Math.floor(j / CX) - (CZ - 1) / 2) * CDZ;
+    aWaf.set([x, WY + row * RH + RH / 2, z], i * 3); aMeta[i * 4] = row;
   });
   return { aArch, aXfer, aSeed, aMat, aQ, aWaf, aInfo, aMeta };
 }
@@ -121,16 +122,15 @@ void state(float i, out vec3 p, out vec3 T, out vec3 Nn, out vec3 sc, out vec3 c
       sc *= mix(1. + passed*.2, .72, detach*(1. - back));
     }
   } else {
-    // 95 blocks of manual effort fall away; 5 remain
+    // one column, 100 rows = the manual effort before automation; the top 95 drain away, top down; 5 remain
     p = aWaf;
-    float kept = step(94.5, aMeta.x);
-    float gone = (1. - kept) * smoothstep(0., 1., clamp(uCut*1.4 - aMeta.x/95.*.4, 0., 1.));
-    float cell = ${(MOB ? .3 : .44).toFixed(2)}/${PC}.;
-    sc = vec3(cell*.84, cell*.84*${(PC / PR).toFixed(3)}, .02) * mix(1., .55, gone);
-    p.z -= gone*.08;
-    col = mix(vec3(.66,.74,.82), vec3(.30,.36,.44), gone);
+    float kept = 1. - step(4.5, aMeta.x);
+    float gone = (1. - kept) * smoothstep(0., 1., clamp(uCut*1.6 - (99. - aMeta.x)/95.*.6, 0., 1.));
+    sc = vec3(${(CP * .82).toFixed(4)}, ${(RH * .78).toFixed(4)}, ${(CDZ * .8).toFixed(4)}) * mix(1., .38, gone);
+    p.z -= gone*.12;
+    col = mix(vec3(.66,.74,.82), vec3(.22,.27,.34), gone);
     col = mix(col, vec3(.96,.82,.58), kept*uCut);
-    em = kept*uCut*.25 + (1. - gone)*.03;
+    em = kept*uCut*.3 + (1. - gone)*.03;
   }
 }
 void main(){
@@ -246,7 +246,10 @@ function boot() {
   const mframe = lineSet(fr, [.62, .70, .78]);
   const qb = [Q0 - .12, MH / 2 + .1, Q0 + (QC - 1) * QX + .12, MH / 2 - (Math.ceil(N * .024 / QC) - 1) * QY - .1];
   const qframe = lineSet([qb[0], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[1], 0, qb[2], qb[3], 0, qb[2], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[3], 0, qb[0], qb[1], 0], [1, .71, .28]);
-  const lines = [arch, mframe, qframe];
+  const fx0 = WX - CW / 2 - .06, fx1 = WX + CW / 2 + .06, fy0 = WY - .04, fy1 = WY + CH + .04, fz = CZ * CDZ / 2 + .06;
+  const cframe = lineSet([fx0, fy0, fz, fx1, fy0, fz, fx1, fy0, fz, fx1, fy1, fz, fx1, fy1, fz, fx0, fy1, fz, fx0, fy1, fz, fx0, fy0, fz,
+    fx1 + .12, fy1, fz, fx1 + .22, fy1, fz, fx1 + .22, fy1, fz, fx1 + .22, WY + 5 * RH, fz, fx1 + .22, WY + 5 * RH, fz, fx1 + .12, WY + 5 * RH, fz], [.62, .70, .78]);
+  const lines = [arch, mframe, qframe, cframe];
   function render() {
     gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
     gl.useProgram(skyP.p); gl.uniform1f(skyP.u.uA, innerWidth / innerHeight); G3.attrib(skyP.attr('p'), quad, 2); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -264,14 +267,14 @@ function boot() {
     gl.depthMask(true);
   }
   const labelLayer = $('labels'), mkLab = (t, cls) => { const el = document.createElement('div'); el.className = 'lab ' + cls; el.textContent = t; labelLayer.appendChild(el); return el; };
-  const qLab = mkLab(MOB ? 'Exceptions' : 'Exceptions, held for review', 'tray'), wLab = mkLab('100 blocks = reporting effort before automation', 'layer'), wLab2 = mkLab('What remains: 5%', 'seg');
+  const qLab = mkLab(MOB ? 'Exceptions' : 'Exceptions, held for review', 'tray'), wLab = mkLab('Before: 100% manual', 'seg'), wLab2 = mkLab('95% less', 'big95'), wLab3 = mkLab('5% remains', 'keep');
 
   const cam = {
     raw: MOB ? [V(-3.4, 5.0, 12.6), V(0, -1.5, -.8)] : [V(-9.4, 4.2, 10.0), V(-2.6, -1.6, -.9)],
     matrix: s => { const K = MOB ? [[0, V(-2.2, .7, 11.2), V(.3, .4, 0)], [.6, V(.6, .5, 11.4), V(.8, .3, 0)], [1, V(.6, .6, 12.6), V(.6, .3, 0)]]
       : [[0, V(-6.4, 1.6, 8.6), V(-.6, -.3, 0)], [.35, V(-1.4, 1.0, 8.6), V(1.4, -.2, 0)], [.7, V(3.4, .8, 8.4), V(3.4, -.1, 0)], [1, V(1.6, 1.2, 11.6), V(1.6, -.2, 0)]];
       let j = 0; while (j < K.length - 2 && s > K[j + 1][0]) j++; const t = ease((s - K[j][0]) / (K[j + 1][0] - K[j][0])); return [K[j][1].clone().lerp(K[j + 1][1], t), K[j][2].clone().lerp(K[j + 1][2], t)]; },
-    waffle: s => MOB ? [V(.1, .3, 10.6 - s * .5), V(0, -.4, 0)] : [V(1.2 + s * .3, .5, 9.6 - s * .5), V(1.6, .05, 0)],
+    waffle: s => MOB ? [V(-1.2, 1.4, 8.6 - s * .4), V(0, .4, 0)] : [V(.2 + s * .3, 1.0, 8.8 - s * .5), V(1.5, .05, 0)],
   };
   const keyFor = (i, sub) => i === 0 ? cam.raw : i === 1 ? cam.matrix(sub[1]) : cam.waffle(sub[2]);
   const resize = () => { G3.size(innerWidth, innerHeight, dpr); proj = perspective(FOV, innerWidth / innerHeight, .1, 80); };
@@ -309,10 +312,13 @@ function boot() {
     lookAt(cp, cl, view); U.uCam.copy(cp);
     arch.opacity = .16 * near(p, 0, 1.6); mframe.opacity = .2 * near(p, 1, 2);
     qframe.opacity = .45 * near(p, 1, 2) * smooth((s1 - .08) / .1) * (1 - U.uRes);
+    cframe.opacity = .35 * near(p, 2, 2) * smooth(U.uCut * 2);
     if (draw) {
       place(qLab, V(Q0 + (QC - 1) * QX / 2, MH / 2 + .3, 0), near(p, 1, 3) * smooth((s1 - .1) / .1) * (1 - U.uRes) * vis);
-      place(wLab, V(WX, WY + 5 * (WCELL + WGAP) + .05, 0), near(p, 2, 3) * vis);
-      place(wLab2, V(WX + 5 * (WCELL + WGAP) + .1, WY + 4.5 * (WCELL + WGAP), 0), near(p, 2, 3) * U.uCut * vis * (MOB ? 0 : 1), '0');
+      const fzz = CZ * CDZ / 2 + .06;
+      place(wLab, V(WX, WY + CH + .22, fzz), near(p, 2, 3) * vis);
+      place(wLab2, V(WX + CW / 2 + .32, WY + CH * .55, fzz), near(p, 2, 3) * smooth(U.uCut * 1.4 - .3) * vis, '0');
+      place(wLab3, V(WX + CW / 2 + .32, WY + 2.5 * RH, fzz), near(p, 2, 3) * smooth(U.uCut * 1.6 - .5) * vis, '0');
       render();
     }
   }
