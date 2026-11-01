@@ -264,7 +264,7 @@ function boot() {
     gl.depthMask(true);
   }
   const labelLayer = $('labels'), mkLab = (t, cls) => { const el = document.createElement('div'); el.className = 'lab ' + cls; el.textContent = t; labelLayer.appendChild(el); return el; };
-  const qLab = mkLab('Breaks, held for review', 'tray'), wLab = mkLab('100 blocks = reporting effort before automation', 'layer'), wLab2 = mkLab('What remains: 5%', 'seg');
+  const qLab = mkLab(MOB ? 'Exceptions' : 'Exceptions, held for review', 'tray'), wLab = mkLab('100 blocks = reporting effort before automation', 'layer'), wLab2 = mkLab('What remains: 5%', 'seg');
 
   const cam = {
     raw: MOB ? [V(-3.4, 5.0, 12.6), V(0, -1.5, -.8)] : [V(-9.4, 4.2, 10.0), V(-2.6, -1.6, -.9)],

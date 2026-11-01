@@ -36,3 +36,20 @@ The canvas then fades out and the resume takes over on solid graphite.
 - **One `h1`.** The print header's name is no longer a second heading.
 - **Phone intro** shortened from 4.6 to 3.8 screens of scrolling.
 - Audit at 1440, 390 and 360: no horizontal overflow, no console errors, every image has alt text, every button and link has a name, no text under 12 px in the resume.
+
+## Content accuracy pass (1 Nov)
+Compared the page's text against the live site, line by line.
+- **Corrected:** the intro said "Every record checked before it reaches a report". Ryan's correction: the framework validated that the rules were accurate, for audit purposes. The intro now says that.
+- **Restored to the live wording:**
+  - The 95% note.
+  - Case-study labels (Problem, My contribution, Approach, Impact).
+  - L//IOS product names: the page had shown internal names such as "L//IOS (desktop)".
+- **Restored, because the profile had dropped them:**
+  - The section leads from the live page.
+  - The "no client, trade or proprietary detail" note.
+  - The skills legend.
+  - The L//IOS thesis, the "why" question, each app's flow and its proof points.
+  - Projects, including the LEI validator and earlier work.
+  - The five principles.
+  - The contact line, and the "Views are my own" footer.
+- **Open:** the validation case study in `src/content.ts` still describes catching errors before reporting. It needs Ryan's wording.
