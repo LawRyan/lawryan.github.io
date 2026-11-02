@@ -25,7 +25,7 @@ Branch `v8-site`. Nothing is deployed.
 ## Still open
 - Copy for review: the Beyond sentences, "Eleven years at RBC Capital Markets", and the open items from DIRECTION.md (Malaysia, share-of-wallet, crypto, the 100–150K wording, the validation case study).
 - Smoothness on real hardware (PC and S24+) is unverified. These captures are software-rendered.
-- The tower → city hand-over is a cut via scroll. A future pass could fly the tower's members down to become the city's buildings.
+- The tower → city hand-over is now a rise-and-dissolve (see Build-out). A literal flight of the tower members into the buildings remains a possible later pass.
 
 ## Build-out (2 Nov 2026)
 Built out as its own page. The live site is not replaced.
