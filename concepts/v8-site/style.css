@@ -55,15 +55,18 @@ html:not(.js) .x-beats li { position: static; opacity: 1; transform: none; margi
 
 @media (max-width: 860px) {
   .x-h1 { bottom: 210px; right: var(--pad); font-size: 30px !important; max-width: none; }
-  .x-side { left: var(--pad); right: var(--pad); bottom: 70px; width: auto; }
+  .x-side { left: var(--pad); right: var(--pad); top: auto; bottom: 64px; width: auto; }
+  .x-side p:first-child { display: none; }
   .x-side .x-note { display: none; }
   .x-cue { display: none; }
   .x-copy { top: auto; bottom: 70px; transform: none; width: auto; right: var(--pad); }
   .x-copy::before { inset: -40px calc(-1 * var(--pad)) -80px; background: linear-gradient(rgba(11,13,17,0), rgba(11,13,17,.9) 35%); }
   .x-beats { min-height: 200px; } .x-beats h3 { font-size: 30px !important; } .x-beats p { font-size: 15px; }
   .x-rail { bottom: 18px; font-size: 10.5px; gap: 6px; }
-  .x-close .x-pin { justify-content: flex-end; }
+  .x-close .x-pin { justify-content: flex-start; padding-top: 46svh; }
+  .x-close .x-note { display: none; }
   .x-close h2 { font-size: 34px !important; }
 }
 
-h1 em, h2 em, h3 em, .pull em { font-style: normal; color: inherit; }
+.work-head h2 em, h1 em, h2 em, h3 em, .pull em { font-style: normal; color: inherit; }
+@media (max-width: 860px) { .top nav a:not(:last-child) { display: none; } .top nav a:last-child { display: inline; } }

@@ -43,8 +43,8 @@ const mat = new ShaderMaterial({ transparent: true, depthWrite: false, blending:
   const st = { order: 0, grow: 0 }; let hi = 0, W = 1, H = 1;
   const rc = new Raycaster(), sph = new Sphere(new Vector3(), 1.4), hitP = new Vector3(), nd = new Vector2();
   return { scene, cam, st,
-    resize(w, h) { W = w; H = h; cam.aspect = w / h; cam.setViewOffset(w, h, mob ? 0 : -w * .2, mob ? h * .18 : 0, w, h); cam.updateProjectionMatrix(); },
+    resize(w, h) { W = w; H = h; cam.aspect = w / h; cam.setViewOffset(w, h, mob ? 0 : -w * .2, mob ? h * .22 : 0, w, h); cam.updateProjectionMatrix(); },
     touch(cx, cy) { nd.set(cx / W * 2 - 1, -(cy / H) * 2 + 1); rc.setFromCamera(nd, cam); if (rc.ray.intersectSphere(sph, hitP)) { const l = form.worldToLocal(hitP.clone()).normalize(); mat.uniforms.uHits.value[hi++ % 4].set(l.x, l.y, l.z, mat.uniforms.uTime.value); } },
     update(t) { mat.uniforms.uTime.value = t; mat.uniforms.uOrder.value = st.order; mat.uniforms.uGrow.value = st.grow;
-      form.rotation.y = t * (reduce ? 0 : .07); form.rotation.x = .25; cam.position.set(0, .2, mob ? 11.5 : 9.2); cam.lookAt(0, 0, 0); } };
+      form.rotation.y = t * (reduce ? 0 : .07); form.rotation.x = .25; cam.position.set(0, .2, mob ? 17 : 9.2); cam.lookAt(0, 0, 0); } };
 }
