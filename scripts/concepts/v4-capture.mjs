@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 const [out, which = 'dm', file] = process.argv.slice(2); mkdirSync(out, { recursive: true });
 const srv = file ? null : spawn('node', ['scripts/serve.mjs', '4332'], { stdio: 'ignore' }); await new Promise(r => setTimeout(r, 800));
-const url = file ? 'file://' + file : 'http://localhost:4332/concepts/v4/';
+const url = file ? 'file://' + file : `http://localhost:4332/concepts/${process.env.NAME || 'v4'}/`;
 const b = await chromium.launch();
 const VP = { d: [1440, 900, 1], m: [390, 844, 2] };
 const SHOTS = process.env.ONLY ? JSON.parse(process.env.ONLY) : [
