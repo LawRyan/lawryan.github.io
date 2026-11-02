@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ryan Law · I look for the shape inside complex problems</title>
+<meta name="description" content="Ryan Law: analyst, problem solver and builder.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0D11">
+<link rel="stylesheet" href="./base.css">
+<link rel="stylesheet" href="./style.css">
+<script>document.documentElement.classList.add('js');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rm')}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#work">Skip to the work</a>
+<canvas id="gl" aria-hidden="true"></canvas>
+<header class="top" id="top">
+  <a class="brand" href="#about">Ryan Law</a>
+  <nav aria-label="Chapters"><a href="#thinking">How I think</a><a href="#work">What I build</a><a href="#workshop">L//IOS</a><a href="#beyond">Beyond</a><a href="#contact">Connect</a></nav>
+</header>
+
+<main>
+  <!-- 01 · the transformation -->
+  <section class="x-hero" id="about" data-tone="dark" data-scene="tower" aria-labelledby="h1">
+    <div class="x-pin">
+      <h1 class="x-h1" id="h1"><span>I look for the shape inside complex problems,</span> <span>then build what it makes possible.</span></h1>
+      <div class="x-side">
+        <p>Analyst, problem solver and builder. By day, Vice President, Client Intelligence at RBC Capital Markets.</p>
+        <p class="x-note">Nine thousand straight members, one curved structure. Move across it to break it; it rebuilds.</p>
+        <button class="pill" id="break" type="button">Break it apart</button>
+      </div>
+      <p class="x-cue" aria-hidden="true">Scroll</p>
+    </div>
+  </section>
+
+  <!-- 02 · how I think -->
+  <section class="x-think" id="thinking" data-tone="dark" data-scene="city" aria-labelledby="h-think">
+    <div class="x-track" id="think-track">
+      <div class="x-sticky">
+        <div class="x-copy">
+          <p class="kick"><span>02</span> How I think</p>
+          <h2 id="h-think" class="vh">How I think</h2>
+          <ol class="x-beats" id="beats">
+            <li><h3>Step back.</h3><p>This city is built from 3,200 measurements: 40 series over 80 weeks. From above, it isn’t a city at all. It’s a pattern: seasons, a trend, districts that rise together.</p></li>
+            <li><h3>Get close.</h3><p>Patterns are made of details. At street level every building is one value, and the avenue is time.</p></li>
+            <li><h3>Follow the signal.</h3><p>Most of what you see is ordinary. The work is knowing which line to follow, and not getting distracted by the rest.</p></li>
+            <li><h3>Find what doesn’t fit.</h3><p id="anom-text">One value stands several times taller than anything near it. Then the real work: check the data before calling it an event.</p></li>
+          </ol>
+          <p class="x-synth">Synthetic data, generated in your browser.</p>
+        </div>
+        <ol class="x-rail" aria-hidden="true"><li>Step back</li><li>Get close</li><li>Follow the signal</li><li>Find what doesn’t fit</li></ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 · what I can do -->
+  <section class="work" id="work" data-tone="light" aria-labelledby="h-work">
+    <header class="work-head">
+      <p class="kick"><span>03</span> What I build</p>
+      <h2 id="h-work">Ideas are interesting. <em>Making them work</em> is what matters.</h2>
+      <p class="work-lede">Three small things I made for this page. They work: paste your own data in, change the rules, ask a different question. Nothing leaves your browser.</p>
+    </header>
+
+    <article class="tool" id="t-untangle" aria-labelledby="h-t1">
+      <div class="tool-copy">
+        <p class="tn">03.1</p>
+        <h3 id="h-t1">Understand complexity</h3>
+        <p class="tool-say">A messy list hides its problems in plain sight. Before fixing anything, find out what’s actually in it.</p>
+        <dl class="pas"><dt>Problem</dt><dd>A sign-up sheet that six people have typed into.</dd><dt>Approach</dt><dd>Read every column, work out what it’s meant to hold, then find what doesn’t fit.</dd><dt>Result</dt><dd>A short, ranked list of what’s worth a look, in plain sentences.</dd></dl>
+      </div>
+      <div class="card app ut"><div class="app-bar" aria-hidden="true"><i></i><i></i><i></i><span>untangle</span><em>local · nothing uploaded</em></div>
+        <div class="card-head"><p><b>Untangle</b> · paste any CSV</p><p class="acts"><button type="button" data-act="reset">Sample</button><button type="button" data-act="clear">Clear</button></p></div>
+        <label class="vh" for="ut-in">Your data, as CSV with a header row</label>
+        <textarea id="ut-in" spellcheck="false" rows="7"></textarea>
+        <p class="ut-sum" aria-live="polite"></p>
+        <div class="ut-out"></div>
+        <p class="synth">Sample data is made up. Your own data stays in this tab.</p>
+      </div>
+    </article>
+
+    <article class="tool flip" id="t-rules" aria-labelledby="h-t2">
+      <div class="tool-copy">
+        <p class="tn">03.2</p>
+        <h3 id="h-t2">Automate the repetitive</h3>
+        <p class="tool-say">If a fix has to be made the same way every time, a person shouldn’t be the one making it.</p>
+        <dl class="pas"><dt>Problem</dt><dd>The same clean-up, by hand, every time the list is used.</dd><dt>Approach</dt><dd>Write each fix once as a rule and run every rule on every row. Hold back only what needs a person.</dd><dt>Result</dt><dd>Turn rules on and off and watch the list change.</dd></dl>
+        <aside class="atwork"><p class="aw-h">The same idea, at work</p><p><b>95%</b> less manual reporting effort, by automating the preparation and moving the reports into Tableau.</p><p><b>300+</b> validation rules across roughly 100–150K trade records, used to confirm the rules were accurate for audit.</p></aside>
+      </div>
+      <div class="card app ri"><div class="app-bar" aria-hidden="true"><i></i><i></i><i></i><span>rule-it</span><em>7 rules · runs on 03.1</em></div>
+        <div class="card-head"><p><b>Rule it</b> · runs on the list from 03.1</p></div>
+        <div class="chips" role="group" aria-label="Rules"></div>
+        <p class="ri-meter" aria-live="polite"></p>
+        <div class="ri-out"></div>
+      </div>
+    </article>
+
+    <article class="tool" id="t-ask" aria-labelledby="h-t3">
+      <div class="tool-copy">
+        <p class="tn">03.3</p>
+        <h3 id="h-t3">Make information useful</h3>
+        <p class="tool-say">A chart is only useful if it answers a question. So start with the question.</p>
+        <dl class="pas"><dt>Problem</dt><dd>A year of numbers and no idea where to look.</dd><dt>Approach</dt><dd>Each question picks its own chart; the code works out the answer, and the sentence only states what the numbers show.</dd><dt>Result</dt><dd>Four questions, four honest answers, one of them a warning.</dd></dl>
+      </div>
+      <div class="card app at"><div class="app-bar" aria-hidden="true"><i></i><i></i><i></i><span>ask-the-table</span><em>synthetic dataset</em></div>
+        <div class="card-head"><p><b>Ask the table</b> · a coffee roaster’s year</p><p class="synth-tag">synthetic</p></div>
+        <div class="qs" role="group" aria-label="Questions"></div>
+        <svg class="chart" role="img" aria-label="Chart for the selected question"></svg>
+        <p class="ans" aria-live="polite"></p>
+      </div>
+    </article>
+
+    <a class="door" href="#workshop"><span class="tn">03.4</span><span class="door-t">Build working products</span><span class="door-s">The rest of the proof is a product. Step into the workshop</span><span class="arrow" aria-hidden="true">→</span></a>
+  </section>
+
+  <!-- 04 · the workshop -->
+  <section class="lios" id="workshop" data-tone="dark" aria-labelledby="h-lios">
+    <div class="lios-hero">
+      <p class="kick"><span>04</span> L//IOS</p>
+      <h2 id="h-lios" class="lios-mark"><span>L</span><span class="sl">//</span><span>IOS</span></h2>
+      <p class="lios-tag">%LIOS_TAG%</p>
+      <p class="lios-st">%LIOS_STATEMENT%</p>
+    </div>
+    <div class="lios-tabs" role="tablist" aria-label="L//IOS applications">%LIOS_TABS%</div>
+    <div class="lios-panels">%LIOS_PANELS%</div>
+    <ul class="lios-pr">%LIOS_PRINCIPLES%</ul>
+    <p class="disc">%LIOS_DISC%</p>
+  </section>
+
+  <!-- 05 · beyond the work -->
+  <section class="beyond" id="beyond" data-tone="warm" aria-labelledby="h-beyond">
+    <div class="by-head">
+      <p class="kick"><span>05</span> Beyond the work</p>
+      <h2 id="h-beyond">Curiosity doesn’t stop when the workday ends.</h2>
+      <p class="by-lede">Most of what I make starts with something I was curious about first.</p>
+      <blockquote class="pull"><p>Curiosity drives me.<br><em>Building defines me.</em></p></blockquote>
+    </div>
+    <ol class="contents">
+      <li><span class="no">i</span><b>Technology and AI</b><p>Not just using the tools: taking them apart to see how they work, then building with them.</p><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="9" width="22" height="22" rx="2"/><path d="M15 9V4M25 9V4M15 36v-5M25 36v-5M9 15H4M9 25H4M36 15h-5M36 25h-5"/></svg></li>
+      <li><span class="no">ii</span><b>Markets and investing</b><p>Reading markets outside work too, with research tools I built for myself.</p><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 30l9-9 6 5 9-12 8 6"/><path d="M4 36h32"/></svg></li>
+      <li><span class="no">iii</span><b>Fitness</b><p>Strength, running and recovery, tracked in an app I wrote so the numbers mean something.</p><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 20h24M8 13v14M32 13v14M4 16v8M36 16v8"/></svg></li>
+      <li><span class="no">iv</span><b>Sports and pickleball</b><p>Competitive enough to keep score, curious enough to analyse it afterwards.</p><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="24" cy="16" r="9"/><path d="M17 23L6 34"/><circle cx="22" cy="14" r="1"/><circle cx="27" cy="17" r="1"/><circle cx="23" cy="20" r="1"/></svg></li>
+      <li><span class="no">v</span><b>Travel</b><p>New places are new systems: how a city moves, feeds itself and fits together.</p><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="15"/><path d="M5 20h30M20 5c-6 8-6 22 0 30M20 5c6 8 6 22 0 30"/></svg></li>
+      <li><span class="no">vi</span><b>Creative experiments</b><p>Music, visuals and side projects that exist because I wanted to see if they could.</p><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 30V9l18-4v21"/><circle cx="10" cy="30" r="4"/><circle cx="28" cy="26" r="4"/></svg></li>
+    </ol>
+  </section>
+
+  <!-- background, secondary -->
+  <section class="cv" id="background" data-tone="dark" aria-labelledby="h-cv">
+    <div class="cv-head">
+      <p class="kick">Experience and background</p>
+      <h2 id="h-cv">Eleven years at RBC Capital Markets, from tax operations to client intelligence.</h2>
+    </div>
+    <div class="cv-cols">
+      <div><h3>Roles</h3><ol class="roles">%ROLES%</ol></div>
+      <div><h3>Education</h3><ol class="roles edu">%EDU%</ol>
+        <h3>Expertise</h3>%SKILLS%</div>
+    </div>
+  </section>
+
+  <!-- 06 · connect -->
+  <section class="x-close" id="contact" data-tone="dark" data-scene="field" aria-labelledby="h-close">
+    <div class="x-pin">
+      <div class="x-close-copy">
+        <p class="kick"><span>06</span> Connect</p>
+        <h2 id="h-close">There’s always something worth figuring out.</h2>
+        <p class="close-sub">If you have one, I’d like to hear about it.</p>
+        <ul class="links">
+          <li><a href="mailto:%EMAIL%">%EMAIL%</a></li>
+          <li><a href="%LINKEDIN%" rel="noopener">LinkedIn</a></li>
+          <li><a href="%GITHUB%" rel="noopener">GitHub</a></li>
+        </ul>
+        <p class="x-note">The form on the right is a system that responds. Touch it and the change travels; hold to bring it to order.</p>
+        <button class="pill" id="order" type="button">Bring it to order</button>
+      </div>
+      <p class="foot"><a class="up" href="#about">Back to the start</a> © Ryan Law · Prototype, not published</p>
+    </div>
+  </section>
+</main>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
