@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#101318">
+<title>Ryan Law · find the shape inside the problem</title>
+<meta name="description" content="Ryan Law: analyst, problem solver and builder.">
+<link rel="stylesheet" href="./style.css">
+<script>document.documentElement.classList.add('js');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rm')}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#after">Skip the introduction</a>
+<header class="top">
+  <a class="brand" href="#">Ryan Law</a>
+  <nav aria-label="Sections"><a href="#after">Thinking</a><a href="#after">Work</a><a href="#after">L//IOS</a><a href="#after">Contact</a></nav>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="h1">
+    <div class="track" id="track">
+      <div class="pin">
+        <canvas id="gl" tabindex="0" aria-label="A 3D cloud of 1,400 synthetic customers. Drag, or use the arrow keys, to turn it. From most angles it looks like one cloud; from one angle it separates into three groups."></canvas>
+        <svg id="hist" aria-hidden="true"></svg>
+        <div id="labels" aria-hidden="true"></div>
+
+        <div class="copy">
+          <p class="name">Ryan Law</p>
+          <h1 id="h1">I look for the shape inside complex problems, then build what it makes possible.</h1>
+          <p class="role">Analyst, problem solver and builder. By day, Vice President, Client Intelligence at RBC Capital Markets.</p>
+
+          <div class="beats" aria-live="polite">
+            <div class="beat" data-b="0">
+              <p class="say">Three kinds of customer are hiding in this cloud. Turn it until you can see them.</p>
+              <div class="gauge" role="meter" aria-label="Structure visible from this angle" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="g-row"><span>Structure visible from this angle</span><b id="g-val">0%</b></div>
+                <div class="g-track"><i id="g-bar"></i><em class="g-mark" style="left:80%"></em></div>
+                <p class="g-hint" id="g-hint">Drag the cloud, or use the arrow keys.</p>
+              </div>
+              <button class="btn" id="show" type="button">Show me where it is</button>
+            </div>
+            <div class="beat" data-b="1"><p class="say">The machine agrees. k-means looks for three centres and settles in <b id="b-iters"></b> steps, without being told where to look.</p></div>
+            <div class="beat" data-b="2"><p class="say">The difference is a combination of all three measures. Read any one column alone and you'd be right <b id="b-one"></b> of the time.</p></div>
+            <div class="beat" data-b="3"><p class="say">So the angle becomes a rule. On <b id="b-hold"></b> customers it has never seen, it sorts <b id="b-acc"></b> correctly. That's the job: find the shape, then build with it.</p></div>
+          </div>
+          <aside class="panel" aria-label="Readout">
+            <dl id="ro"></dl>
+            <p class="synth">Synthetic data, generated and analysed in your browser.</p>
+          </aside>
+        </div>
+
+        <ol class="progress" aria-label="Stages">
+          <li><button type="button" data-go="0">Complexity</button></li>
+          <li><button type="button" data-go="1">Structure</button></li>
+          <li><button type="button" data-go="2">Insight</button></li>
+          <li><button type="button" data-go="3">Creation</button></li>
+        </ol>
+        <noscript><p class="nogl">This introduction needs JavaScript. The short version: 1,400 customers look like one cloud until you find the angle that splits them into three groups; that angle becomes a rule that sorts new customers 99.8% correctly.</p></noscript>
+      </div>
+    </div>
+  </section>
+  <section class="after" id="after"><p>The rest of the site continues here: How I think, What I can do, L//IOS, Beyond, Contact.</p></section>
+</main>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
