@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>Concept B · Exploded drawing</title>
+<link rel="stylesheet" href="./shared.css">
+<style>
+body { background: #15181D; color: #ECEDEE; }
+.track { height: 330vh; position: relative; }
+.pin { position: sticky; top: 0; height: 100svh; overflow: hidden;
+  background-image: linear-gradient(rgba(236,237,238,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(236,237,238,.045) 1px, transparent 1px);
+  background-size: 28px 28px; }
+.copy { position: absolute; left: var(--pad); top: 50%; transform: translateY(-50%); max-width: min(520px, 40vw); z-index: 2; }
+.kick { font: 12.5px 'Geist Mono', monospace; color: #8E99A6; margin: 0 0 22px; }
+h1 { margin: 0; font: 400 clamp(46px, 5.4vw, 92px)/.98 'Instrument Serif', Georgia, serif; letter-spacing: -.015em; }
+h1 i { color: var(--amber); }
+.sub { margin: 24px 0 0; color: #AEB6C0; font-size: 17px; max-width: 42ch; }
+.stage { position: absolute; inset: 0; }
+svg { width: 100%; height: 100%; display: block; }
+.part { cursor: pointer; }
+.part path { transition: stroke .2s; }
+.part:hover path, .part.on path { stroke: var(--amber); }
+.note { font: 12px 'Geist Mono', monospace; fill: #AEB6C0; }
+.note.k { fill: var(--amber); }
+.step { position: absolute; right: var(--pad); top: 92px; font: 12.5px 'Geist Mono', monospace; color: #8E99A6; text-align: right; }
+.step b { display: block; color: #ECEDEE; font: 400 26px 'Instrument Serif', serif; margin-top: 4px; }
+@media (max-width: 760px) { .copy { top: auto; bottom: 40px; transform: none; max-width: none; right: var(--pad); } h1 { font-size: 40px; } .step { top: 70px; } }
+</style></head>
+<body>
+<header class="top"><b>Ryan Law</b><nav><span>Thinking</span><span>Work</span><span>Workshop</span><span>Beyond</span><span>Contact</span></nav></header>
+<div class="track" id="track"><div class="pin">
+  <div class="stage"><svg id="svg" role="img" aria-label="A technical drawing of an object taken apart, studied, reduced and rebuilt simpler"></svg></div>
+  <div class="copy">
+    <p class="kick">fig. 01 — how something gets simpler</p>
+    <h1>I build things that make complex problems <i>simpler.</i></h1>
+    <p class="sub">Curious by default: take it apart, understand every piece, keep what matters, and put it back together so it works better.</p>
+  </div>
+  <p class="step" id="step">scroll<b>The whole thing</b></p>
+</div></div>
+<p class="tag">Concept B · Exploded drawing (sketch)</p>
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const svg = document.getElementById('svg'), track = document.getElementById('track'), stepEl = document.getElementById('step');
+const C30 = Math.cos(Math.PI / 6), S30 = .5;
+// parts, bottom to top: [kind, w, d, h, label, keep]
+const PARTS = [
+  ['box', 6, 4, .5, 'base — holds everything', 1],
+  ['box', 1.8, 3.6, 1.1, 'module a — the real work', 1],
+  ['box', 1.8, 3.6, 1.1, 'module b — duplicate of a', 0],
+  ['box', 1.6, 3.6, 1.1, 'module c — nobody uses it', 0],
+  ['cyl', 1.25, 0, .55, 'the core — why it exists', 1],
+  ['box', 4.2, 3, .28, 'lid — keeps it simple', 1],
+];
+const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+let S = 46, OX = 0, OY = 0, hover = -1, intro = reduce ? 1 : 0;
+const P = (x, y, z) => [OX + (x - z) * C30 * S, OY + (x + z) * S30 * S - y * S];
+const pt = a => a.map(v => v.toFixed(1)).join(',');
+function box(cx, cy, cz, w, d, h) {
+  const x0 = cx - w / 2, x1 = cx + w / 2, z0 = cz - d / 2, z1 = cz + d / 2, y0 = cy, y1 = cy + h;
+  const top = [P(x0, y1, z0), P(x1, y1, z0), P(x1, y1, z1), P(x0, y1, z1)];
+  const left = [P(x0, y1, z1), P(x1, y1, z1), P(x1, y0, z1), P(x0, y0, z1)];
+  const right = [P(x1, y1, z0), P(x1, y1, z1), P(x1, y0, z1), P(x1, y0, z0)];
+  const f = q => 'M' + q.map(pt).join('L') + 'Z';
+  return [[f(right), '#14171C'], [f(left), '#191C22'], [f(top), '#20242B']];
+}
+function cyl(cx, cy, cz, r, h) {
+  const [ex, ey] = P(cx, cy, cz), [tx, ty] = P(cx, cy + h, cz), rx = r * S * 1.2247, ry = r * S * .7071;
+  return [[`M${ex - rx},${ey} L${tx - rx},${ty} A${rx},${ry} 0 0 1 ${tx + rx},${ty} L${ex + rx},${ey} A${rx},${ry} 0 0 1 ${ex - rx},${ey} Z`, '#191C22'],
+    [`M${tx - rx},${ty} A${rx},${ry} 0 1 1 ${tx + rx},${ty} A${rx},${ry} 0 1 1 ${tx - rx},${ty} Z`, '#20242B']];
+}
+function layout() {
+  const W = innerWidth, H = innerHeight, mob = W < 760;
+  S = mob ? 30 : Math.min(54, W / 30); OX = mob ? W * .5 : W * .68; OY = mob ? H * .52 : H * .7;
+}
+layout(); addEventListener('resize', layout);
+let g = 0;
+function frame() {
+  const target = cl(-track.getBoundingClientRect().top / (track.offsetHeight - innerHeight));
+  g += (target - g) * (reduce ? 1 : .09); intro = Math.min(1, intro + (reduce ? 1 : .012));
+  // phases: 0–.3 take apart · .3–.62 remove what doesn't belong · .62–1 rebuild simpler
+  const apart = ease(cl(g / .3)), cut = ease(cl((g - .34) / .26)), back = ease(cl((g - .64) / .3));
+  stepEl.innerHTML = g < .08 ? 'scroll<b>The whole thing</b>' : g < .34 ? '1 — take it apart<b>Understand every piece</b>' : g < .64 ? '2 — reduce<b>Remove what doesn’t belong</b>' : '3 — rebuild<b>Simpler. Still works.</b>';
+  let y = 0, out = '', notes = '';
+  const t = performance.now() / 1000;
+  PARTS.forEach(([k, w, d, h, label, keep], i) => {
+    const gap = apart * (1 - back) * (i ? 1.05 : 0) * i * (innerWidth < 760 ? .55 : .7);
+    const drop = keep ? 0 : cut;                                  // removed parts slide out to the side and fade
+    const fly = keep ? 0 : cut * 3.2 * (i === 2 ? 1 : 1.25);
+    const cy = y + gap + (reduce ? 0 : Math.sin(t * .8 + i) * .04 * apart * (1 - back));
+    const xo = -fly, zo = fly * .4;
+    const geo = k === 'box' ? box(xo, cy, zo, w, d, h) : cyl(xo, cy, zo, w, h);
+    const op = (keep ? 1 : 1 - drop * .85) * cl(intro * 7 - i * .9);
+    const dash = keep ? '' : (cut > .02 ? 'stroke-dasharray="4 4"' : '');
+    out += `<g class="part${hover === i ? ' on' : ''}" data-i="${i}" opacity="${op.toFixed(3)}">` + geo.map(([dd, fill]) => `<path d="${dd}" fill="${fill}" stroke="#E6E8EA" stroke-width="1.15" stroke-linejoin="round" ${dash}/>`).join('') + '</g>';
+    // leader + label, shown while apart
+    const show = apart * (1 - back * .9) * (keep ? 1 : 1 - drop * .4);
+    if (show > .02) {
+      const [ax, ay] = P(xo + w / 2, cy + h / 2, zo - (k === 'box' ? d / 2 : 0));
+      const lx = ax + (innerWidth < 760 ? 30 : 60);
+      notes += `<g opacity="${show.toFixed(3)}"><path d="M${ax},${ay} L${lx},${ay}" stroke="#8E99A6" stroke-width=".8"/><circle cx="${ax}" cy="${ay}" r="2" fill="#8E99A6"/>`
+        + `<text class="note${keep ? '' : ' k'}" x="${lx + 6}" y="${ay + 4}">${String(i + 1).padStart(2, '0')}  ${label}${!keep && cut > .3 ? '  ✕' : ''}</text></g>`;
+    }
+    // stacked height: removed parts stop taking space as they leave
+    y += h * (keep ? 1 : 1 - drop);
+  });
+  // construction line and a dimension
+  const [b0x, b0y] = P(0, -.4, 0), [b1x, b1y] = P(0, y + apart * (1 - back) * 4 + .8, 0);
+  const pre = `<path d="M${b0x},${b0y} L${b1x},${b1y}" stroke="rgba(236,237,238,.22)" stroke-dasharray="2 6"/>`;
+  const dim = back > .5 ? `<text class="note k" x="${b1x + 10}" y="${b1y + 10}" opacity="${((back - .5) * 2).toFixed(2)}">6 parts → 4</text>` : '';
+  svg.innerHTML = pre + out + notes + dim;
+  requestAnimationFrame(frame);
+}
+svg.addEventListener('pointerover', e => { const p = e.target.closest('.part'); hover = p ? +p.dataset.i : -1; });
+svg.addEventListener('pointerleave', () => { hover = -1; });
+document.fonts.ready.then(() => requestAnimationFrame(frame));
+</script>
+</body></html>

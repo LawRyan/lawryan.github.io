@@ -1,0 +1,16 @@
+@font-face { font-family: 'Instrument Serif'; src: url('/fonts/InstrumentSerif-Regular.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Instrument Serif'; src: url('/fonts/InstrumentSerif-Italic.woff2') format('woff2'); font-style: italic; font-display: swap; }
+@font-face { font-family: 'Instrument Sans'; src: url('/fonts/InstrumentSans-var.woff2') format('woff2'); font-weight: 400 700; font-stretch: 75% 100%; font-display: swap; }
+@font-face { font-family: 'Geist Mono'; src: url('/fonts/GeistMono-400.woff') format('woff'); font-display: swap; }
+:root { --ink: #0E1013; --paper: #EDEBE6; --graphite: #16191E; --silver: #A9B3BF; --teal: #2FB8AC; --amber: #F2A33A; --pad: clamp(20px, 5vw, 84px); }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font: 400 17px/1.55 'Instrument Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+.top { position: fixed; inset: 0 0 auto; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: 22px var(--pad); font-size: 14px; }
+.top b { font-weight: 600; letter-spacing: -.01em; }
+.top nav { display: flex; gap: 26px; opacity: .62; }
+.tag { position: fixed; right: var(--pad); bottom: 22px; z-index: 10; font: 12px 'Geist Mono', monospace; opacity: .55; }
+.serif { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
+.mono { font-family: 'Geist Mono', ui-monospace, monospace; }
+@media (max-width: 760px) { .top nav { display: none; } }

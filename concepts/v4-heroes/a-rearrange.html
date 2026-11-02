@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>Concept A · Rearrange</title>
+<link rel="stylesheet" href="./shared.css">
+<style>
+body { background: var(--paper); color: var(--ink); }
+.hero { min-height: 100svh; display: grid; align-content: end; padding: 0 var(--pad) clamp(36px, 8vh, 90px); position: relative; }
+.kick { font: 13px 'Geist Mono', monospace; margin: 0 0 22px; opacity: .6; }
+h1 { margin: 0; font: 400 clamp(54px, 8.6vw, 156px)/.93 'Instrument Serif', Georgia, serif; letter-spacing: -.02em; max-width: 13ch; position: relative; z-index: 2; }
+h1 .w { display: inline-block; white-space: nowrap; }
+h1 .l { display: inline-block; text-align: center; will-change: transform; cursor: grab; user-select: none; }
+h1 .l > span { display: inline-block; }
+h1 .em { font-style: italic; color: #B8661A; }
+.l.pile-serif > span { font-style: italic; }
+.l.pile-mono > span { font-family: 'Geist Mono', monospace; font-size: .62em; }
+.l.pile-sans > span { font-family: 'Instrument Sans', sans-serif; font-weight: 700; font-size: .78em; }
+.row { display: flex; gap: 40px; align-items: end; justify-content: space-between; margin-top: 34px; flex-wrap: wrap; }
+.sub { max-width: 46ch; margin: 0; font-size: 18px; }
+.sub small { display: block; margin-top: 10px; font-size: 14px; opacity: .6; }
+.toggle { appearance: none; border: 1px solid var(--ink); background: none; color: var(--ink); font: 500 14px 'Instrument Sans', sans-serif; padding: 12px 18px; border-radius: 999px; cursor: pointer; min-height: 44px; }
+.toggle:hover { background: var(--ink); color: var(--paper); }
+.toggle:focus-visible { outline: 2px solid #B8661A; outline-offset: 3px; }
+.hint { font: 12px 'Geist Mono', monospace; opacity: .5; margin-top: 10px; }
+</style></head>
+<body>
+<header class="top"><b>Ryan Law</b><nav><span>Thinking</span><span>Work</span><span>Workshop</span><span>Beyond</span><span>Contact</span></nav></header>
+<main class="hero">
+  <p class="kick">01 — the curious mind</p>
+  <h1 id="h" aria-label="I build things that make complex problems simpler.">I build things that make complex problems <span class="em">simpler.</span></h1>
+  <div class="row">
+    <p class="sub">I’m driven by curiosity: understanding how things work, questioning how they could work better, and turning those ideas into practical solutions.<small>By day, Vice President, Client Intelligence at RBC Capital Markets.</small></p>
+    <div><button class="toggle" id="tg" type="button">Take it apart</button><p class="hint">or pull a letter</p></div>
+  </div>
+</main>
+<p class="tag">Concept A · Rearrange (sketch)</p>
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const h = document.getElementById('h'), L = [];
+// split into words and letters; each letter keeps a fixed width so pile styles never shift the layout
+function split(node, em) {
+  [...node.childNodes].forEach(n => {
+    if (n.nodeType === 3) {
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach(tok => {
+        if (!tok) return; if (/^\s+$/.test(tok)) { frag.append(' '); return; }
+        const w = document.createElement('span'); w.className = 'w'; w.setAttribute('aria-hidden', 'true');
+        for (const ch of tok) { const l = document.createElement('span'); l.className = 'l'; l.innerHTML = '<span></span>'; l.firstChild.textContent = ch; w.append(l); L.push({ el: l, em }); }
+        frag.append(w);
+      });
+      n.replaceWith(frag);
+    } else split(n, true);
+  });
+}
+split(h, false);
+const styles = ['pile-serif', 'pile-mono', 'pile-sans', '', ''];
+let home = [], mode = 'pile', ptr = { x: -999, y: -999 }, drag = null;
+const R = () => Math.random();
+function measure() {
+  L.forEach(o => { o.el.style.transform = 'none'; o.el.style.width = ''; o.el.className = 'l'; });
+  home = L.map(o => { const r = o.el.getBoundingClientRect(); o.el.style.width = r.width + 'px'; return { x: r.left + r.width / 2, y: r.top + r.height / 2 + scrollY }; });
+  const W = innerWidth, H = innerHeight, mob = W < 760;
+  L.forEach((o, i) => {   // a heap of loose type, top right
+    const a = R() * Math.PI * 2, rr = Math.sqrt(R());
+    const px = W * (mob ? .55 : .7) + Math.cos(a) * rr * W * (mob ? .3 : .19), py = H * (mob ? .22 : .3) + Math.sin(a) * rr * H * .15 + scrollY;
+    o.pile = { x: px - home[i].x, y: py - home[i].y, r: (R() - .5) * 170, s: .7 + R() * .7 };
+    o.style = styles[Math.floor(R() * styles.length)];
+    if (!o.p) o.p = { x: o.pile.x, y: o.pile.y, r: o.pile.r, s: o.pile.s, vx: 0, vy: 0, vr: 0, vs: 0 };
+    o.el.classList.toggle(o.style || 'x', mode === 'pile' && !!o.style);
+  });
+}
+measure(); addEventListener('resize', () => { measure(); });
+let t0 = performance.now(), assembleAt = reduce ? 0 : 700;
+function setMode(m) {
+  mode = m; t0 = performance.now(); assembleAt = 0;
+  document.getElementById('tg').textContent = m === 'pile' ? 'Put it together' : 'Take it apart';
+}
+document.getElementById('tg').onclick = () => setMode(mode === 'pile' ? 'built' : 'pile');
+addEventListener('pointermove', e => { ptr = { x: e.clientX, y: e.clientY + scrollY }; if (drag) { drag.p.x = ptr.x - drag.hx; drag.p.y = ptr.y - drag.hy; } });
+h.addEventListener('pointerdown', e => { const el = e.target.closest('.l'); if (!el) return; const o = L.find(q => q.el === el); const i = L.indexOf(o); drag = o; drag.hx = home[i].x; drag.hy = home[i].y; el.setPointerCapture?.(e.pointerId); });
+addEventListener('pointerup', () => { drag = null; });
+let last = performance.now();
+function tick(now) {
+  const dt = Math.min(.033, (now - last) / 1000); last = now;
+  if (mode === 'pile' && now - t0 > assembleAt && assembleAt) setMode('built');
+  L.forEach((o, i) => {
+    const p = o.p, el = o.el, n = L.length;
+    const go = mode === 'built' && now - t0 > i / n * 900;      // letters leave the heap in reading order
+    let tx = go ? 0 : o.pile.x, ty = go ? 0 : o.pile.y, tr = go ? 0 : o.pile.r, ts = go ? 1 : o.pile.s;
+    if (go && el.className !== 'l') el.className = 'l';
+    if (!go && mode === 'pile' && o.style && !el.classList.contains(o.style)) el.classList.add(o.style);
+    if (go && !drag) {          // curiosity: the cursor nudges what's nearby
+      const dx = home[i].x + p.x - ptr.x, dy = home[i].y + p.y - ptr.y, d = Math.hypot(dx, dy);
+      if (d < 110) { const f = (1 - d / 110) * 34; tx += dx / (d || 1) * f; ty += dy / (d || 1) * f; tr += dx > 0 ? f * .4 : -f * .4; }
+    }
+    if (drag === o) { el.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${p.r}deg)`; return; }
+    if (reduce) { p.x = tx; p.y = ty; p.r = tr; p.s = ts; }
+    else {
+      const k = go ? 170 : 60, c = go ? 19 : 11;
+      p.vx += ((tx - p.x) * k - p.vx * c) * dt; p.vy += ((ty - p.y) * k - p.vy * c) * dt;
+      p.vr += ((tr - p.r) * k - p.vr * c) * dt; p.vs += ((ts - p.s) * k - p.vs * c) * dt;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.s += p.vs * dt;
+    }
+    el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) rotate(${p.r.toFixed(1)}deg) scale(${p.s.toFixed(3)})`;
+  });
+  requestAnimationFrame(tick);
+}
+document.fonts.ready.then(() => { measure(); requestAnimationFrame(tick); });
+window.__setMode = setMode;
+</script>
+</body></html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>Concept C · Pieces</title>
+<link rel="stylesheet" href="./shared.css">
+<style>
+body { background: #E7E4DD; color: var(--ink); }
+.hero { min-height: 100svh; position: relative; overflow: hidden; }
+.copy { position: absolute; left: var(--pad); bottom: clamp(40px, 9vh, 100px); max-width: min(620px, 50vw); z-index: 3; pointer-events: none; }
+.kick { font: 12.5px 'Geist Mono', monospace; margin: 0 0 20px; opacity: .6; }
+h1 { margin: 0; font: 700 clamp(48px, 6vw, 108px)/.9 'Instrument Sans', sans-serif; font-stretch: 75%; letter-spacing: -.035em; text-transform: none; }
+h1 span { color: #C26A12; }
+.sub { margin: 22px 0 0; font-size: 18px; max-width: 44ch; }
+.piece { position: absolute; left: 0; top: 0; cursor: grab; touch-action: none; will-change: transform; }
+.piece:active { cursor: grabbing; }
+.qc { border-radius: 100% 0 0 0; } .qc2 { border-radius: 0 0 100% 0; } .hc { border-radius: 50%; clip-path: inset(0 0 50% 0); } .ci { border-radius: 50%; }
+.tri { clip-path: polygon(0 100%, 100% 100%, 0 0); } .tri2 { clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.ring { border-radius: 50%; box-shadow: inset 0 0 0 14px var(--ink); }
+.cap { position: absolute; font: 12px 'Geist Mono', monospace; opacity: .55; }
+@media (max-width: 760px) { .copy { max-width: none; right: var(--pad); } h1 { font-size: 46px; } }
+</style></head>
+<body>
+<header class="top"><b>Ryan Law</b><nav><span>Thinking</span><span>Work</span><span>Workshop</span><span>Beyond</span><span>Contact</span></nav></header>
+<main class="hero" id="hero">
+  <div class="copy">
+    <p class="kick">01 — the curious mind</p>
+    <h1>I build things that make complex problems <span>simpler.</span></h1>
+    <p class="sub">I’m driven by curiosity: understanding how things work, questioning how they could work better, and turning those ideas into practical solutions.</p>
+  </div>
+  <p class="cap" id="cap">nine pieces, one idea · drag any of them</p>
+</main>
+<p class="tag">Concept C · Pieces (sketch)</p>
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hero = document.getElementById('hero'), cap = document.getElementById('cap');
+const INK = '#0E1013', GR = '#3A4049', SI = '#A9B3BF', TE = '#2FB8AC', AM = '#F2A33A', PA = '#E7E4DD';
+// the resolved composition: a 3×3 tile, [class, colour]
+const KIT = [['qc', INK], ['', SI], ['hc', TE], ['tri', AM], ['ci', INK], ['qc2', SI], ['tri2', INK], ['ring', 'transparent'], ['hc', GR]];
+const P = KIT.map(([cls, col]) => { const d = document.createElement('div'); d.className = 'piece ' + cls; d.style.background = col; hero.append(d); return { el: d, x: 0, y: 0, r: 0, vx: 0, vy: 0, vr: 0 }; });
+let cell = 120, gx = 0, gy = 0, drag = null, t0 = performance.now();
+const R = () => Math.random();
+function layout() {
+  const W = innerWidth, H = innerHeight, mob = W < 760;
+  cell = mob ? Math.min(96, W / 3.6) : Math.min(150, W * .095);
+  gx = mob ? W / 2 - cell * 1.5 : W * .74 - cell * 1.5; gy = mob ? H * .14 + 40 : H * .5 - cell * 1.5;
+  cap.style.left = gx + 'px'; cap.style.top = (gy + cell * 3 + 18) + 'px';
+  P.forEach((p, i) => {
+    p.el.style.width = cell + 'px'; p.el.style.height = cell + 'px';
+    p.hx = gx + (i % 3) * cell; p.hy = gy + Math.floor(i / 3) * cell;
+    if (p.start === undefined) { p.start = 1; p.x = W * (.1 + R() * .85); p.y = -cell * 2 - R() * H * .6; p.r = (R() - .5) * 360; }
+  });
+}
+layout(); addEventListener('resize', layout);
+hero.addEventListener('pointerdown', e => { const el = e.target.closest('.piece'); if (!el) return; drag = P.find(p => p.el === el); drag.ox = e.clientX - drag.x; drag.oy = e.clientY - drag.y; el.setPointerCapture(e.pointerId); el.style.zIndex = 5; });
+addEventListener('pointermove', e => { if (drag) { const nx = e.clientX - drag.ox, ny = e.clientY - drag.oy; drag.vr = (nx - drag.x) * 1.5; drag.x = nx; drag.y = ny; } });
+addEventListener('pointerup', () => { if (drag) { drag.el.style.zIndex = ''; drag.free = performance.now(); } drag = null; });
+let last = performance.now();
+function tick(now) {
+  const dt = Math.min(.033, (now - last) / 1000); last = now;
+  P.forEach((p, i) => {
+    if (p === drag) { p.r += (p.vr - p.r * .0) * dt; }
+    else {
+      const go = reduce || now - t0 > 500 + i * 140;               // pieces drop in and find their place one by one
+      const tx = go ? p.hx : p.x, ty = go ? p.hy : p.y + 0, tr = go ? 0 : p.r;
+      if (reduce) { p.x = tx; p.y = ty; p.r = 0; }
+      else if (go) {
+        p.vx += ((tx - p.x) * 90 - p.vx * 13) * dt; p.vy += ((ty - p.y) * 90 - p.vy * 13) * dt; p.vr += ((tr - p.r) * 60 - p.vr * 10) * dt;
+        p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      }
+    }
+    p.el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) rotate(${p.r.toFixed(1)}deg)`;
+  });
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body></html>
