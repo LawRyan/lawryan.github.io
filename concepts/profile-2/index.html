@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ryan Law · Vice President, Client Intelligence</title>
+<meta name="description" content="Ryan Law, Vice President, Client Intelligence at RBC Capital Markets. Capital Markets analytics, automation and business intelligence. Builder of L//IOS.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#070A10">
+<link rel="preload" href="/fonts/MonaSans-var.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="./base.css">
+<link rel="stylesheet" href="./v2.css">
+<script>document.documentElement.classList.add('js');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rm')}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#about">Skip the introduction</a>
+<canvas id="engine" aria-hidden="true"></canvas>
+<div id="labels" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="#top" aria-label="Ryan Law, back to top"><span class="mono">RL</span><span class="full">Ryan Law</span></a>
+  <nav class="rnav" id="rnav" aria-label="Sections">
+    <a href="#impact"><i>01</i>Impact</a><a href="#lios"><i>02</i>L//IOS</a><a href="#experience"><i>03</i>Experience</a><a href="#projects"><i>04</i>Projects</a><a href="#skills"><i>05</i>Skills</a><a href="#contact"><i>06</i>Contact</a>
+  </nav>
+  <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="rnav">Menu</button>
+</header>
+
+<main id="top">
+  <!-- ═══ The Intelligence Engine: four scroll-linked moves ═══ -->
+  <div class="track intro" id="track">
+    <div class="stage-pin">
+      <section class="copy k0" data-k="0" aria-labelledby="h1">
+        <p class="eyebrow">The intelligence engine</p>
+        <p class="name" id="h1"><span>R</span><span>Y</span><span>A</span><span>N</span><span class="sp"> </span><span>L</span><span>A</span><span>W</span></p>
+        <h1>Turning complex data into intelligent decisions.</h1>
+        <p class="role">Vice President, Client Intelligence<br>RBC Capital Markets</p>
+        <a class="cta-scroll" href="#about">Scroll to explore</a>
+      </section>
+
+      <section class="copy k1" data-k="1" aria-labelledby="h-val">
+        <p class="eyebrow"><b>02</b> / Validation</p>
+        <h2 id="h-val">Validation built for audit.</h2>
+        <p class="real">A data quality framework of rules run across the trade population, used to confirm the rules were accurate for audit purposes.</p>
+      </section>
+      <dl class="copy vpanel" data-k="1" aria-label="The validation framework">
+        <div><dd>300+</dd><dt>validation rules</dt></div>
+        <div><dd>~100–150K</dd><dt>trade records</dt></div>
+        <div><dd class="w">Audit</dd><dt>rule accuracy confirmed</dt></div>
+      </dl>
+
+      <section class="copy k2" data-k="2" aria-labelledby="h-auto">
+        <p class="eyebrow"><b>03</b> / Impact</p>
+        <h2 id="h-auto"><b class="big">95%</b> less manual reporting.</h2>
+        <p class="real">By automating and moving Excel reports into Tableau, freeing capacity that now goes to other initiatives and workstreams.</p>
+      </section>
+
+      <section class="copy k3" data-k="3" aria-labelledby="h-builder">
+        <p class="eyebrow"><b>04</b> / The builder</p>
+        <h2 id="h-builder" class="builder-name">Ryan Law</h2>
+        <p class="b-role">Vice President, Client Intelligence</p>
+        <p class="b-areas">Capital Markets Analytics · Automation · Business Intelligence</p>
+      </section>
+
+      <ol class="chapters" aria-hidden="true">
+        <li><i></i><b>01</b> Raw information</li><li><i></i><b>02</b> Validation</li><li><i></i><b>03</b> Impact</li><li><i></i><b>04</b> The builder</li>
+      </ol>
+      <p class="synthetic">The animation is illustrative and the trade records shown are synthetic. The figures are real, approved results.</p>
+    </div>
+  </div>
+
+  <div class="site">
+    %PRINT%
+
+    <!-- ═══ Professional introduction ═══ -->
+    <section class="about" id="about" aria-labelledby="h-about">
+      %ABOUT%
+    </section>
+
+    <!-- ═══ 01 Featured impact ═══ -->
+    <section class="impact" id="impact" aria-labelledby="h-impact">
+      <header class="sec-head rv">
+        <p class="eyebrow"><b>01</b> / Featured impact</p>
+        <h2 id="h-impact">Reliable data, less manual work, clearer answers.</h2>
+        <p class="sec-note">Three areas of work, described in general terms. No client, trade or proprietary detail is shown; every interactive example runs on synthetic data.</p>
+      </header>
+      <nav class="cs-index rv" aria-label="Case studies">
+        <a href="#cs-validation"><b>01</b> Trade validation &amp; controls</a>
+        <a href="#cs-reporting"><b>02</b> Reporting transformation</a>
+        <a href="#cs-clients"><b>03</b> Client &amp; revenue intelligence</a>
+      </nav>
+
+      <!-- Case 1: validation, a working rule run -->
+      <article class="cs cs1" id="cs-validation" aria-labelledby="h-cs1">
+        <div class="cs-copy rv">
+          <p class="cs-n">01</p>
+          <h3 id="h-cs1">Trade validation &amp; controls</h3>
+          %CS1%
+        </div>
+        <div class="demo run rv" id="run" aria-label="Interactive example: a rule run on synthetic trades">
+          <div class="d-bar">
+            <p class="d-title">Rule run <span>synthetic trades</span></p>
+            <div class="seg" role="group" aria-label="Mode">
+              <button type="button" data-mode="manual" aria-pressed="false">Manual review</button>
+              <button type="button" data-mode="rules" aria-pressed="true">Rules engine</button>
+            </div>
+          </div>
+          <ol class="rules" id="rules"></ol>
+          <div class="d-table-wrap"><table class="d-table" id="trades"><thead></thead><tbody></tbody></table></div>
+          <div class="d-foot">
+            <button type="button" class="btn-run" id="run-btn">Run the rules</button>
+            <p class="d-status" id="run-status" aria-live="polite">6 rules ready to run on 10 synthetic trades.</p>
+          </div>
+          <div class="exc" id="exc" hidden>
+            <p class="exc-h">Exceptions, held for review</p>
+            <ul id="exc-list"></ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- Case 2: reporting, fragments resolve into one pack -->
+      <article class="cs cs2" id="cs-reporting" aria-labelledby="h-cs2">
+        <div class="cs2-pin" id="cs2">
+          <div class="cs2-stage">
+            <div class="cs-copy cs2-copy">
+              <p class="cs-n">02</p>
+              <h3 id="h-cs2">Reporting transformation</h3>
+              <p class="cs2-state"><span class="s-before">Before: reports built by hand in Excel, each one its own format.</span><span class="s-after">After: one automated pack in Tableau.</span></p>
+              <button type="button" class="btn-ghost" id="cs2-toggle" aria-pressed="false">Show after</button>
+            </div>
+            <div class="frag" id="frag" aria-label="Illustration: separate Excel reports become one Tableau report pack" role="img"></div>
+            <p class="illus">Illustration. Report names and figures are placeholders.</p>
+          </div>
+        </div>
+        <div class="cs2-facts rv">%CS2%</div>
+      </article>
+
+      <!-- Case 3: client & revenue intelligence, an explorer -->
+      <article class="cs cs3" id="cs-clients" aria-labelledby="h-cs3">
+        <div class="cs-copy cs3-copy rv">
+          <p class="cs-n">03</p>
+          <h3 id="h-cs3">Client &amp; revenue intelligence</h3>
+          %CS3%
+        </div>
+        <div class="demo explorer rv" id="explorer" aria-label="Interactive example: client segment explorer on synthetic data">
+          <div class="d-bar">
+            <p class="d-title">Client segment explorer <span>synthetic data</span></p>
+            <div class="seg" role="group" aria-label="Region" id="regions"></div>
+          </div>
+          <div class="ex-body">
+            <div class="ex-segs" role="radiogroup" aria-label="Client segment" id="segs"></div>
+            <div class="ex-main">
+              <div class="ex-kpis" id="kpis"></div>
+              <svg class="ex-chart" id="ex-chart" viewBox="0 0 560 220" role="img" aria-label="Monthly revenue and RFQ count for the selected segment (synthetic)"></svg>
+              <p class="ex-legend"><span class="l-rev">Revenue</span><span class="l-rfq">RFQs received</span><span class="l-hit">Hit rate</span></p>
+            </div>
+          </div>
+          <div class="insight" id="insight" aria-live="polite"></div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ═══ 02 L//IOS: the reveal, then the product ═══ -->
+    <section class="lios" id="lios" aria-labelledby="h-lios">
+      <div class="lr-track" id="lr">
+        <div class="lr-pin">
+          <div class="lr-copy">
+            <p class="eyebrow"><b>02</b> / Independent project</p>
+            <h2 id="h-lios" class="lr-mark">L//IOS</h2>
+            %LIOSHEAD%
+          </div>
+          <div class="lr-stage">
+            <div class="device" id="device">
+              <div class="d-screen" id="d-screen">
+                <div class="cells" id="cells" aria-hidden="true"></div>
+                <img class="d-shot" id="d-shot" src="/lios-shots/analyst-dashboard.webp" alt="L//IOS Analyst dashboard: KPIs, revenue by month and ranked findings, on its synthetic sample" decoding="async">
+              </div>
+              <div class="d-base" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="showcase" id="showcase">
+        %SHOWCASE%
+      </div>
+    </section>
+
+    <!-- ═══ 03 Experience & leadership ═══ -->
+    <section class="experience" id="experience" aria-labelledby="h-exp">
+      %EXPERIENCE%
+    </section>
+
+    <!-- ═══ 04 Projects ═══ -->
+    <section class="projects" id="projects" aria-labelledby="h-pj">
+      %PROJECTS%
+    </section>
+
+    <!-- ═══ 05 Skills & expertise, education ═══ -->
+    <section class="skills" id="skills" aria-labelledby="h-sk">
+      %SKILLS%
+    </section>
+
+    <!-- ═══ 06 Contact ═══ -->
+    <section class="contact" id="contact" aria-labelledby="h-ct">
+      %CONTACT%
+    </section>
+  </div>
+</main>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
