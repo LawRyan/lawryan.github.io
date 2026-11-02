@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ryan Law · I build things that make complex problems simpler</title>
+<meta name="description" content="Ryan Law builds things that make complex problems simpler: analytics, automation and software, at work and on his own.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0A0C10">
+<link rel="preload" href="/fonts/MonaSans-var.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="./style.css">
+<script>document.documentElement.classList.add('js');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rm')}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#work">Skip to the work</a>
+<canvas id="engine" aria-hidden="true"></canvas>
+<div id="labels" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="#top">Ryan Law</a>
+  <nav class="nav" aria-label="Chapters">
+    <a href="#top" data-k="0">About</a><a href="#thinking" data-k="1">Thinking</a><a href="#work" data-k="2">Work</a><a href="#next" data-k="3">Building</a><a href="#next" data-k="3">Beyond</a><a href="#contact" data-k="3">Contact</a>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- Chapters 01–02: one stage, one set of records -->
+  <div class="track" id="track">
+    <div class="pin">
+      <section class="copy hero" data-k="0" aria-labelledby="h1">
+        <p class="who">Ryan Law</p>
+        <h1 id="h1">I build things that make complex problems <em>simpler.</em></h1>
+        <p class="lede">I’m driven by curiosity: understanding how things work, questioning how they could work better, and turning those ideas into practical solutions.</p>
+        <p class="day">By day, Vice President, Client Intelligence at RBC Capital Markets.</p>
+        <p class="go"><a class="btn" href="#thinking" data-go="0.19">Explore <span aria-hidden="true">↓</span></a></p>
+      </section>
+      <p class="mark copy" data-k="0" aria-hidden="true"><b>01</b> The curious mind</p>
+      <p class="cue copy" data-k="0" aria-hidden="true"><span>Scroll</span></p>
+
+      <section class="copy cap c1" data-k="1" id="thinking" aria-labelledby="h-think">
+        <p class="ch">Understand it. Simplify it. Build it. Improve it.</p>
+        <h2 id="h-think">Every complicated problem has an underlying structure.</h2>
+      </section>
+      <p class="copy cap c2" data-k="2">The first step is understanding what matters.</p>
+      <p class="copy cap c3" data-k="3">Clarity comes from removing what doesn’t belong.</p>
+      <div class="copy cap c4" data-k="4">
+        <p class="say">Then I build something that makes the process better.</p>
+        <p class="ev">In practice: a validation framework of <b>300+ rules</b> across roughly <b>100–150K trade records</b>, used to confirm the rules were accurate for audit.</p>
+      </div>
+      <div class="copy cap c5" data-k="5">
+        <p class="say">And keep improving it until it works.</p>
+        <p class="ev"><b class="big">95%</b> less manual reporting, after I automated the preparation and moved the reports into Tableau. The time went to other work.</p>
+      </div>
+
+      <ol class="steps" aria-hidden="true">
+        <li><i></i><b>Understand</b><span>Find the signal in the complexity</span></li>
+        <li><i></i><b>Simplify</b><span>Remove what doesn’t matter</span></li>
+        <li><i></i><b>Build</b><span>Turn insight into a solution</span></li>
+        <li><i></i><b>Improve</b><span>Measure, refine, make it better</span></li>
+      </ol>
+      <p class="mark m2" aria-hidden="true"><b>02</b> How I think</p>
+      <p class="note">The trade records in this animation are illustrative. The figures quoted are real, approved results.</p>
+    </div>
+  </div>
+
+  <!-- Chapter 03, first capability: the signature demo -->
+  <section class="work" id="work" aria-labelledby="h-work">
+    <header class="w-head">
+      <p class="ch"><b>03</b> What I can do</p>
+      <h2 id="h-work">Ideas are interesting. Making them work is what matters.</h2>
+    </header>
+
+    <ol class="caps" aria-label="Four capabilities">
+      <li><b>01</b> Understand complexity</li>
+      <li class="on" aria-current="true"><b>02</b> Automate the repetitive</li>
+      <li><b>03</b> Make information useful</li>
+      <li><b>04</b> Build working products</li>
+    </ol>
+
+    <article class="cap2" aria-labelledby="h-cap2">
+      <div class="c2-copy">
+        <h3 id="h-cap2">Automate the repetitive</h3>
+        <p class="c2-lede">If a check has to be done the same way every cycle, a person shouldn’t be the one doing it.</p>
+        <ol class="pas">
+          <li><b>The problem</b> Ten trades, seven fields each. Checked by hand, that’s seventy look-ups every cycle, and the next cycle starts from zero.</li>
+          <li><b>My approach</b> Write each check once, as a rule. Run every rule across every record. Keep only the exceptions for a person, with the reason attached.</li>
+          <li><b>The result</b> Run both and compare. The rules finish before the first row is done by hand.</li>
+        </ol>
+        <aside class="atwork">
+          <p class="aw-h">At work, the same idea</p>
+          <p><b>95%</b> less manual reporting effort, by automating the preparation with VBA and moving the reports into Tableau.</p>
+          <p><b>300+</b> validation rules across roughly 100–150K trade records, used to confirm the rules were accurate for audit.</p>
+        </aside>
+      </div>
+
+      <div class="demo" id="demo" aria-label="Interactive example on ten synthetic trades">
+        <div class="d-top">
+          <p class="d-t">Ten trades <span>synthetic</span></p>
+          <div class="seg" role="group" aria-label="How to check them">
+            <button type="button" data-mode="hand" aria-pressed="true">By hand</button>
+            <button type="button" data-mode="rules" aria-pressed="false">With rules</button>
+          </div>
+        </div>
+        <ol class="rules" id="rules" aria-label="Rules"></ol>
+        <div class="tw"><table class="tt" id="tt"><thead></thead><tbody></tbody></table></div>
+        <div class="d-run">
+          <button type="button" class="run" id="run">Check by hand</button>
+          <div class="meter" aria-live="polite">
+            <p id="m-line">Seventy fields to check, one at a time.</p>
+            <div class="bars" aria-hidden="true">
+              <div class="bar hand"><span>By hand</span><i><em id="b-hand"></em></i><small id="t-hand">–</small></div>
+              <div class="bar rules"><span>With rules</span><i><em id="b-rules"></em></i><small id="t-rules">–</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="exc" id="exc" hidden>
+          <p class="exc-h">Held for review</p>
+          <ul id="exc-list"></ul>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="next" id="next" aria-labelledby="h-next">
+    <p class="ch">Coming in the full build</p>
+    <h2 id="h-next">There’s always something worth figuring out.</h2>
+    <p>Still to come in this prototype: the other three capabilities, the workshop (L//IOS), beyond the work, and the sculpture’s return.</p>
+    <p class="links" id="contact"><a href="mailto:ryanlaw@live.com">ryanlaw@live.com</a><a href="https://www.linkedin.com/in/ryan-law-92a629104/" rel="noopener">LinkedIn</a><a href="https://github.com/lawryan" rel="noopener">GitHub</a></p>
+  </section>
+</main>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
