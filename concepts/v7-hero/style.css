@@ -1,0 +1,94 @@
+@font-face { font-family: 'Mona Sans'; src: url('/fonts/MonaSans-var.woff') format('woff'); font-weight: 200 900; font-stretch: 75% 125%; font-display: swap; }
+@font-face { font-family: 'Geist Mono'; src: url('/fonts/GeistMono-400.woff') format('woff'); font-display: swap; }
+:root {
+  --ground: #101318; --ground-2: #191E25; --surface: #242B33; --ink: #F0EDE7; --ink-2: #A7AFB9; --ink-3: #6E7782; --silver: #A9B6C4; --teal: #2FB8AC; --amber: #F2A33A;
+  --hair: rgba(240, 237, 231, .09); --hair-2: rgba(240, 237, 231, .16); --sans: 'Mona Sans', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  --out: cubic-bezier(.16, 1, .3, 1); --pad: clamp(20px, 4.2vw, 76px);
+}
+* { box-sizing: border-box; }
+html { background: var(--ground); color-scheme: dark; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 400 16px/1.55 var(--sans); font-feature-settings: 'tnum' 1; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+a { color: inherit; } button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 100; padding: 10px 14px; background: var(--ink); color: var(--ground); }
+.skip:focus { left: 8px; }
+.top { position: fixed; inset: 0 0 auto; z-index: 20; display: flex; justify-content: space-between; align-items: center; padding: 22px var(--pad); font-size: 14px; }
+.brand { text-decoration: none; font-weight: 600; font-stretch: 110%; }
+.top nav { display: flex; gap: clamp(16px, 2.2vw, 30px); }
+.top nav a { text-decoration: none; color: var(--ink-2); transition: color .2s; } .top nav a:hover { color: var(--ink); }
+
+.track { height: 520vh; position: relative; }
+.pin { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate;
+  background: radial-gradient(60% 70% at 57% 46%, #171C23 0%, var(--ground) 58%, #0B0D11 100%); }
+.pin::after { content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(120% 90% at 57% 46%, transparent 55%, rgba(8, 10, 13, .55) 100%); }
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; display: block; touch-action: pan-y; cursor: grab; outline: none; }
+#gl:active { cursor: grabbing; }
+#gl:focus-visible + #svg { outline: 1px solid rgba(242, 163, 58, .35); outline-offset: -12px; }
+#svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
+#ov { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.lab { position: absolute; left: 0; top: 0; white-space: nowrap; font-size: 12.5px; line-height: 1.4; opacity: 0; will-change: transform, opacity; }
+.lab b { display: block; font-weight: 600; font-stretch: 108%; font-size: 13.5px; }
+.lab span { display: block; max-width: 210px; white-space: normal; color: var(--ink-2); }
+.lab.axis { font: 11px var(--mono); color: var(--ink-3); }
+.cross { position: absolute; left: 0; top: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 1.5px solid currentColor; opacity: 0; will-change: transform, opacity; }
+.cross::before, .cross::after { content: ''; position: absolute; background: currentColor; }
+.cross::before { left: -7px; width: 5px; top: 50%; height: 1.5px; margin-top: -.75px; box-shadow: 31px 0 currentColor; }
+.cross::after { top: -7px; height: 5px; left: 50%; width: 1.5px; margin-left: -.75px; box-shadow: 0 31px currentColor; }
+
+/* the statement, in the instrument's foreground */
+.h1 { position: absolute; z-index: 7; left: var(--pad); bottom: 104px; margin: 0; max-width: 14.5ch; font: 500 clamp(38px, 4.3vw, 80px)/1.01 var(--sans); font-stretch: 112%; letter-spacing: -.03em; text-wrap: balance; will-change: transform; }
+.h1 span { display: block; } .h1 span + span { color: var(--ink-2); }
+.who { position: absolute; z-index: 7; left: var(--pad); bottom: 104px; margin: 0; transform: translateY(calc(-1 * var(--hh, 0px))); max-width: 44ch; font-size: 13.5px; color: var(--ink-2); }
+.lede { position: absolute; z-index: 7; right: var(--pad); bottom: 96px; width: min(330px, 25vw); transition: opacity .6s; }
+.beats { position: relative; min-height: 150px; }
+.beat { position: absolute; inset: auto 0 0 0; opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity .5s, transform .7s var(--out), visibility 0s .5s; }
+.beat.on { opacity: 1; visibility: visible; transform: none; transition: opacity .5s .1s, transform .7s var(--out) .1s, visibility 0s; }
+.say { margin: 0; font-size: 17px; line-height: 1.5; }
+.say b { font-weight: 600; }
+.hint { margin: 8px 0 0; font-size: 13.5px; color: var(--ink-3); min-height: 1.5em; }
+.found .hint { color: var(--teal); }
+.btn { appearance: none; margin-top: 14px; padding: 0 16px; min-height: 40px; border-radius: 999px; border: 1px solid var(--hair-2); background: rgba(240, 237, 231, .03); font-size: 13.5px; cursor: pointer; transition: background .2s, border-color .2s; }
+.btn:hover { background: var(--surface); border-color: rgba(240, 237, 231, .3); } .btn[disabled] { opacity: .35; cursor: default; }
+.how { margin-top: 16px; font-size: 13px; }
+.how summary { cursor: pointer; color: var(--ink-2); list-style: none; display: inline-flex; gap: 8px; align-items: center; min-height: 32px; }
+.how summary::-webkit-details-marker { display: none; }
+.how summary::before { content: '+'; display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--hair-2); border-radius: 50%; font-size: 12px; }
+.how[open] summary::before { content: '−'; }
+.how dl { position: absolute; right: 0; bottom: calc(100% + 12px); width: min(440px, 80vw); margin: 0; padding: 16px 18px; display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; background: rgba(20, 24, 30, .94); border: 1px solid var(--hair); border-radius: 10px; color: var(--ink-2); line-height: 1.45; }
+.how dt { color: var(--ink); font-weight: 600; } .how dd { margin: 0; } .how code { font: 11.5px var(--mono); color: var(--ink); }
+.progress { position: absolute; z-index: 7; left: var(--pad); bottom: 30px; display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.progress button { appearance: none; background: none; border: 0; border-top: 1px solid var(--hair-2); padding: 9px 16px 0 0; min-width: 120px; text-align: left; font-size: 12.5px; color: var(--ink-3); cursor: pointer; transition: color .3s, border-color .3s; }
+.progress button:hover { color: var(--ink-2); }
+.progress li.on button { color: var(--ink); border-top-color: var(--teal); }
+.progress li.done button { color: var(--ink-2); border-top-color: rgba(240, 237, 231, .4); }
+.tag { position: absolute; z-index: 7; right: var(--pad); bottom: 30px; margin: 0; font-size: 12px; color: var(--ink-3); }
+.exiting .lede, .exiting .progress, .exiting .tag { opacity: 0; pointer-events: none; }
+.lede, .progress, .tag { transition: opacity .6s; }
+.nogl { position: absolute; left: var(--pad); right: var(--pad); top: 40%; font-size: 17px; }
+.no-gl .track { height: auto; } .no-gl .pin { position: relative; min-height: 100vh; }
+.no-gl .beat[data-b="0"] { opacity: 1; visibility: visible; transform: none; }
+.no-gl .progress, .no-gl #show, .no-gl .hint { display: none; }
+
+/* where the hero hands over: the separating axis becomes this line */
+.think { position: relative; padding: 0 var(--pad) 160px; min-height: 130vh; }
+.axis-line { height: 1px; margin: 0 calc(-1 * var(--pad)) 96px; background: linear-gradient(90deg, rgba(47, 184, 172, 0), #2FB8AC 22%, #A9B6C4 50%, #F2A33A 78%, rgba(242, 163, 58, 0)); }
+.chap { margin: 0 0 20px; font-size: 14px; color: var(--ink-2); } .chap span { color: var(--ink); margin-right: 12px; }
+.think h2 { margin: 0; max-width: 18ch; font: 500 clamp(32px, 3.4vw, 60px)/1.06 var(--sans); font-stretch: 112%; letter-spacing: -.025em; }
+.next { margin-top: 24px; max-width: 52ch; color: var(--ink-3); }
+
+@media (max-width: 860px) {
+  .top { background: linear-gradient(var(--ground) 40%, rgba(16, 19, 24, 0)); }
+  .top nav a:not(:first-child) { display: none; }
+  .track { height: 480vh; }
+  .h1 { bottom: auto; top: min(53svh, calc(100svh - 372px)); font-size: clamp(24px, 6.8vw, 30px); max-width: none; right: var(--pad); }
+  .lab.seg span { display: none; }
+  .who { display: none; }
+  .lede { left: var(--pad); right: var(--pad); bottom: 64px; width: auto; }
+  .beats { min-height: 118px; }
+  .say { font-size: 15px; }
+  .how dl { left: 0; right: auto; width: auto; max-width: calc(100vw - 2 * var(--pad)); }
+  .progress { right: var(--pad); bottom: 22px; }
+  .progress li { flex: 1; } .progress button { min-width: 0; width: 100%; font-size: 11px; padding-right: 4px; }
+  .tag { display: none; }
+}
+.rm .beat, .rm .lede, .rm .progress { transition: none; }
