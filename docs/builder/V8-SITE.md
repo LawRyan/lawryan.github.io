@@ -26,3 +26,35 @@ Branch `v8-site`. Nothing is deployed.
 - Copy for review: the Beyond sentences, "Eleven years at RBC Capital Markets", and the open items from DIRECTION.md (Malaysia, share-of-wallet, crypto, the 100–150K wording, the validation case study).
 - Smoothness on real hardware (PC and S24+) is unverified. These captures are software-rendered.
 - The tower → city hand-over is a cut via scroll. A future pass could fly the tower's members down to become the city's buildings.
+
+## Build-out (2 Nov 2026)
+Built out as its own page. The live site is not replaced.
+
+- **Hand-over hero → How I think:** while leaving the hero, the tower breaks apart as the camera rises until it looks straight down. The city then dissolves in from the same overhead view.
+- **Room changes** are a 0.7 s dissolve, not a cut.
+- **Shaders for every room are compiled during idle time** after the hero has assembled, so later chapters don't stutter on arrival.
+- **How I think:** the map view is framed to the right of the copy, with a stronger backdrop behind the words.
+- **Print:** a print stylesheet gives an 8-page text version of the site, without the 3D rooms.
+- **Metadata:** Open Graph tags.
+- **Fixed:** "Break it apart" was ignored while the intro was still assembling (tween overwrite). The idle-callback call had wrong arguments.
+
+## Validation (actual results, `scripts/concepts/v8-validate.mjs`, raw output in `v8-validation.json`)
+
+| Check | Result |
+|---|---|
+| Keyboard | The first Tab goes to the skip link. L//IOS tabs move with arrow keys (Analyst → Markets, panel follows) |
+| Accessible names | 0 unnamed controls, 0 images without alt, one h1, headings in order |
+| Break / build | Build 1 → 0 after "Break it apart", back to 1 after "Build it" |
+| How I think | Scroll at 3 / 36 / 60 / 97% shows beats 1 / 2 / 3 / 4 |
+| Untangle | "14 rows · 6 columns · 13 things worth a look", with 9 findings listed |
+| Rule it | Toggling a rule changes the output |
+| Ask the table | A different question gives a different, computed answer |
+| Rendering when not needed | 0 frames in 1.5 s while Beyond is on screen; the Connect room renders while visible |
+| Bring it to order | Field order reaches 1 |
+| Horizontal overflow | 0 px at 1920, 1440, 390 and 360, checked down the whole page |
+| Reduced motion | The tower is built immediately; no errors |
+| No WebGL | `no-gl`; all four How I think beats shown as text; no errors |
+| Print | 8 pages, all chapters as text |
+| Console errors | None |
+| Bundle | About 193 KB gzipped (three.js + GSAP + ScrollTrigger + site). L//IOS screenshots load lazily |
+| Frame rate | **Not measured on real hardware** (software WebGL here) |

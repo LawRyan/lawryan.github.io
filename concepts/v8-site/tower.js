@@ -48,10 +48,11 @@ const mat = new ShaderMaterial({ transparent: true, depthWrite: false, blending:
   }`,
   fragmentShader: `varying vec3 vC; varying float vA; void main(){ gl_FragColor = vec4(vC * vA, 1.); }` });
   const scene = new Scene(), cam = new PerspectiveCamera(32, 1, .1, 100); scene.add(new LineSegments(geo, mat));
-  const st = { build: 0, offX: mob ? 0 : -.1, offY: mob ? .1 : 0 };
+  const st = { lift: 0, build: 0, offX: mob ? 0 : -.1, offY: mob ? .1 : 0 };
   return { scene, cam, st, mat,
     resize(w, h) { cam.aspect = w / h; cam.setViewOffset(w, h, st.offX * w, st.offY * h, w, h); cam.updateProjectionMatrix(); mat.uniforms.uAsp.value = cam.aspect; },
     pointer(x, y) { mat.uniforms.uPtr.value.set(x, y); },
     update(t) { mat.uniforms.uTime.value = t; mat.uniforms.uBuild.value = st.build;
-      const yaw = t * (reduce ? 0 : .09), d = mob ? 30 : 18.5; cam.position.set(Math.sin(yaw) * d, 1.6 + Math.sin(t * .2) * .4, Math.cos(yaw) * d); cam.lookAt(0, .2, 0); } };
+      const yaw = t * (reduce ? 0 : .09), d = mob ? 30 : 18.5; const L = st.lift, e = L * L * (3 - 2 * L), dd = d * (1 + e * .6);   // leaving: the camera rises until it looks straight down, like the map that follows
+      cam.position.set(Math.sin(yaw) * dd * (1 - e * .92), 1.6 + Math.sin(t * .2) * .4 + e * 26, Math.cos(yaw) * dd * (1 - e * .92)); cam.lookAt(0, .2 - e * 2, 0); } };
 }

@@ -1,0 +1,49 @@
+{
+ "firstTab": "skip",
+ "a11y": {
+  "unnamed": 0,
+  "h1": 1,
+  "imgsNoAlt": 0,
+  "headingsOrder": "H1 H2 H3 H3 H3 H3 H2 H3 H3 H3 H2 H3"
+ },
+ "breakButton": {
+  "afterBreak": 0,
+  "afterBuild": 1
+ },
+ "cityBeats": [
+  0,
+  1,
+  2,
+  3
+ ],
+ "untangle": {
+  "summary": "14 rows · 6 columns · 13 things worth a look",
+  "findings": 9
+ },
+ "ruleToggleChangesOutput": true,
+ "askAnswer": {
+  "changed": true,
+  "text": "Espresso in Oct (252 cups) sits 27.9 standard deviations below its own trend; every other "
+ },
+ "liosArrowKey": "lt-markets / panel shown: lp-markets",
+ "framesRenderedOnBeyondIn1500ms": 0,
+ "framesRenderedOnConnectIn1500ms": 21,
+ "orderButton": 1,
+ "errors": [],
+ "overflow": {
+  "360": 0,
+  "390": 0,
+  "1440": 0,
+  "1920": 0
+ },
+ "reducedMotion": {
+  "towerBuiltImmediately": 1,
+  "errors": []
+ },
+ "noWebGL": {
+  "cls": "js no-gl ready",
+  "beatsVisible": 4,
+  "errors": []
+ },
+ "printPages": "saved"
+}

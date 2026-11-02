@@ -53,7 +53,7 @@ const sigGeo = new BufferGeometry().setFromPoints(sp), sigMat = new LineBasicMat
 const signal = new Line(sigGeo, sigMat); sigGeo.setDrawRange(0, 0);
   const scene = new Scene(), cam = new PerspectiveCamera(mob ? 58 : 42, 1, .1, 300); scene.add(ground, city, signal);
   const KEYS = [
-    [new Vector3(-6, 95, 30), new Vector3(0, 0, 0)],
+    [mob ? new Vector3(-6, 110, 30) : new Vector3(-26, 95, 30), mob ? new Vector3(0, 0, 0) : new Vector3(-22, 0, 2)],
     [new Vector3(-62, 22, 26), new Vector3(-10, 0, 0)],
     [new Vector3(-58, 2.4, 0), new Vector3(0, 2.2, 0)],
     [new Vector3(ax - 9, 2.6, -1.2), new Vector3(ax, 4.5, az)],

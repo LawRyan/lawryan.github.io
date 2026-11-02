@@ -27,7 +27,7 @@ main { position: relative; z-index: 1; }
 .x-track { height: 520vh; position: relative; }
 .x-sticky { position: sticky; top: 0; height: 100svh; }
 .x-copy { position: absolute; left: var(--pad); top: 50%; transform: translateY(-50%); width: min(400px, 30vw); padding: 24px 0; }
-.x-copy::before { content: ''; position: absolute; inset: -60px -80px -60px calc(-1 * var(--pad)); z-index: -1; background: radial-gradient(closest-side, rgba(11,13,17,.85), rgba(11,13,17,0)); }
+.x-copy::before { content: ''; position: absolute; inset: -60px -80px -60px calc(-1 * var(--pad)); z-index: -1; background: radial-gradient(closest-side, rgba(11,13,17,.92) 55%, rgba(11,13,17,0)); }
 .x-beats { list-style: none; margin: 0; padding: 0; position: relative; min-height: 230px; }
 .x-beats li { position: absolute; inset: 0 0 auto; opacity: 0; transform: translateY(10px); transition: opacity .6s, transform .8s var(--slow); pointer-events: none; }
 .x-beats li.on { opacity: 1; transform: none; }
@@ -70,3 +70,24 @@ html:not(.js) .x-beats li { position: static; opacity: 1; transform: none; margi
 
 .work-head h2 em, h1 em, h2 em, h3 em, .pull em { font-style: normal; color: inherit; }
 @media (max-width: 860px) { .top nav a:not(:last-child) { display: none; } .top nav a:last-child { display: inline; } }
+
+/* print: the words, not the rooms */
+@media print {
+  #gl, .top, .skip, .x-cue, .pill, .x-note, .x-rail, .x-synth, .tool .card, .door, .lios-tabs, .lp-stage, .thumbs, .foot .up { display: none !important; }
+  html, body { background: #fff !important; color: #111 !important; }
+  .x-hero, .x-track, .x-sticky, .x-hero .x-pin, .x-close .x-pin { height: auto !important; min-height: 0 !important; position: static !important; }
+  .x-h1, .x-side, .x-copy { position: static !important; transform: none !important; width: auto !important; max-width: none !important; }
+  .x-beats li { position: static !important; opacity: 1 !important; transform: none !important; margin-bottom: 12px; }
+  .x-h1 { font-size: 28pt !important; color: #111 !important; } .x-h1 span + span { color: #555 !important; }
+  .work, .lios, .beyond, .cv, .x-close { background: #fff !important; color: #111 !important; padding: 24pt 0 !important; }
+  .lp[hidden] { display: block !important; }
+  * { color: #111 !important; box-shadow: none !important; }
+  a { text-decoration: underline; }
+  .rev, .js .rev { opacity: 1 !important; transform: none !important; }
+  .work, .beyond, .cv, .lios, .x-close, section { min-height: 0 !important; height: auto !important; break-inside: auto; }
+  .lios-hero .lios-mark { clip-path: none !important; }
+  .beyond { display: block !important; } .by-head { position: static !important; }
+  .x-close .x-pin { padding: 0 !important; }
+  .tool, .lp, .cv-cols { display: block !important; }
+  h2, h3 { break-after: avoid; }
+}

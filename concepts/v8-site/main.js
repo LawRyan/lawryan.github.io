@@ -28,9 +28,9 @@ if (renderer) {
   // 01 · the tower assembles on arrival; scrolling on breaks it apart again: every structure starts as a problem
   if (reduce) tower.st.build = 1; else gsap.to(tower.st, { build: 1, duration: 4.2, ease: 'power3.inOut', delay: .9 });
   let broken = false;
-  $('#break').onclick = () => { broken = !broken; gsap.to(tower.st, { build: broken ? 0 : 1, duration: broken ? 1.6 : 3.4, ease: broken ? 'power2.out' : 'power3.inOut' }); $('#break').textContent = broken ? 'Build it' : 'Break it apart'; };
+  $('#break').onclick = () => { broken = !broken; gsap.to(tower.st, { build: broken ? 0 : 1, duration: broken ? 1.6 : 3.4, ease: broken ? 'power2.out' : 'power3.inOut', overwrite: true }); $('#break').textContent = broken ? 'Build it' : 'Break it apart'; };
   ScrollTrigger.create({ trigger: '.x-hero', start: 'top top', end: 'bottom top', scrub: 1,
-    onUpdate: s => { if (!gsap.isTweening(tower.st) && !broken) tower.st.build = 1 - Math.max(0, s.progress - .25) * 1.4; } });
+    onUpdate: s => { if (!gsap.isTweening(tower.st) && !broken) tower.st.build = 1 - Math.max(0, s.progress - .25) * 1.4; tower.st.lift = reduce ? 0 : Math.max(0, Math.min(1, (s.progress - .35) / .65)); } });
   addEventListener('pointermove', e => { const x = e.clientX / innerWidth * 2 - 1, y = -(e.clientY / innerHeight) * 2 + 1; tower.pointer(x, y); city.pointer(x, y);
     gsap.to(tower.mat.uniforms.uPow, { value: 1, duration: .25, overwrite: true }); gsap.to(tower.mat.uniforms.uPow, { value: 0, duration: 1.8, delay: .6, ease: 'power2.inOut' }); }, { passive: true });
 
@@ -53,15 +53,23 @@ if (renderer) {
 
   // ── one loop: render only the room whose chapter is on screen
   const sections = [['tower', $('.x-hero')], ['city', $('.x-think')], ['field', $('.x-close')]];
-  let active = null, frames = 0, ft = 0, last = performance.now();
+  let active = null, frames = 0, ft = 0, last = performance.now(), shown = null;
+  const canvas = $('#gl');
+  // warm up: compile every room's shaders while the visitor reads the hero, so no chapter stutters on arrival
+  const warm = () => { for (const r of Object.values(rooms)) { try { r.update(0); renderer.compile(r.scene, r.cam); } catch {} } };
+  setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(warm, { timeout: 3000 }) : warm()), 2500);
   gsap.ticker.add(t => {
     if (document.hidden) return;
     let best = null, bestA = 0;
     for (const [k, el] of sections) { const r = el.getBoundingClientRect(), a = Math.min(innerHeight, r.bottom) - Math.max(0, r.top); if (a > bestA) { bestA = a; best = k; } }
     active = bestA > 0 ? best : null;
-    $('#gl').style.visibility = active ? 'visible' : 'hidden';
+    canvas.style.visibility = active ? 'visible' : 'hidden';
     if (!active) return;
-    const room = rooms[active]; room.update(t); renderer.render(room.scene, room.cam);
+    if (active !== shown) {   // a short dissolve between rooms instead of a hard cut
+      if (shown && !reduce) gsap.fromTo(canvas, { opacity: 0 }, { opacity: 1, duration: .7, ease: 'power2.out' });
+      shown = active;
+    }
+    const room = rooms[active]; room.update(t); renderer.render(room.scene, room.cam); window.__renders = (window.__renders || 0) + 1;
     if (active === 'city') {
       const p = ctl.progress(), b = BEATS.reduce((a, s, i) => (p >= s - .01 ? i : a), 0);
       if (b !== beat) { beat = b; $$('#beats li').forEach((li, i) => li.classList.toggle('on', i === b)); $$('.x-rail li').forEach((li, i) => { li.classList.toggle('on', i === b); li.classList.toggle('done', i < b); }); }
