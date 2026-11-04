@@ -84,7 +84,6 @@ out.CONTACT = `
 <header class="cs-head reveal"><p class="eyebrow"><b>//</b> Contact</p><h2 id="contact-h">Let’s build something meaningful.</h2><span class="tick" aria-hidden="true"></span></header>
 <ul class="contact-links reveal">
   <li><a href="${e(contact.linkedin)}" rel="noopener"><span class="mono">LinkedIn</span><b>Ryan Law</b><span aria-hidden="true">→</span></a></li>
-  <li><a href="${e(contact.github)}" rel="noopener"><span class="mono">GitHub</span><b>lawryan</b><span aria-hidden="true">→</span></a></li>
   <li><a href="mailto:${e(contact.email)}"><span class="mono">Email</span><b>${e(contact.email)}</b><span aria-hidden="true">→</span></a></li>
 </ul>`;
 

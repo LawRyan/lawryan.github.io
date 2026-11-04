@@ -113,7 +113,7 @@ async function buildFlow(pre, workerUrl) {
   writeFileSync(join(OUT, cssFile), css);
   const home = pages.find(p => p.og === 'home'), words = pre.flow;
   const html = readFileSync('src/flow/page.html', 'utf8')
-    .replace(/%(\w+)%/g, (m, k) => ({ TITLE: home.title, DESC: home.desc, CSS: '/' + cssFile, JS: js, LD: ldFor('home') }[k] ?? words[k] ?? m));
+    .replace(/%(\w+)%/g, (m, k) => ({ TITLE: home.title, DESC: home.desc, CSS: '/' + cssFile, JS: js, LD: ldFor('home').replace(',"https://github.com/lawryan"', '') }[k] ?? words[k] ?? m));
   writeFileSync(join(OUT, 'index.html'), html);
   return [js, cssFile];
 }
