@@ -2,6 +2,7 @@
 // Output in dist/ is a plain static site that GitHub Pages serves as-is.
 import * as esbuild from 'esbuild';
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -10,7 +11,9 @@ const OUT = 'dist';
 
 const pages = [
   {
-    entry: 'src/main-home.tsx', out: 'index.html', path: '/', og: 'home',
+    // The previous homepage, unchanged, now at /classic/. Visitors without JavaScript are sent here from /;
+    // anyone with JavaScript who lands here is sent back to the flow homepage.
+    entry: 'src/main-home.tsx', out: 'classic/index.html', path: '/', og: 'home', toFlow: true,
     title: 'Ryan Law — Capital Markets, Data & Intelligence',
     desc: 'Ryan Law, Vice President at RBC Capital Markets: reporting, data quality, analytics and automation. Creator of L//IOS, independent software that understands data and shows its working.',
   },
@@ -74,7 +77,8 @@ function writeHtml(meta, pre = {}) {
     const html = tpl
       .replaceAll('%TITLE%', p.title).replaceAll('%DESC%', p.desc).replaceAll('%PATH%', p.path).replaceAll('%OG%', p.og)
       .replace('%CSS%', rel(css)).replace('%JS%', rel(js)).replace('%LD%', () => ldFor(p.og))
-      .replace('<div id="root"></div>', () => `<div id="root">${pre[p.og] ?? ''}</div>`);
+      .replace('<div id="root"></div>', () => `<div id="root">${pre[p.og] ?? ''}</div>`)
+      .replace('<meta charset="utf-8">', () => '<meta charset="utf-8">' + (p.toFlow ? FLOW_REDIRECT : ''));
     mkdirSync(dirname(join(OUT, p.out)), { recursive: true });
     writeFileSync(join(OUT, p.out), html);
   }
@@ -88,6 +92,32 @@ nav{display:flex;flex-wrap:wrap;gap:10px}a{display:inline-flex;align-items:cente
   writeFileSync(join(OUT, '.nojekyll'), '');
 }
 
+// With JavaScript, /classic/ forwards to the flow homepage, keeping the section (#philosophy is #principles there).
+const FLOW_REDIRECT = `\n<script>location.replace('/' + (location.hash === '#philosophy' ? '#principles' : location.hash))</script>`;
+
+// ── The flow homepage (/): one live 3D scene behind the full site. Built from src/flow; its words come from
+// src/content.ts (rendered below), the Intelligence Lab is the same component, its stylesheet scoped under .labx.
+async function buildFlow(pre, workerUrl) {
+  const r = await esbuild.build({
+    entryPoints: ['src/flow/main.js'], bundle: true, format: 'esm', minify: true, target: ['es2020', 'safari15'], jsx: 'automatic',
+    outdir: join(OUT, 'assets'), entryNames: 'flow-[hash]', metafile: true, logLevel: 'warning',
+    define: { 'process.env.NODE_ENV': '"production"', __OWN_WORKER__: JSON.stringify(workerUrl) },
+  });
+  const js = '/' + Object.keys(r.metafile.outputs).find(f => f.endsWith('.js')).replace(/^dist\//, '');
+  let site = readFileSync('src/styles.css', 'utf8');
+  const rootVars = site.match(/:root\s*\{([\s\S]*?)\n\}/)[1], kf = [];
+  site = site.replace(/@keyframes[^{]+\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, m => { kf.push(m); return ''; })
+    .replace(/@font-face[^}]+\}/g, '').replace(/:root\s*\{[\s\S]*?\n\}/, '');
+  const css = (await esbuild.transform(readFileSync('src/flow/style.css', 'utf8') + '\n' + kf.join('\n') + `\n.labx {${rootVars}\n${site}\n}`, { loader: 'css', target: 'chrome100', minify: true })).code;
+  const cssFile = `assets/flow-${createHash('sha256').update(css).digest('hex').slice(0, 8).toUpperCase()}.css`;
+  writeFileSync(join(OUT, cssFile), css);
+  const home = pages.find(p => p.og === 'home'), words = pre.flow;
+  const html = readFileSync('src/flow/page.html', 'utf8')
+    .replace(/%(\w+)%/g, (m, k) => ({ TITLE: home.title, DESC: home.desc, CSS: '/' + cssFile, JS: js, LD: ldFor('home') }[k] ?? words[k] ?? m));
+  writeFileSync(join(OUT, 'index.html'), html);
+  return [js, cssFile];
+}
+
 // Pre-render each page to static HTML so text shows before any JavaScript runs; React then hydrates it.
 async function prerender() {
   const file = resolve(OUT, '_ssr.mjs');
@@ -97,8 +127,10 @@ async function prerender() {
         import { jsx } from 'react/jsx-runtime';
         import Home from './src/home/Home';
         import LiosPage from './src/lios/LiosPage';
+        import { renderFlow } from './src/flow/render';
         export const home = () => renderToString(jsx(Home, {}));
-        export const lios = () => renderToString(jsx(LiosPage, {}));`,
+        export const lios = () => renderToString(jsx(LiosPage, {}));
+        export const flow = () => renderFlow();`,
       resolveDir: '.', loader: 'tsx',
     },
     bundle: true, platform: 'node', format: 'esm', outfile: file, jsx: 'automatic',
@@ -107,7 +139,7 @@ async function prerender() {
     define: { 'process.env.NODE_ENV': '"production"', __OWN_WORKER__: '""' },
   });
   const m = await import(pathToFileURL(file).href);
-  const out = { home: m.home(), lios: m.lios() };
+  const out = { home: m.home(), lios: m.lios(), flow: m.flow() };
   rmSync(file);
   return out;
 }
@@ -116,7 +148,8 @@ if (/REVIEW_MODE = true/.test(readFileSync('src/content.ts', 'utf8'))) console.w
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 cpSync('public', OUT, { recursive: true });
-options.define.__OWN_WORKER__ = JSON.stringify(await buildWorker());
+const workerUrl = await buildWorker();
+options.define.__OWN_WORKER__ = JSON.stringify(workerUrl);
 
 if (watch) {
   const ctx = await esbuild.context({ ...options, plugins: [{ name: 'html', setup(b) { b.onEnd(r => r.metafile && writeHtml(r.metafile)); } }] });
@@ -125,7 +158,10 @@ if (watch) {
   console.log(`Dev server: http://localhost:${port}`);
 } else {
   const r = await esbuild.build(options);
-  writeHtml(r.metafile, await prerender());
+  const pre = await prerender();
+  writeHtml(r.metafile, pre);
+  const [fjs, fcss] = await buildFlow(pre, workerUrl);
+  console.log(`flow homepage: ${fjs}  ${fcss}`);
   const size = Object.entries(r.metafile.outputs).filter(([f]) => !f.endsWith('.map')).map(([f, o]) => `${f}  ${(o.bytes / 1024).toFixed(1)} kB`);
   console.log(size.join('\n'));
   if (!existsSync(join(OUT, 'starter/index.html'))) throw new Error('legacy apps missing');
