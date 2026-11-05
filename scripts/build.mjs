@@ -27,16 +27,22 @@ const pages = [
 const person = {
   '@type': 'Person', '@id': 'https://lawryan.github.io/#ryan', name: 'Ryan Law', url: 'https://lawryan.github.io/',
   image: 'https://lawryan.github.io/og-home.png',
+  description: 'Vice President of Client Intelligence at RBC Capital Markets: reporting, data quality, analytics and automation for Capital Markets. Creator of L//IOS.',
   jobTitle: 'Vice President, Client Intelligence', worksFor: { '@type': 'Organization', name: 'RBC Capital Markets' },
   alumniOf: { '@type': 'CollegeOrUniversity', name: 'Wilfrid Laurier University' },
   knowsAbout: ['Capital Markets', 'Client intelligence', 'Business intelligence', 'Data quality', 'Tableau', 'Python', 'SQL', 'Automation', 'Applied AI'],
   sameAs: ['https://www.linkedin.com/in/ryan-law-92a629104/', 'https://github.com/lawryan'],
 };
+const BUILT = new Date().toISOString().slice(0, 10);
 const ldFor = og => JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': og === 'lios'
     ? [person, { '@type': 'CreativeWork', name: 'L//IOS', alternateName: 'LIOS', url: 'https://lawryan.github.io/lios/', description: 'An independent project by Ryan Law: L//IOS Analyst for data intelligence, L//IOS Markets for research, and L//IOS Health on Android.', author: { '@id': 'https://lawryan.github.io/#ryan' }, image: 'https://lawryan.github.io/og-lios.png' }]
-    : [person, { '@type': 'WebSite', name: 'Ryan Law', url: 'https://lawryan.github.io/', author: { '@id': 'https://lawryan.github.io/#ryan' } }],
+    : [person,
+      // A profile page about one person: the structured-data shape Google documents for personal and about pages.
+      { '@type': 'ProfilePage', '@id': 'https://lawryan.github.io/#page', url: 'https://lawryan.github.io/', name: pages[0].title, description: pages[0].desc,
+        dateModified: BUILT, mainEntity: { '@id': 'https://lawryan.github.io/#ryan' }, isPartOf: { '@id': 'https://lawryan.github.io/#site' } },
+      { '@type': 'WebSite', '@id': 'https://lawryan.github.io/#site', name: 'Ryan Law', url: 'https://lawryan.github.io/', author: { '@id': 'https://lawryan.github.io/#ryan' } }],
 });
 
 // The own-file analyser runs in a Web Worker; bundle it separately and hand its URL to the app.
@@ -90,6 +96,7 @@ main{max-width:36rem}.k{font-family:GM,ui-monospace,monospace;font-size:13px;let
 nav{display:flex;flex-wrap:wrap;gap:10px}a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid rgba(255,255,255,.14);color:#e9eef5;text-decoration:none}a:first-child{background:#e9eef5;color:#090c11;border-color:#e9eef5}a:focus-visible{outline:2px solid #6fd3f2;outline-offset:3px}.w{font-family:GM,ui-monospace,monospace;font-weight:700}.w b{color:#6fd3f2}</style>
 <main><div class="k">404 · OUTLIER DETECTED</div><h1>That page isn’t in the data.</h1><p>The link may be old or mistyped. Everything that’s here is one click away.</p><nav><a href="/">Ryan Law · home</a><a href="/lios/"><span class="w">L<b>//</b>IOS</span></a><a href="/#lab">Intelligence Lab</a><a href="/#contact">Contact</a></nav></main></html>`);
   writeFileSync(join(OUT, '.nojekyll'), '');
+  writeFileSync(join(OUT, 'sitemap.xml'), readFileSync('public/sitemap.xml', 'utf8').replace(/<lastmod>[^<]*<\/lastmod>/g, `<lastmod>${BUILT}</lastmod>`));
 }
 
 // With JavaScript, /classic/ forwards to the flow homepage, keeping the section (#philosophy is #principles there).
