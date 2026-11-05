@@ -75,7 +75,7 @@ function writeHtml(meta, pre = {}) {
     const css = info.cssBundle;
     const rel = f => '/' + f.replace(/^dist\//, '');
     const html = tpl
-      .replaceAll('%TITLE%', p.title).replaceAll('%DESC%', p.desc).replaceAll('%PATH%', p.path).replaceAll('%OG%', p.og)
+      .replaceAll('%COUNT%', '/' + p.out.replace('index.html', '')).replaceAll('%TITLE%', p.title).replaceAll('%DESC%', p.desc).replaceAll('%PATH%', p.path).replaceAll('%OG%', p.og)
       .replace('%CSS%', rel(css)).replace('%JS%', rel(js)).replace('%LD%', () => ldFor(p.og))
       .replace('<div id="root"></div>', () => `<div id="root">${pre[p.og] ?? ''}</div>`)
       .replace('<meta charset="utf-8">', () => '<meta charset="utf-8">' + (p.toFlow ? FLOW_REDIRECT : ''));
