@@ -45,7 +45,10 @@ if (renderer) {
 scene.add(new THREE.HemisphereLight('#9fb4d8', '#05070b', .9));
 const key = new THREE.DirectionalLight('#ffffff', 1.5); key.position.set(-4, 6, 8); scene.add(key);
 
-const U = { uT: { value: 0 }, uPix: { value: 1 }, uIn: { value: 1 } };
+const U = { uT: { value: 0 }, uPix: { value: 1 }, uIn: { value: 1 }, uGB: { value: 0 }, uPulse: { value: -1 }, uEnd: { value: 0 } };
+// Each scene builds itself the first time the camera arrives: v runs 0 → 1 over dur seconds.
+const BUILD = [{ t: -1, v: 0, dur: 1.6 }, { t: -1, v: 0, dur: 2.6 }, { t: -1, v: 0, dur: 2.2 }, { t: -1, v: 0, dur: 2.4 }];
+const built = { bars: [], wire: null };
 const POINT_FS = `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - .5); float a = smoothstep(.5, .0, d); a *= a; if (a < .01) discard; gl_FragColor = vec4(vC * a * vA, 1.); }`;
 const LINE_FS = `varying vec3 vC; varying float vA; void main(){ gl_FragColor = vec4(vC * vA, 1.); }`;
 const add = (vs, fs = POINT_FS) => new THREE.ShaderMaterial({ uniforms: U, vertexShader: vs, fragmentShader: fs, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
@@ -132,21 +135,25 @@ const colAt = `vec3 colAt(float s, float k){ vec3 c = k < .42 ? mix(${glsl(C.cya
       v.copy(P[i]).addScaledVector(side[i], o * c + wob).addScaledVector(nrm[i], o * sn * .5 + wob * .6);
       const j = k * (SEG + 1) + i; pos.set([v.x, v.y, v.z], j * 3); sa[j] = s; ka[j] = kk; if (i) idx.push(j - 1, j); } }
   const g = geo({ position: [pos, 3], s: [sa, 1], k: [ka, 1] }); g.setIndex(idx);
-  const L = new THREE.LineSegments(g, add(`uniform float uT; attribute float s, k; varying vec3 vC; varying float vA; ${colAt}
+  const L = new THREE.LineSegments(g, add(`uniform float uT, uPulse, uEnd; attribute float s, k; varying vec3 vC; varying float vA; ${colAt}
     void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.); gl_Position = projectionMatrix * mv; float head = pow(fract(s * 12. - uT * .2 + k * .43), 10.);
-      vC = colAt(s, k) * (.14 + head * .9) + vec3(1.) * head * .12; vA = smoothstep(.0, .04, s) * (1. - smoothstep(.99, 1., s)) * smoothstep(40., 8., -mv.z); }`, LINE_FS));
+      float pk = exp(-pow((s - uPulse) * 70., 2.)) * step(0., uPulse), en = uEnd * smoothstep(.8, .99, s) * (.5 + .5 * pow(fract(s * 30. - uT * 1.2 + k), 6.));
+      vC = colAt(s, k) * (.14 + head * .9 + pk * 3. + en * 1.4) + vec3(1.) * (head * .12 + pk * .8 + en * .3); vA = smoothstep(.0, .04, s) * (1. - smoothstep(.99, 1., s)) * smoothstep(40., 8., -mv.z); }`, LINE_FS));
   L.frustumCulled = false; scene.add(L);
   const NP = 14000, pp = new Float32Array(NP * 3), pr = new Float32Array(NP * 2);
   for (let n = 0; n < NP; n++) { const i = Math.floor(rnd() * SEG), s = i / SEG, kk = rnd(), o = (kk - .5) * 1.2, tw = s * Math.PI * 5 + Math.sin(s * 12) * .6;
     v.copy(P[i]).addScaledVector(side[i], o * Math.cos(tw)).addScaledVector(nrm[i], o * Math.sin(tw) * .5 + (rnd() - .5) * .1); pp.set([v.x, v.y, v.z], n * 3); pr.set([s, kk], n * 2); }
-  const Pt = new THREE.Points(geo({ position: [pp, 3], q: [pr, 2] }), add(`uniform float uT, uPix; attribute vec2 q; varying vec3 vC; varying float vA; ${colAt}
+  const Pt = new THREE.Points(geo({ position: [pp, 3], q: [pr, 2] }), add(`uniform float uT, uPix, uPulse, uEnd; attribute vec2 q; varying vec3 vC; varying float vA; ${colAt}
     void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.); gl_Position = projectionMatrix * mv; float head = pow(fract(q.x * 12. - uT * .2 + q.y * .43), 8.); float tw = pow(fract(q.y * 91.7), 30.) * 2.;
-      vC = colAt(q.x, q.y) * (.35 + head * 1.1) + vec3(1.) * tw; vA = .6 * smoothstep(40., 6., -mv.z) * (1. - smoothstep(.99, 1., q.x)); gl_PointSize = (1.1 + tw * 2. + head) * uPix * 7. / -mv.z; }`));
+      float pk = exp(-pow((q.x - uPulse) * 60., 2.)) * step(0., uPulse), en = uEnd * smoothstep(.8, .99, q.x);
+      vC = colAt(q.x, q.y) * (.35 + head * 1.1 + pk * 3. + en) + vec3(1.) * (tw + pk); vA = .6 * smoothstep(40., 6., -mv.z) * (1. - smoothstep(.99, 1., q.x)); gl_PointSize = (1.1 + tw * 2. + head) * uPix * 7. / -mv.z; }`));
   Pt.frustumCulled = false; scene.add(Pt);
 }
 
 // ═════════════ 02 · ANALYZE: a glass globe with the land drawn in points, an orbit, and four small chart cards
 const orbits = [];
+// ── the scene follows what is being read: role beads on the stream, metric points on the orbit, a tower per project
+const react = { roles: [], metrics: [], towers: [] };
 {
   const g = new THREE.Group(); g.position.copy(S.orb); g.rotation.set(.32, -.4, .12); scene.add(g); floaters.push({ o: g, spin: .05 });
   g.add(new THREE.Mesh(new THREE.SphereGeometry(S.orbR, 96, 64), new THREE.ShaderMaterial({ uniforms: { cA: { value: C.blue }, cB: { value: C.cyan } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -157,15 +164,28 @@ const orbits = [];
   const put = (lat, lon, i, R) => { const la = lat * Math.PI / 180, lo = lon * Math.PI / 180; a.set([Math.cos(la) * Math.cos(lo) * R, Math.sin(la) * R, -Math.cos(la) * Math.sin(lo) * R], i * 3); };
   LAND.forEach(([lat, lon], i) => { put(lat, lon, i, S.orbR * 1.003); r[i] = rnd(); land[i] = 1; });
   for (let i = 0; i < M; i++) { const y = 1 - (i + .5) / M * 2, lat = Math.asin(y) * 180 / Math.PI, lon = (i * 137.508) % 360 - 180; put(lat, lon, N + i, S.orbR * .995); r[N + i] = rnd(); land[N + i] = 0; }
-  const shell = new THREE.Points(geo({ position: [a, 3], rnd: [r, 1], land: [land, 1] }), add(`uniform float uT, uPix; attribute float rnd, land; varying vec3 vC; varying float vA;
+  const shell = new THREE.Points(geo({ position: [a, 3], rnd: [r, 1], land: [land, 1] }), add(`uniform float uT, uPix, uGB; attribute float rnd, land; varying vec3 vC; varying float vA;
     void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.); gl_Position = projectionMatrix * mv; vec3 n = normalize(normalMatrix * position); float face = n.z; float rim = pow(1. - abs(n.z), 2.);
       float tw = pow(rnd, 18.) * (.5 + .5 * sin(uT * 2. + rnd * 40.)) * land; vC = mix(${glsl(C.blue)}, ${glsl(C.cyan)}, land * .7 + rim * .3) + vec3(1.) * tw * 1.4;
-      vA = (land * 1.3 + (1. - land) * .12) * smoothstep(-.35, .25, face) + rim * .2; gl_PointSize = (1. + land * 1.5 + tw * 2.) * uPix * 7. / -mv.z; }`));
+      vA = (land * 1.3 + (1. - land) * .12) * smoothstep(-.35, .25, face) + rim * .2; gl_PointSize = (1. + land * 1.5 + tw * 2.) * uPix * 7. / -mv.z;
+      // build: points appear in a sweep around the globe, the newest ones flaring as they land
+      float lon = (atan(position.z, position.x) + 3.14159) / 6.28318, edge = uGB * 1.2 - .1 - rnd * .08 - lon;
+      vA *= step(0., edge); vC += vec3(.6, .9, 1.) * (1. - smoothstep(0., .06, edge)) * step(0., edge) * (1. - step(1., uGB)); }`));
   g.add(shell); g.add(glow(C.blue, 6.6, 6.6, .1));
+  { // the construction grid: meridians and parallels, drawn first, then fading as the land arrives
+    const L = [], R = S.orbR * 1.012, seg = 96;
+    for (let m = 0; m < 12; m++) { const lo = m / 12 * Math.PI * 2; for (let i = 0; i < seg; i++) { const a1 = -Math.PI / 2 + i / seg * Math.PI, a2 = -Math.PI / 2 + (i + 1) / seg * Math.PI;
+      L.push(Math.cos(a1) * Math.cos(lo) * R, Math.sin(a1) * R, Math.cos(a1) * Math.sin(lo) * R, Math.cos(a2) * Math.cos(lo) * R, Math.sin(a2) * R, Math.cos(a2) * Math.sin(lo) * R); } }
+    for (let pl = 1; pl < 8; pl++) { const la = -Math.PI / 2 + pl / 8 * Math.PI, rr = Math.cos(la) * R, y = Math.sin(la) * R; for (let i = 0; i < seg; i++) { const b1 = i / seg * Math.PI * 2, b2 = (i + 1) / seg * Math.PI * 2;
+      L.push(Math.cos(b1) * rr, y, Math.sin(b1) * rr, Math.cos(b2) * rr, y, Math.sin(b2) * rr); } }
+    const wg = new THREE.BufferGeometry(); wg.setAttribute('position', new THREE.Float32BufferAttribute(L, 3));
+    built.wire = new THREE.LineSegments(wg, basic('#8fdcff', 0)); g.add(built.wire);
+  }
   const o = new THREE.Group(); o.position.copy(S.orb); o.rotation.set(1.36, 0, .16); scene.add(o);
   o.add(new THREE.Mesh(new THREE.TorusGeometry(3.25, .007, 6, 260), basic('#a9c8ff', .55)));
   o.add(new THREE.Mesh(new THREE.TorusGeometry(3.9, .004, 6, 260), basic('#a98bff', .28)));
   const d1 = glow(C.orange, .45, .45, .95), d2 = glow(C.cyan, .32, .32, .8); o.add(d1, d2); orbits.push({ r: 3.25, d1, d2, sp: .12 });
+  for (let i = 0; i < 4; i++) { const a = .5 + i * Math.PI / 2, m = glow(i === 3 ? C.orange : C.cyan, 1.2, 1.2, 0); m.position.set(Math.cos(a) * 3.25, Math.sin(a) * 3.25, 0); o.add(m); react.metrics.push({ m, v: 0 }); }
   // chart cards: shapes only, no numbers (they stand for the kind of view, not for data)
   const card = (draw, w, h, pos, ry) => { const c = document.createElement('canvas'); c.width = 512; c.height = Math.round(512 * h / w); const x = c.getContext('2d');
     x.fillStyle = 'rgba(14,22,40,.82)'; x.strokeStyle = 'rgba(170,200,255,.55)'; x.lineWidth = 2; x.beginPath(); x.roundRect(2, 2, c.width - 4, c.height - 4, 22); x.fill(); x.stroke();
@@ -182,6 +202,13 @@ const orbits = [];
 }
 
 // ═════════════ 03 · BUILD: three glass plates (orange bars, cyan bars, a circuit), and the tools around them
+// where each scene sits along the stream (0 = where the waves meet, 1 = the L//IOS screen)
+const sNear = t => { let bi = 0, bd = 1e9; P.forEach((q, i) => { const d = q.distanceToSquared(t); if (d < bd) { bd = d; bi = i; } }); return bi / SEG; };
+const ST_S = [.03, sNear(S.orb), sNear(new THREE.Vector3(S.px, 0, .8)), .985];
+const pulse = { t0: -1, from: 0, to: 0 }, firePulse = k => { pulse.t0 = performance.now(); pulse.to = ST_S[k]; pulse.from = Math.max(0, ST_S[k] - .16); };
+// seven role beads on the stretch of stream that wraps the globe
+for (let i = 0; i < 7; i++) { const sv = ST_S[1] - .075 + i / 6 * .15, q = P[Math.round(sv * SEG)], hal = glow(C.cyan, 1.5, 1.5, 0), core = glow('#ffffff', .32, .32, 0);
+  hal.position.copy(q); core.position.copy(q); scene.add(hal, core); react.roles.push({ hal, core, v: 0 }); }
 const plates = [];
 {
   const glassM = new THREE.MeshPhysicalMaterial({ color: '#0f1a2e', metalness: 0, roughness: .08, transparent: true, opacity: .26, clearcoat: 1, side: THREE.DoubleSide, depthWrite: false });
@@ -201,9 +228,12 @@ const plates = [];
       const m = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color(), x0 = li === 0 ? .4 : -1.6;
       for (let i = 0, k = 0; i < NX; i++) for (let j = 0; j < NZ; j++, k++) { const h = .12 + Math.pow(rnd(), 1.5) * (.3 + .55 * (i / NX)), x = x0 + (i / (NX - 1) - .5) * 2.2, z = (j - .5) * .42 - .6;
         m.compose(new THREE.Vector3(x, .03 + h / 2, z), q, new THREE.Vector3(.11, h, .11)); bars.setMatrixAt(k, m); col.copy(li === 0 ? C.orange : C.cyan).multiplyScalar(.7 + h); bars.setColorAt(k, col); }
-      g.add(bars);
+      g.add(bars); built.bars.push({ bars, li });
     }
     plates.push({ g });
+    if (li === 2) { const n = document.querySelectorAll('.proj li').length;
+      for (let i = 0; i < n; i++) { const h = .35 + ((i * 37) % 11) / 11 * .75, t = new THREE.Mesh(new THREE.BoxGeometry(.12, 1, .12), new THREE.MeshBasicMaterial({ color: i % 3 === 2 ? C.orange : C.cyan, transparent: true, opacity: .95, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+        t.position.set((i / Math.max(1, n - 1) - .5) * 4.2, .04, .95); t.scale.y = .001; g.add(t); react.towers.push({ t, h, v: 0 }); } }
   });
   // the tools: six tiles with line icons, three on each side
   const icon = draw => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
@@ -226,18 +256,22 @@ const plates = [];
 // ═════════════ 04 · L//IOS: a glass screen on a pedestal of light, the real screens on it
 const screenCanvas = document.createElement('canvas'); screenCanvas.width = 2048; screenCanvas.height = 1280;
 const screenTex = new THREE.CanvasTexture(screenCanvas); screenTex.colorSpace = THREE.SRGBColorSpace; screenTex.anisotropy = 4;
-const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, color: '#ffffff' });
+const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, color: '#ffffff', toneMapped: false, depthTest: false, depthWrite: false });
+// the screen is drawn after the glow pass, so its text stays sharp instead of blooming like the light streams
+const screenScene = new THREE.Scene(), screenTop = [];
 const ripples = [];
 {
   const g = new THREE.Group(); g.position.copy(S.tab); g.rotation.set(-.3, -.22, 0); scene.add(g);
   const W = 5.6, H = 3.5;
   const body = new THREE.Mesh(new THREE.BoxGeometry(W + .24, H + .24, .1), new THREE.MeshBasicMaterial({ color: '#0b1222', transparent: true, opacity: .6, depthWrite: false })); body.position.z = -.06; g.add(body);
   g.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(W + .24, H + .24, .1)), new THREE.LineBasicMaterial({ color: '#b8a4ff', transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false })));
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(W, H), screenMat); face.position.z = .002; g.add(face);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({ color: '#05080f' })); face.position.z = .002; g.add(face);
+  const faceTop = new THREE.Mesh(face.geometry, screenMat); faceTop.matrixAutoUpdate = false; screenScene.add(faceTop); screenTop.push([face, faceTop]);
   const sheen = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: `varying vec2 vU; void main(){ vU = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`,
     fragmentShader: `varying vec2 vU; void main(){ float s = smoothstep(.0, .5, vU.y - vU.x * .45 + .1) * (1. - smoothstep(.5, 1., vU.y - vU.x * .45 + .1)); gl_FragColor = vec4(vec3(.06, .08, .12) * s, 1.); }` }));
-  sheen.position.z = .006; g.add(sheen);
+  sheen.material.depthTest = false; sheen.position.z = .006; g.add(sheen); sheen.visible = false;
+  const sheenTop = new THREE.Mesh(sheen.geometry, sheen.material); sheenTop.matrixAutoUpdate = false; screenScene.add(sheenTop); screenTop.push([sheen, sheenTop]);
   const top = glow(C.cyan, 3.2, .7, .08); top.position.set(0, H / 2 + .1, .05); g.add(top);
   // pedestal
   const p = new THREE.Group(); p.position.set(S.tab.x, S.ped, 0); scene.add(p);
@@ -254,13 +288,27 @@ const ripples = [];
 const cache = {};
 const loadImg = src => cache[src] ??= new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = shot(src); });
 let screenPulse = 0;
+const fullCanvas = document.createElement('canvas'); fullCanvas.width = screenCanvas.width; fullCanvas.height = screenCanvas.height;
+const scr = { p: 1, dur: 1, t: -1 };
+function drawScreen(p) {   // p: 0 → 1, how much of the screen has rendered
+  const x = screenCanvas.getContext('2d'), W = screenCanvas.width, H = screenCanvas.height, y = Math.round(p * H);
+  x.fillStyle = '#05080f'; x.fillRect(0, 0, W, H);
+  if (p < 1) { x.strokeStyle = 'rgba(111,211,242,.18)'; x.lineWidth = 1; for (let gx = 0; gx <= W; gx += 64) { x.beginPath(); x.moveTo(gx + .5, 0); x.lineTo(gx + .5, H); x.stroke(); }
+    for (let gy = 0; gy <= H; gy += 64) { x.beginPath(); x.moveTo(0, gy + .5); x.lineTo(W, gy + .5); x.stroke(); } }
+  if (y > 0) x.drawImage(fullCanvas, 0, 0, W, y, 0, 0, W, y);
+  if (p < 1) { const gr = x.createLinearGradient(0, y - 90, 0, y); gr.addColorStop(0, 'rgba(111,211,242,0)'); gr.addColorStop(1, 'rgba(111,211,242,.35)'); x.fillStyle = gr; x.fillRect(0, y - 90, W, 90);
+    x.fillStyle = 'rgba(220,245,255,.95)'; x.fillRect(0, y - 3, W, 4); }
+  screenTex.needsUpdate = true;
+}
 async function paintScreen(app) {
-  const Sx = lios.pillars[app].shots, x = screenCanvas.getContext('2d'), W = screenCanvas.width, H = screenCanvas.height;
+  const Sx = lios.pillars[app].shots, x = fullCanvas.getContext('2d'), W = fullCanvas.width, H = fullCanvas.height;
   x.fillStyle = '#07090d'; x.fillRect(0, 0, W, H);
   if (Sx[0].device !== 'phone') { const im = await loadImg(Sx[0].src); if (im) x.drawImage(im, 0, 0, W, W * im.height / im.width); }
   else { const ph = H * .9, pw = ph * 540 / 1170, gap = pw * .22, n = 3, x0 = (W - (n * pw + (n - 1) * gap)) / 2;
     for (let j = 0; j < n; j++) { const im = await loadImg(Sx[j % Sx.length].src); if (!im) continue; const dx = x0 + j * (pw + gap); x.save(); x.beginPath(); x.roundRect(dx, H * .05, pw, ph, 30); x.clip(); x.drawImage(im, dx, H * .05, pw, ph); x.restore(); } }
-  screenTex.needsUpdate = true; screenPulse = 1;
+  // the first paint waits for the camera to arrive and builds slowly; later tab changes re-render quickly
+  if (BUILD[3].t < 0 && !reduce) { scr.p = 0; drawScreen(0); } else { scr.dur = reduce ? 0 : .9; scr.t = reduce ? -1 : performance.now(); scr.p = reduce ? 1 : 0; drawScreen(scr.p); }
+  screenPulse = 1;
 }
 (function tabs() {
   const el = document.querySelector('.apps'); el.innerHTML = lios.pillars.map((p, i) => `<button role="tab" type="button" aria-selected="${i === 0}" tabindex="${i ? -1 : 0}">${p.short}<i>${p.status}</i></button>`).join('');
@@ -299,6 +347,8 @@ function pose(g, d) {
   pc.set(...a.c).lerp(v3.set(...b.c), f); pt.set(...a.t).lerp(v3.set(...b.t), f);
   // while a chapter is read the camera keeps drifting along the stream; the next leg starts from where the drift left off
   const off = (g % 1 > 1e-4 && g < 3 ? 1 - f : d) * DRIFT; pc.x += off; pt.x += off;
+  // while a section is read, the scene slides right, into the space beside the text, so its reactions stay in view
+  const sh = PORTRAIT() ? 0 : 4.4 * dimV; pc.x -= sh; pt.x -= sh;
   // a gentle arc on the way down, so the camera swings past the stream rather than sliding
   pc.y += Math.sin(f * Math.PI) * .9; pc.z += Math.sin(f * Math.PI) * 2.2;   // lift and pull back a little while travelling along the stream
   camera.position.copy(pc); camera.position.x += ptr.x * .6; camera.position.y -= ptr.y * .35; camera.lookAt(pt);
@@ -314,6 +364,47 @@ function resize() {
 const rv = $$('.sc .copy'); rv.forEach(e => e.classList.add('reveal'));
 const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('in', e.isIntersecting)), { threshold: .2 }); rv.forEach(e => io.observe(e));
 const io2 = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io2.unobserve(e.target); } }), { threshold: .08 }); $$('.cs .reveal').forEach(e => io2.observe(e));
+// ── the build: the first time a section comes into view it is drawn as a blueprint (each block outlined and
+// labelled with its real size), a cursor places the blocks in reading order, and the content fills in.
+if (!reduce && 'IntersectionObserver' in window) {
+  root.classList.add('bp');
+  const SEL = '.cs-head h2, .cs-head .lede, .two > *, .arc, .xp-row, .edu, .metrics li, .case, .legend, .kit > section, .proj li, .principles li, .pillar, .tech, .cs .links, .contact-links li, #lab-root';
+  const NAME = el => el.matches('h2') ? 'heading' : el.matches('.lede') ? 'intro' : el.matches('.prose') ? 'text' : el.matches('.why') ? 'quote' : el.matches('.arc') ? 'timeline'
+    : el.matches('.xp-row') ? 'role' : el.matches('.edu') ? 'education' : el.matches('.metrics li') ? 'metric' : el.matches('.case') ? 'case study' : el.matches('.legend') ? 'legend'
+    : el.matches('.kit > section') ? 'skills' : el.matches('.proj li') ? 'project' : el.matches('.principles li') ? 'principle' : el.matches('.loop') ? 'loop' : el.matches('.pillar') ? 'app'
+    : el.matches('.lphilo, .roadmap') || el.querySelector('.lphilo, .roadmap') ? 'list' : el.matches('.tech') ? 'stack' : el.matches('.links') ? 'links' : el.matches('.contact-links li') ? 'contact'
+    : el.matches('#lab-root') ? 'lab' : 'block';
+  $$('.cs').forEach(sec => sec.querySelectorAll(SEL).forEach(el => el.classList.add('bp-b')));
+  const build = sec => { firePulse(+sec.dataset.station); setTimeout(() => buildNow(sec), 280); };
+  // about a second per section: the first few blocks are drawn as blueprints and placed by the cursor; the rest fade straight in
+  const BLUEPRINTS = 4;
+  const buildNow = sec => {
+    const blocks = [...sec.querySelectorAll('.bp-b')].filter(b => !b.classList.contains('bp-in')), drawn = blocks.slice(0, BLUEPRINTS), rest = blocks.slice(BLUEPRINTS);
+    const cur = document.createElement('div'); cur.className = 'bp-cur'; cur.setAttribute('aria-hidden', 'true');
+    cur.innerHTML = '<svg viewBox="0 0 16 20" width="16" height="20"><path d="M1 1l13 10-6 1.2L5.4 19z"/></svg><b></b>'; sec.appendChild(cur);
+    const tag = cur.querySelector('b'), step = 150;
+    drawn.forEach((b, i) => setTimeout(() => {
+      const r = b.getBoundingClientRect(), sr = sec.getBoundingClientRect(), x = r.left - sr.left, y = r.top - sr.top;
+      const box = document.createElement('div'); box.className = 'bp-box'; box.setAttribute('aria-hidden', 'true');
+      box.style.cssText = `left:${x}px;top:${y}px;width:${r.width}px;height:${r.height}px`;
+      box.innerHTML = `<i></i><i></i><i></i><i></i><span class="bp-lab">${NAME(b)}</span>`; sec.appendChild(box);
+      cur.style.transform = `translate(${x + Math.min(r.width - 10, 26)}px, ${y + Math.min(r.height - 8, 18)}px)`; tag.textContent = NAME(b);
+      setTimeout(() => b.classList.add('bp-in'), 180);
+      setTimeout(() => { box.classList.add('out'); setTimeout(() => box.remove(), 600); }, 520);
+      if (i === drawn.length - 1) setTimeout(() => { cur.classList.add('out'); setTimeout(() => cur.remove(), 500); }, 480);
+    }, i * step));
+    rest.forEach((b, i) => setTimeout(() => b.classList.add('bp-in'), drawn.length * step + 60 + Math.min(i * 45, 400)));
+  };
+
+  // a section builds once its top is a quarter of the way up the screen; a fraction-of-section threshold never fires on a tall section on a phone
+  const bo = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { bo.unobserve(e.target); build(e.target); } }), { threshold: 0, rootMargin: '0px 0px -25% 0px' });
+  $$('.cs').forEach(sec => bo.observe(sec));
+  // safety net: any block that sits on screen without having been built shows itself after a moment
+  const bb = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { bb.unobserve(e.target); setTimeout(() => e.target.classList.add('bp-in'), 1400); } }), { threshold: 0 });
+  $$('.bp-b').forEach(b => bb.observe(b));
+  // anything left hidden (a jump far down the page, a section never scrolled through) still shows: never hold content back
+  addEventListener('hashchange', () => $$('.bp-b').forEach(b => b.classList.add('bp-in')));
+}
 const menu = $('menu'), idx = $('index');
 const setMenu = o => { idx.hidden = !o; menu.setAttribute('aria-expanded', String(o)); if (o) idx.querySelector('a').focus(); };
 menu.addEventListener('click', e => { e.stopPropagation(); setMenu(idx.hidden); });
@@ -322,6 +413,8 @@ addEventListener('click', e => { if (!idx.hidden && !idx.contains(e.target)) set
 $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => { const t = document.querySelector(a.getAttribute('href')); if (!t) return; e.preventDefault(); if (!idx.hidden) setMenu(false);
   t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); history.replaceState(null, '', a.getAttribute('href')); }));
 const steps = $$('#steps a'), navA = $$('.nav a');
+const RD = { roles: $$('.xp-row'), metrics: $$('.metrics li'), projs: $$('.proj li'), contact: $('contact') };
+const seen = list => { const line = innerHeight * .62; let n = 0; for (const el of list) if (el.getBoundingClientRect().top < line) n++; return n; };
 let lastSec = null, veilV = 0, dimV = 0, dd = 0;
 // the real Intelligence Lab from the live site, mounted when its section comes near
 { const el = $('lab-root'); let done = false; const mount = () => { if (done) return; done = true; el.innerHTML = ''; createRoot(el).render(createElement(AnalystLab)); };
@@ -339,8 +432,21 @@ function frame(dt) {
   waveUpd.forEach(f => f(time));
   floaters.forEach(f => { if (f.spin) f.o.rotation.y = -.4 + time * f.spin; else f.o.position.y = f.base + (reduce ? 0 : Math.sin(time * .6 + f.ph) * .06); });
   ripples.forEach((r, i) => { const f = (time * .08 + i / ripples.length) % 1; r.scale.setScalar(1 + f * 6); r.material.opacity = .22 * (1 - f); });
-  screenPulse *= Math.pow(.03, dt); screenMat.color.setScalar(.9 + screenPulse * .2);
+  // the stream's packet, then what the reader has reached: lights accumulate and stay lit
+  if (pulse.t0 > 0) { const q = (performance.now() - pulse.t0) / 480; U.uPulse.value = q < 1 ? pulse.from + (pulse.to - pulse.from) * ease(q) : -1; if (q >= 1) pulse.t0 = -1; }
+  { const kr = reduce ? 1 : 1 - Math.pow(.015, dt), nr = seen(RD.roles), nm = seen(RD.metrics), np = seen(RD.projs), ct = RD.contact.getBoundingClientRect().top < innerHeight * .7 ? 1 : 0;
+    react.roles.forEach((r, i) => { r.v += ((i < nr ? 1 : 0) - r.v) * kr; r.hal.material.opacity = r.v; r.core.material.opacity = r.v; r.hal.scale.setScalar(.5 + r.v * .5 + (reduce ? 0 : Math.sin(time * 2 + i) * .06 * r.v)); });
+    react.metrics.forEach((r, i) => { r.v += ((i < nm ? 1 : 0) - r.v) * kr; r.m.material.opacity = r.v; r.m.scale.setScalar((.3 + r.v * .9) * (1 + (reduce ? 0 : .12 * Math.sin(time * 2.4 + i)))); });
+    react.towers.forEach((r, i) => { r.v += ((i < np ? 1 : 0) - r.v) * kr; r.t.scale.y = Math.max(.001, r.v * r.h); r.t.position.y = .04 + r.t.scale.y / 2; });
+    U.uEnd.value += (ct - U.uEnd.value) * kr; if (ct) screenPulse = Math.max(screenPulse, .35 + .25 * Math.sin(time * 2)); }
+  screenPulse *= Math.pow(.03, dt); screenMat.color.setScalar(.84 + screenPulse * .16);
   pose(g, dd);
+  const now = performance.now(), st0 = Math.round(g);
+  if (Math.abs(g - st0) < .3 && BUILD[st0].t < 0) { BUILD[st0].t = now; if (st0 === 3) { scr.dur = 1.8; scr.t = now; } }
+  BUILD.forEach(b => { b.v = reduce ? 1 : b.t < 0 ? 0 : clamp((now - b.t) / 1000 / b.dur); });
+  U.uGB.value = BUILD[1].v; built.wire.material.opacity = .5 * smooth(BUILD[1].v * 4) * (1 - smooth((BUILD[1].v - .55) / .45)) + .04 * BUILD[1].v;
+  built.bars.forEach(({ bars, li }) => { bars.scale.y = Math.max(.001, ease(clamp(BUILD[2].v * 1.5 - li * .35))); });
+  if (scr.t > 0) { scr.p = clamp((now - scr.t) / 1000 / scr.dur); drawScreen(ease(scr.p)); if (scr.p >= 1) scr.t = -1; }
   // which section is being read: content sections dim the scene, the L//IOS panel gets its side shade
   const yc = scrollY + innerHeight * .5; let cur = allSecs[0]; for (const sc of allSecs) if (sc.offsetTop <= yc) cur = sc;
   const kd = reduce ? 0 : Math.pow(.02, dt), isCs = cur.classList.contains('cs');
@@ -348,7 +454,9 @@ function frame(dt) {
   $('dim').style.opacity = dimV.toFixed(3); $('veil').style.opacity = veilV.toFixed(3);
   if (cur !== lastSec) { lastSec = cur; const st = +cur.dataset.station; steps.forEach((s, i) => s.setAttribute('aria-current', String(i === st)));
     let set = false; navA.forEach(a => { const on = !set && (a.getAttribute('href') === '#' + cur.id || (+a.dataset.st === st && !navA.some(b => b.getAttribute('href') === '#' + cur.id))); if (on) set = true; on ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current'); }); }
-  if (renderer) composer.render(dt);
+  if (renderer) { composer.render(dt);
+    screenTop.forEach(([a, b]) => { a.parent.updateWorldMatrix(true, false); a.updateMatrix(); b.matrix.multiplyMatrices(a.parent.matrixWorld, a.matrix); b.matrixWorld.copy(b.matrix); });
+    renderer.autoClear = false; renderer.render(screenScene, camera); renderer.autoClear = true; }
 }
 function loop(now) {
   const dt = clamp((now - last) / 1000, 0, .1); last = now; frame(dt);

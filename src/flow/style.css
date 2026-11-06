@@ -106,7 +106,7 @@ h1, h2 { margin: 26px 0 0; font: 500 clamp(2.2rem, 3.6vw, 3.3rem)/1 var(--f); le
 .skip { position: absolute; left: -9999px; top: 8px; z-index: 20; background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; }
 .skip:focus { left: 12px; }
 .role { margin: 22px 0 0; font: 400 .72rem/1.5 var(--f-mono); letter-spacing: .08em; color: var(--ink-2); }
-.dim { position: absolute; inset: 0; opacity: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 50%, rgba(3,5,10,.66), rgba(3,5,10,.84)); }
+.dim { position: absolute; inset: 0; opacity: 0; pointer-events: none; background: linear-gradient(90deg, rgba(3,5,10,.86) 0%, rgba(3,5,10,.74) 45%, rgba(3,5,10,.42) 100%); }
 .cs { position: relative; z-index: 3; padding: clamp(64px, 10vh, 120px) var(--pad); max-width: 1240px; }
 .js .cs { padding-right: clamp(20px, 13vw, 210px); }
 .cs-head { max-width: 820px; margin-bottom: clamp(28px, 4vw, 48px); }
@@ -114,7 +114,7 @@ h1, h2 { margin: 26px 0 0; font: 500 clamp(2.2rem, 3.6vw, 3.3rem)/1 var(--f); le
 .cs-head h2 { margin: 18px 0 0; font: 500 clamp(1.9rem, 3.4vw, 3rem)/1.08 var(--f); letter-spacing: -.012em; text-transform: none; margin-right: 0; }
 .cs-head .lede { margin: 20px 0 0; max-width: 62ch; color: var(--ink-2); font-size: 1.02rem; line-height: 1.65; }
 .cs-head .tick { margin-top: 24px; }
-.glass { background: linear-gradient(160deg, rgba(20,30,52,.55), rgba(8,12,22,.6)); border: 1px solid var(--line-2); border-radius: 16px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.glass { background: linear-gradient(160deg, rgba(20,30,52,.5), rgba(8,12,22,.6)); border: 1px solid var(--line-2); border-radius: 16px; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
 .mono { font-family: var(--f-mono); }
 .two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; margin-top: 8px; }
 .prose p { margin: 0 0 16px; color: var(--ink-2); font-size: 1rem; line-height: 1.7; max-width: 60ch; }
@@ -244,4 +244,25 @@ h1, h2 { margin: 26px 0 0; font: 500 clamp(2.2rem, 3.6vw, 3.3rem)/1 var(--f); le
   .proj a, .proj li > div { grid-template-columns: minmax(0, 1fr) 1.5rem; gap: 6px 12px; } .proj .cat, .proj .yr, .proj b, .proj p, .proj .tags { grid-column: 1; grid-row: auto; } .proj .go { grid-column: 2; grid-row: 1; }
   .case dl { grid-template-columns: 1fr; gap: 2px; } .case dd { margin-bottom: 10px; }
   .loop li { grid-template-columns: 2rem minmax(0, 1fr); } .loop li span:last-child { grid-column: 2; }
+}
+
+/* ═════════ the build: blueprint → content ═════════ */
+.bp .cs .reveal { opacity: 1; transform: none; }
+.bp .bp-b { opacity: 0; transform: translateY(8px); filter: blur(5px); transition: opacity .5s var(--ease), transform .6s var(--ease), filter .5s var(--ease); }
+.bp .bp-b.bp-in { opacity: 1; transform: none; filter: none; }
+.bp-box { position: absolute; z-index: 5; pointer-events: none; border: 1px solid rgba(111,211,242,.85); background: rgba(111,211,242,.045); box-shadow: 0 0 18px rgba(111,211,242,.18) inset;
+  clip-path: inset(0 100% 0 0); animation: bpDraw .3s cubic-bezier(.2,.8,.2,1) forwards; transition: opacity .55s ease; }
+.bp-box.out { opacity: 0; }
+@keyframes bpDraw { to { clip-path: inset(-24px -8px -8px -8px); } }
+.bp-box i { position: absolute; width: 7px; height: 7px; background: #03050a; border: 1px solid #9fe4ff; }
+.bp-box i:nth-child(1) { left: -4px; top: -4px; } .bp-box i:nth-child(2) { right: -4px; top: -4px; } .bp-box i:nth-child(3) { left: -4px; bottom: -4px; } .bp-box i:nth-child(4) { right: -4px; bottom: -4px; }
+.bp-lab { position: absolute; left: -1px; top: -21px; padding: 3px 7px; font: 400 10px/1.2 var(--f-mono); letter-spacing: .06em; color: #03050a; background: #8fdcff; white-space: nowrap; }
+.bp-cur { position: absolute; z-index: 6; left: 0; top: 0; display: flex; align-items: flex-start; gap: 2px; pointer-events: none; transition: transform .26s cubic-bezier(.2,.8,.2,1), opacity .4s; filter: drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
+.bp-cur svg { fill: #fff; stroke: #03050a; stroke-width: 1; } .bp-cur b { margin-top: 14px; padding: 3px 8px; border-radius: 4px; background: var(--orange); color: #1a0d00; font: 600 10px/1.2 var(--f-mono); letter-spacing: .04em; }
+.bp-cur.out { opacity: 0; }
+
+/* phones: the scene can't step aside while you read, so the header is solid and the dim is heavier */
+@media (max-width: 640px) {
+  .js .top { background: linear-gradient(180deg, rgba(3,5,10,.98), rgba(3,5,10,.94) 78%, rgba(3,5,10,0)); }
+  .dim { background: linear-gradient(180deg, rgba(3,5,10,.86), rgba(3,5,10,.8)); }
 }
