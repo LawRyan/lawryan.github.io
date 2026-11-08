@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Tiny Ruckus Studio · TikTok sign-in</title><style>body{margin:0;background:#141726;color:#e9e6f2;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}main{max-width:680px;margin:0 auto;padding:48px 22px 80px}h1{font:700 30px/1.15 system-ui;margin:0 0 6px}h2{font-size:18px;margin:28px 0 6px}a{color:#7cc4ff}.k{color:#ff6fa8;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:12px}.muted{color:#9a9cb8}input{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #2e3350;background:#1d2135;color:#e9e6f2;font:13px ui-monospace,Consolas,monospace}footer{margin-top:40px;font-size:13px;color:#9a9cb8}</style></head>
+<body><main><div class="k">Tiny Ruckus Studio</div><h1 id="h">Finishing your TikTok sign-in…</h1>
+<p id="msg" class="muted">Handing the sign-in to Tiny Ruckus Studio on this computer.</p>
+<div id="fallback" hidden><p>If nothing happens, check the studio is running on this computer, or copy this whole address into the studio's <b>Finish sign-in</b> box:</p><input id="addr" readonly onclick="this.select()"></div>
+<footer>This page only passes the one-time sign-in code to the studio running on your own computer (127.0.0.1). It stores and sends nothing anywhere else. <a href="/tinyruckus/privacy.html">Privacy</a> · <a href="/tinyruckus/terms.html">Terms</a></footer></main>
+<script>
+(function () {
+  var q = location.search;
+  document.getElementById('addr').value = location.href;
+  if (!/[?&](code|error)=/.test(q)) { document.getElementById('h').textContent = 'TikTok sign-in for Tiny Ruckus Studio'; document.getElementById('msg').textContent = 'Start the sign-in from the studio’s Connections page.'; return; }
+  setTimeout(function () { document.getElementById('fallback').hidden = false; }, 2500);
+  location.replace('http://127.0.0.1:4330/oauth/tiktok' + q);
+})();
+</script></body></html>
